@@ -11,8 +11,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-<!-- SheetJS for Excel -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <!-- Chart.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 
@@ -336,9 +334,7 @@ html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--t
         <div class="form-group"><label class="form-label">Module for</label><input class="form-input" id="eq-module" placeholder="CF Export P201X"></div>
         <div class="form-group"><label class="form-label">Manufacturer</label><input class="form-input" id="eq-mfg" placeholder="Reliance"></div>
         <div class="form-group"><label class="form-label">Serial No.</label><input class="form-input" id="eq-sn" placeholder="1MAZJ9073 G00X"></div>
-        <div class="form-group"><label class="form-label">Bearing DE (หน้า)</label><input class="form-input" id="eq-bearing-de" placeholder="6312-C3"></div>
-<div class="form-group"><label class="form-label">Bearing NDE (หลัง)</label><input class="form-input" id="eq-bearing-nde" placeholder="6310-C3"></div>
-<div class="form-group"><label class="form-label">Power (HP)</label><input class="form-input" id="eq-power" type="number" placeholder="250"></div>
+        <div class="form-group"><label class="form-label">Power (HP)</label><input class="form-input" id="eq-power" type="number" placeholder="250"></div>
         <div class="form-group"><label class="form-label">Weight (LBS)</label><input class="form-input" id="eq-weight" type="number" placeholder="2268"></div>
         <div class="form-group"><label class="form-label">Stat. Volts</label><input class="form-input" id="eq-volts" placeholder="380YD"></div>
         <div class="form-group"><label class="form-label">Stat. Amps</label><input class="form-input" id="eq-amps" placeholder="323A"></div>
@@ -728,9 +724,7 @@ function renderCheckSheet(el) {
     <div class="section-title" style="margin-bottom:14px">⚙ Machine data</div>
     <div class="grid4">
       <div class="form-group"><label class="form-label">Module for</label><input class="form-input" id="f-module"></div>
-      <div class="form-group"><label class="form-label">Bearing DE (หน้า)</label><input class="form-input" id="eq-bearing-de" placeholder="6312-C3"></div>
-<div class="form-group"><label class="form-label">Bearing NDE (หลัง)</label><input class="form-input" id="eq-bearing-nde" placeholder="6310-C3"></div>
-<div class="form-group"><label class="form-label">Power (HP)</label><input class="form-input" id="f-power"></div>
+      <div class="form-group"><label class="form-label">Power (HP)</label><input class="form-input" id="f-power"></div>
       <div class="form-group"><label class="form-label">Stat. Volts</label><input class="form-input" id="f-volts"></div>
       <div class="form-group"><label class="form-label">Stat. Amps</label><input class="form-input" id="f-amps"></div>
       <div class="form-group"><label class="form-label">Frequency (Hz)</label><input class="form-input" id="f-freq"></div>
@@ -1032,7 +1026,6 @@ function renderEquipment(el) {
       <div style="flex:1">
         <div style="font-size:14px;font-weight:600"><span class="dot ${dotCls}" style="margin-right:7px"></span>${eq.tag}</div>
         <div style="font-size:11px;color:var(--text3);margin-top:2px">${eq.module} | ${eq.mfg} | ${eq.power} HP | ${eq.volts} | ${eq.speed} RPM</div>
-<div style="font-size:11px;color:var(--text3);margin-top:2px">Bearing DE: ${eq.bearingDe||'-'} | Bearing NDE: ${eq.bearingNde||'-'}</div>
         <div style="font-size:11px;color:var(--text3);margin-top:2px">S/N: ${eq.sn} | Alarm: ${eq.vibAlarm} mm/s | Records: ${recs.length}</div>
       </div>
       <div style="text-align:right;margin-right:12px">
@@ -1133,65 +1126,6 @@ function updateClock(){
   const sc=$('sidebar-clock'); if(sc) sc.textContent=d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 }
 setInterval(updateClock,1000); updateClock();
-
-// ══════════════════════════════════════════════
-// EXCEL IMPORT
-// ══════════════════════════════════════════════
-async function importExcel(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  toast('กำลังอ่านไฟล์ Excel...', 'info');
-  const reader = new FileReader();
-  reader.onload = async function(evt) {
-    try {
-      const data = evt.target.result;
-      const workbook = XLSX.read(data, {type: 'binary'});
-      const firstSheet = workbook.SheetNames[0];
-      const excelRows = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[firstSheet]);
-      
-      if(excelRows.length === 0) {
-        toast('ไม่พบข้อมูลในไฟล์', 'error');
-        return;
-      }
-      
-      let count = 0;
-      for (const row of excelRows) {
-        // Map excel columns to equipment fields. Change column names to match your Excel header
-        const tag = row['Tag No.'] || row['Tag'] || row['tag'];
-        if (!tag) continue;
-        
-        const eqData = {
-          tag: String(tag).trim(),
-          module: String(row['Module'] || row['module'] || ''),
-          mfg: String(row['Manufacturer'] || row['mfg'] || ''),
-          sn: String(row['Serial No.'] || row['sn'] || ''),
-          bearingDe: String(row['Bearing DE'] || row['bearingDe'] || ''),
-          bearingNde: String(row['Bearing NDE'] || row['bearingNde'] || ''),
-          power: String(row['Power'] || row['power'] || ''),
-          weight: String(row['Weight'] || row['weight'] || ''),
-          volts: String(row['Volts'] || row['volts'] || ''),
-          amps: String(row['Amps'] || row['amps'] || ''),
-          speed: String(row['Speed'] || row['speed'] || ''),
-          frame: String(row['Frame'] || row['frame'] || ''),
-          vibAlarm: parseFloat(row['Alarm'] || row['vibAlarm']) || 4.5,
-          vibDanger: parseFloat(row['Danger'] || row['vibDanger']) || 7.1,
-          createdAt: new Date().toISOString()
-        };
-        
-        await db.collection('equipment').add(eqData);
-        count++;
-      }
-      toast(`นำเข้าข้อมูลสำเร็จ ${count} รายการ`, 'success');
-      await loadAllData();
-      showPage('equipment', document.getElementById('nav-equipment'));
-    } catch (err) {
-      toast('Error: ' + err.message, 'error');
-    }
-    e.target.value = ''; // clear input
-  };
-  reader.readAsBinaryString(file);
-}
-
 </script>
 </body>
 </html>
