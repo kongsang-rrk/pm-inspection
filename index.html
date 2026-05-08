@@ -225,14 +225,23 @@ w.appendChild(inp);w.appendChild(arrow);w.appendChild(drop);
 let val='',open=false;
 function render(filter){drop.innerHTML='';const f=filter?filter.toLowerCase():'';const fl=opts.filter(o=>!f||o.label.toLowerCase().includes(f)||o.value.toLowerCase().includes(f));
 if(!fl.length){drop.innerHTML='<div class="ss-none">ไม่พบ</div>';return;}
-fl.forEach(o=>{const d=document.createElement('div');d.className='ss-opt';d.textContent=o.label;d.onclick=()=>{val=o.value;inp.value=o.label;inp.dataset.val=o.value;close();if(onChange)onChange(o.value);};drop.appendChild(d);});}
-function show(){drop.classList.add('open');open=true;render(inp.value!==opts.find(o=>o.value===val)?.label?inp.value:'');}
-function close(){drop.classList.remove('open');open=false;if(val){const o=opts.find(x=>x.value===val);if(o)inp.value=o.label;}}
-inp.addEventListener('focus',show);inp.addEventListener('input',()=>render(inp.value));
-inp.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
-document.addEventListener('click',e=>{if(!w.contains(e.target))close();});
+fl.forEach(o=>{const d=document.createElement('div');d.className='ss-opt';d.textContent=o.label;
+d.onmousedown=e=>{e.preventDefault();val=o.value;inp.value=o.label;inp.dataset.val=o.value;drop.classList.remove('open');open=false;if(onChange)onChange(o.value);};
+drop.appendChild(d);});}
+function show(){drop.classList.add('open');open=true;
+// Show all when opening, or filter if user typed something
+const cur=opts.find(o=>o.value===val);
+render((!cur||inp.value===cur.label)?'':inp.value);}
+function close(){drop.classList.remove('open');open=false;
+// Restore display label, keep data-val intact
+if(val){const o=opts.find(x=>x.value===val);if(o)inp.value=o.label;else{inp.value='';inp.dataset.val='';val='';}}
+else{inp.value='';inp.dataset.val='';}}
+inp.addEventListener('focus',show);
+inp.addEventListener('input',e=>{render(e.target.value);});
+inp.addEventListener('blur',()=>setTimeout(close,150));
+inp.addEventListener('keydown',e=>{if(e.key==='Escape'){close();}else if(e.key==='Enter'){const first=drop.querySelector('.ss-opt');if(first)first.onmousedown&&first.onmousedown(e);}});
 w.setVal=v=>{val=v;const o=opts.find(x=>x.value===v);inp.value=o?o.label:'';inp.dataset.val=v;};
-w.getVal=()=>inp.dataset.val||'';
+w.getVal=()=>val;
 return w;}
 // ══════ Unbalance calc ══════
 function calcUnbal(a,b,c){const arr=[a,b,c].map(Number).filter(v=>!isNaN(v)&&v!==0);if(arr.length<3)return'';const avg=(arr[0]+arr[1]+arr[2])/3;if(avg===0)return'0.00';const mx=Math.max(Math.abs(arr[0]-avg),Math.abs(arr[1]-avg),Math.abs(arr[2]-avg));return((mx/avg)*100).toFixed(2);}
@@ -293,33 +302,95 @@ function pgAlert(el){const a=getAl();if(!a.length){el.innerHTML='<div class="car
 
 // ══════════ CHECK SHEET ══════════
 function pgCheck(el){S.cf={ck:{},sev:'5'};
-const opts=S.eq.map(e=>({value:e.tag,label:e.tag+' — '+(e.module||e.mod||'')}));
+// Build ALL html at once — never use innerHTML+= after appending DOM nodes
+el.innerHTML=
+'<div class="card"><div class="st" style="margin-bottom:14px">📋 Work Order Info</div><div class="g4" style="margin-bottom:12px">'+
+'<div class="fg"><label class="fl">WO No.</label><input class="fi" id="f-wo"></div>'+
+'<div class="fg"><label class="fl">Equipment Tag *</label><div id="f-tag-wrap"></div></div>'+
+'<div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="f-dt" value="'+now()+'"></div>'+
+'<div class="fg"><label class="fl">Purpose</label><div id="f-pu-wrap"></div></div>'+
+'<div class="fg"><label class="fl">Inspector</label><input class="fi" id="f-ins" value="'+(S.set.di||'')+'"></div>'+
+'<div class="fg"><label class="fl">Approved by</label><input class="fi" id="f-app" value="'+(S.set.da||'')+'"></div>'+
+'</div></div>'+
+'<div class="card"><div class="st" style="margin-bottom:14px">🔩 Bearing Info</div><div class="g4">'+
+'<div class="fg"><label class="fl">DE Bearing No.</label><input class="fi" id="f-bde"></div>'+
+'<div class="fg"><label class="fl">DE Condition</label><div id="f-bdc-wrap"></div></div>'+
+'<div class="fg"><label class="fl">NDE Bearing No.</label><input class="fi" id="f-bnde"></div>'+
+'<div class="fg"><label class="fl">NDE Condition</label><div id="f-bnc-wrap"></div></div>'+
+'</div></div>'+
+'<div class="card"><div class="st" style="margin-bottom:14px">🔍 General Inspection</div>'+
+'<table class="cht"><thead><tr><th>Item</th><th>Criteria</th><th>As Found</th><th>As Left</th></tr></thead><tbody id="ckb"></tbody></table></div>'+
+'<div class="card"><div class="st" style="margin-bottom:14px">〰 Vibration (mm/s)</div><div class="g2" style="gap:16px">'+
+'<div><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px">🔵 MOTOR</div>'+
+'<table class="vt"><thead><tr><th>Position</th><th>V</th><th>H</th><th>A</th><th>Status</th></tr></thead><tbody>'+
+'<tr><td>DE</td><td><input class="vi" id="vmDV" type="number" step=".01"></td><td><input class="vi" id="vmDH" type="number" step=".01" oninput="chkV(this,\'smD\')"></td><td><input class="vi" id="vmDA" type="number" step=".01"></td><td id="smD">—</td></tr>'+
+'<tr><td>NDE</td><td><input class="vi" id="vmNV" type="number" step=".01"></td><td><input class="vi" id="vmNH" type="number" step=".01" oninput="chkV(this,\'smN\')"></td><td><input class="vi" id="vmNA" type="number" step=".01"></td><td id="smN">—</td></tr>'+
+'</tbody></table></div>'+
+'<div><div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:8px">🟡 PUMP</div>'+
+'<table class="vt"><thead><tr><th>Position</th><th>V</th><th>H</th><th>A</th><th>Status</th></tr></thead><tbody>'+
+'<tr><td>DE</td><td><input class="vi" id="vpDV" type="number" step=".01"></td><td><input class="vi" id="vpDH" type="number" step=".01" oninput="chkV(this,\'spD\')"></td><td><input class="vi" id="vpDA" type="number" step=".01"></td><td id="spD">—</td></tr>'+
+'<tr><td>NDE</td><td><input class="vi" id="vpNV" type="number" step=".01"></td><td><input class="vi" id="vpNH" type="number" step=".01"></td><td><input class="vi" id="vpNA" type="number" step=".01"></td><td>—</td></tr>'+
+'</tbody></table></div></div></div>'+
+'<div class="card"><div class="st" style="margin-bottom:14px">⚡ Voltage & Current</div>'+
+'<table class="et"><thead><tr><th>Phase</th><th>U</th><th>V</th><th>W</th><th>Unbal%</th></tr></thead><tbody>'+
+'<tr><td>Current (A)</td><td><input class="vi" id="ecu" type="number" oninput="autoUnbal(\'ecu\',\'ecv\',\'ecw\',\'ecUn\')"></td><td><input class="vi" id="ecv" type="number" oninput="autoUnbal(\'ecu\',\'ecv\',\'ecw\',\'ecUn\')"></td><td><input class="vi" id="ecw" type="number" oninput="autoUnbal(\'ecu\',\'ecv\',\'ecw\',\'ecUn\')"></td><td><span class="vi-ro" id="ecUn">—</span></td></tr>'+
+'<tr><td>Voltage (V)</td><td><input class="vi" id="evu" type="number" oninput="autoUnbal(\'evu\',\'evv\',\'evw\',\'evUn\')"></td><td><input class="vi" id="evv" type="number" oninput="autoUnbal(\'evu\',\'evv\',\'evw\',\'evUn\')"></td><td><input class="vi" id="evw" type="number" oninput="autoUnbal(\'evu\',\'evv\',\'evw\',\'evUn\')"></td><td><span class="vi-ro" id="evUn">—</span></td></tr>'+
+'</tbody></table></div>'+
+'<div class="card"><div class="st" style="margin-bottom:14px">🧪 Electrical Static Test</div>'+
+'<div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:10px">INSULATION RESISTANCE (MΩ)</div>'+
+'<table class="et"><thead><tr><th>Test</th><th>U-V</th><th>V-W</th><th>W-U</th><th>UVW-G</th></tr></thead><tbody>'+
+'<tr><td>IR @ Vdc</td><td><input class="vi" id="irUV" type="number" step=".01"></td><td><input class="vi" id="irVW" type="number" step=".01"></td><td><input class="vi" id="irWU" type="number" step=".01"></td><td><input class="vi" id="irG" type="number" step=".01"></td></tr>'+
+'</tbody></table><div style="margin-top:8px;font-size:12px;color:var(--text3)">PI (R10/R1): <input class="vi" id="irPI" type="number" step=".01" style="width:80px"></div>'+
+'<div style="font-size:12px;font-weight:600;color:var(--text3);margin-top:16px;margin-bottom:10px">WINDING RESISTANCE (Ω)</div>'+
+'<table class="et"><thead><tr><th>Phase</th><th>U</th><th>V</th><th>W</th><th>Unbal%</th></tr></thead><tbody>'+
+'<tr><td>WR @ °C</td><td><input class="vi" id="wrU" type="number" step=".001" oninput="autoUnbal(\'wrU\',\'wrV\',\'wrW\',\'wrUn\')"></td><td><input class="vi" id="wrV" type="number" step=".001" oninput="autoUnbal(\'wrU\',\'wrV\',\'wrW\',\'wrUn\')"></td><td><input class="vi" id="wrW" type="number" step=".001" oninput="autoUnbal(\'wrU\',\'wrV\',\'wrW\',\'wrUn\')"></td><td><span class="vi-ro" id="wrUn">—</span></td></tr>'+
+'</tbody></table>'+
+'<div style="font-size:12px;font-weight:600;color:var(--text3);margin-top:16px;margin-bottom:10px">WINDING INDUCTANCE (mH)</div>'+
+'<table class="et"><thead><tr><th>Phase</th><th>U</th><th>V</th><th>W</th><th>Unbal%</th></tr></thead><tbody>'+
+'<tr><td>WI @ °C</td><td><input class="vi" id="wiU" type="number" step=".01" oninput="autoUnbal(\'wiU\',\'wiV\',\'wiW\',\'wiUn\')"></td><td><input class="vi" id="wiV" type="number" step=".01" oninput="autoUnbal(\'wiU\',\'wiV\',\'wiW\',\'wiUn\')"></td><td><input class="vi" id="wiW" type="number" step=".01" oninput="autoUnbal(\'wiU\',\'wiV\',\'wiW\',\'wiUn\')"></td><td><span class="vi-ro" id="wiUn">—</span></td></tr>'+
+'</tbody></table></div>'+
+'<div class="card"><div class="st" style="margin-bottom:14px">📝 Results & Severity</div>'+
+'<div class="fg" style="margin-bottom:14px"><label class="fl">Results</label><textarea class="ft" id="f-res" rows="4"></textarea></div>'+
+'<div class="fl" style="margin-bottom:8px">Severity:</div>'+
+'<div class="sg">'+
+'<div class="so" onclick="selS(1,this)"><span style="color:var(--red)">⛔</span> Immediate</div>'+
+'<div class="so" onclick="selS(2,this)"><span style="color:var(--amber)">⚠</span> Correct ASAP</div>'+
+'<div class="so" onclick="selS(3,this)"><span style="color:var(--accent)">🔧</span> Next opportunity</div>'+
+'<div class="so" onclick="selS(4,this)"><span style="color:var(--accent)">👁</span> Monitor</div>'+
+'<div class="so s5" onclick="selS(5,this)"><span style="color:var(--green)">✓</span> No action</div>'+
+'</div><input type="hidden" id="f-sev" value="5"></div>'+
+'<div style="display:flex;gap:10px;justify-content:flex-end;margin-bottom:24px">'+
+'<button class="btn" onclick="pgCheck(E(\'content\'))">Clear</button>'+
+'<button class="btn btn-s" id="svb" onclick="saveR()">✓ Save to Firestore</button></div>';
+
+// ── NOW append all searchable selects (DOM is stable) ──
+const eqOpts=S.eq.map(e=>({value:e.tag,label:e.tag+(e.module||e.mod?' — '+(e.module||e.mod):'') }));
 const purpOpts=[{value:'PM',label:'PM'},{value:'Routine',label:'Routine'},{value:'Investigation',label:'Investigation'},{value:'CM',label:'CM'}];
-el.innerHTML='<div class="card"><div class="st" style="margin-bottom:14px">📋 Work Order Info</div><div class="g4" style="margin-bottom:12px"><div class="fg"><label class="fl">WO No.</label><input class="fi" id="f-wo"></div><div class="fg"><label class="fl">Equipment Tag *</label><div id="f-tag-wrap"></div></div><div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="f-dt" value="'+now()+'"></div><div class="fg"><label class="fl">Purpose</label><div id="f-pu-wrap"></div></div><div class="fg"><label class="fl">Inspector</label><input class="fi" id="f-ins" value="'+(S.set.di||'')+'"></div><div class="fg"><label class="fl">Approved by</label><input class="fi" id="f-app" value="'+(S.set.da||'')+'"></div></div></div>';
-const tw=E('f-tag-wrap');if(tw){const ss=mkSS('f-tag',opts,'Search equipment...',onTg);tw.appendChild(ss);}
-const pw=E('f-pu-wrap');if(pw){const ss=mkSS('f-pu',purpOpts,'Purpose...');ss.setVal('PM');pw.appendChild(ss);}
-el.innerHTML+='<div class="card"><div class="st" style="margin-bottom:14px">🔩 Bearing Info</div><div class="g4"><div class="fg"><label class="fl">DE Bearing No.</label><input class="fi" id="f-bde"></div><div class="fg"><label class="fl">DE Condition</label><div id="f-bdc-wrap"></div></div><div class="fg"><label class="fl">NDE Bearing No.</label><input class="fi" id="f-bnde"></div><div class="fg"><label class="fl">NDE Condition</label><div id="f-bnc-wrap"></div></div></div></div>';
 const brgOpts=[{value:'ok',label:'OK'},{value:'alarm',label:'Alarm'},{value:'nok',label:'NOK-Replace'}];
-[['f-bdc','f-bdc-wrap'],['f-bnc','f-bnc-wrap']].forEach(([id,wid])=>{const w=E(wid);if(w){const ss=mkSS(id,brgOpts,'Condition...');ss.setVal('ok');w.appendChild(ss);}});
-el.innerHTML+='<div class="card"><div class="st" style="margin-bottom:14px">🔍 General Inspection</div><table class="cht"><thead><tr><th>Item</th><th>Criteria</th><th>As Found</th><th>As Left</th></tr></thead><tbody id="ckb"></tbody></table></div>';
-// Vibration table with Motor & Pump, NDE-A added
-el.innerHTML+='<div class="card"><div class="st" style="margin-bottom:14px">〰 Vibration (mm/s)</div><div class="g2" style="gap:16px"><div><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px">🔵 MOTOR</div><table class="vt"><thead><tr><th>Position</th><th>V</th><th>H</th><th>A</th><th>Status</th></tr></thead><tbody><tr><td>DE</td><td><input class="vi" id="vmDV" type="number" step=".01"></td><td><input class="vi" id="vmDH" type="number" step=".01" oninput="chkV(this,\'smD\')"></td><td><input class="vi" id="vmDA" type="number" step=".01"></td><td id="smD">—</td></tr><tr><td>NDE</td><td><input class="vi" id="vmNV" type="number" step=".01"></td><td><input class="vi" id="vmNH" type="number" step=".01" oninput="chkV(this,\'smN\')"></td><td><input class="vi" id="vmNA" type="number" step=".01"></td><td id="smN">—</td></tr></tbody></table></div><div><div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:8px">🟡 PUMP</div><table class="vt"><thead><tr><th>Position</th><th>V</th><th>H</th><th>A</th><th>Status</th></tr></thead><tbody><tr><td>DE</td><td><input class="vi" id="vpDV" type="number" step=".01"></td><td><input class="vi" id="vpDH" type="number" step=".01" oninput="chkV(this,\'spD\')"></td><td><input class="vi" id="vpDA" type="number" step=".01"></td><td id="spD">—</td></tr><tr><td>NDE</td><td><input class="vi" id="vpNV" type="number" step=".01"></td><td><input class="vi" id="vpNH" type="number" step=".01"></td><td><input class="vi" id="vpNA" type="number" step=".01"></td><td>—</td></tr></tbody></table></div></div></div>';
-// Electrical with auto-unbalance
-el.innerHTML+='<div class="card"><div class="st" style="margin-bottom:14px">⚡ Voltage & Current</div><table class="et"><thead><tr><th>Phase</th><th>U</th><th>V</th><th>W</th><th>Unbal%</th></tr></thead><tbody><tr><td>Current (A)</td><td><input class="vi" id="ecu" type="number" oninput="autoUnbal(\'ecu\',\'ecv\',\'ecw\',\'ecUn\')"></td><td><input class="vi" id="ecv" type="number" oninput="autoUnbal(\'ecu\',\'ecv\',\'ecw\',\'ecUn\')"></td><td><input class="vi" id="ecw" type="number" oninput="autoUnbal(\'ecu\',\'ecv\',\'ecw\',\'ecUn\')"></td><td><span class="vi-ro" id="ecUn">—</span></td></tr><tr><td>Voltage (V)</td><td><input class="vi" id="evu" type="number" oninput="autoUnbal(\'evu\',\'evv\',\'evw\',\'evUn\')"></td><td><input class="vi" id="evv" type="number" oninput="autoUnbal(\'evu\',\'evv\',\'evw\',\'evUn\')"></td><td><input class="vi" id="evw" type="number" oninput="autoUnbal(\'evu\',\'evv\',\'evw\',\'evUn\')"></td><td><span class="vi-ro" id="evUn">—</span></td></tr></tbody></table></div>';
-// Static test with auto-unbalance
-el.innerHTML+='<div class="card"><div class="st" style="margin-bottom:14px">🧪 Electrical Static Test</div><div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:10px">INSULATION RESISTANCE (MΩ)</div><table class="et"><thead><tr><th>Test</th><th>U-V</th><th>V-W</th><th>W-U</th><th>UVW-G</th></tr></thead><tbody><tr><td>IR @ Vdc</td><td><input class="vi" id="irUV" type="number" step=".01"></td><td><input class="vi" id="irVW" type="number" step=".01"></td><td><input class="vi" id="irWU" type="number" step=".01"></td><td><input class="vi" id="irG" type="number" step=".01"></td></tr></tbody></table><div style="margin-top:8px;font-size:12px;color:var(--text3)">PI (R10/R1): <input class="vi" id="irPI" type="number" step=".01" style="width:80px"></div><div style="font-size:12px;font-weight:600;color:var(--text3);margin-top:16px;margin-bottom:10px">WINDING RESISTANCE (Ω)</div><table class="et"><thead><tr><th>Phase</th><th>U</th><th>V</th><th>W</th><th>Unbal%</th></tr></thead><tbody><tr><td>WR @ °C</td><td><input class="vi" id="wrU" type="number" step=".001" oninput="autoUnbal(\'wrU\',\'wrV\',\'wrW\',\'wrUn\')"></td><td><input class="vi" id="wrV" type="number" step=".001" oninput="autoUnbal(\'wrU\',\'wrV\',\'wrW\',\'wrUn\')"></td><td><input class="vi" id="wrW" type="number" step=".001" oninput="autoUnbal(\'wrU\',\'wrV\',\'wrW\',\'wrUn\')"></td><td><span class="vi-ro" id="wrUn">—</span></td></tr></tbody></table><div style="font-size:12px;font-weight:600;color:var(--text3);margin-top:16px;margin-bottom:10px">WINDING INDUCTANCE (mH)</div><table class="et"><thead><tr><th>Phase</th><th>U</th><th>V</th><th>W</th><th>Unbal%</th></tr></thead><tbody><tr><td>WI @ °C</td><td><input class="vi" id="wiU" type="number" step=".01" oninput="autoUnbal(\'wiU\',\'wiV\',\'wiW\',\'wiUn\')"></td><td><input class="vi" id="wiV" type="number" step=".01" oninput="autoUnbal(\'wiU\',\'wiV\',\'wiW\',\'wiUn\')"></td><td><input class="vi" id="wiW" type="number" step=".01" oninput="autoUnbal(\'wiU\',\'wiV\',\'wiW\',\'wiUn\')"></td><td><span class="vi-ro" id="wiUn">—</span></td></tr></tbody></table></div>';
-el.innerHTML+='<div class="card"><div class="st" style="margin-bottom:14px">📝 Results & Severity</div><div class="fg" style="margin-bottom:14px"><label class="fl">Results</label><textarea class="ft" id="f-res" rows="4"></textarea></div><div class="fl" style="margin-bottom:8px">Severity:</div><div class="sg"><div class="so" onclick="selS(1,this)"><span style="color:var(--red)">⛔</span> Immediate</div><div class="so" onclick="selS(2,this)"><span style="color:var(--amber)">⚠</span> Correct ASAP</div><div class="so" onclick="selS(3,this)"><span style="color:var(--accent)">🔧</span> Next opportunity</div><div class="so" onclick="selS(4,this)"><span style="color:var(--accent)">👁</span> Monitor</div><div class="so s5" onclick="selS(5,this)"><span style="color:var(--green)">✓</span> No action</div></div><input type="hidden" id="f-sev" value="5"></div>';
-el.innerHTML+='<div style="display:flex;gap:10px;justify-content:flex-end;margin-bottom:24px"><button class="btn" onclick="pgCheck(E(\'content\'))">Clear</button><button class="btn btn-s" id="svb" onclick="saveR()">✓ Save to Firestore</button></div>';
-const tb=E('ckb');S.ci.forEach(i=>{const tr=document.createElement('tr');tr.innerHTML='<td style="font-weight:500">'+i.l+'</td><td style="color:var(--text3);font-size:12px">'+i.c+'</td><td><div style="display:flex;gap:4px"><button class="cb" onclick="setCk(\''+i.k+'\',\'ok\',this)">OK</button><button class="cb" onclick="setCk(\''+i.k+'\',\'nok\',this)">NOK</button><button class="cb" onclick="setCk(\''+i.k+'\',\'na\',this)">N/A</button></div></td><td id="c_'+i.k+'">—</td>';tb.appendChild(tr);});}
+
+const sTag=mkSS('f-tag',eqOpts,eqOpts.length?'Search equipment...':'(No equipment — add first)',onTg);
+E('f-tag-wrap').appendChild(sTag);
+
+const sPu=mkSS('f-pu',purpOpts,'Purpose...');
+sPu.setVal('PM');
+E('f-pu-wrap').appendChild(sPu);
+
+const sBdc=mkSS('f-bdc',brgOpts,'Condition...');sBdc.setVal('ok');E('f-bdc-wrap').appendChild(sBdc);
+const sBnc=mkSS('f-bnc',brgOpts,'Condition...');sBnc.setVal('ok');E('f-bnc-wrap').appendChild(sBnc);
+
+// ── Populate General Inspection table ──
+const tb=E('ckb');
+S.ci.forEach(i=>{const tr=document.createElement('tr');tr.innerHTML='<td style="font-weight:500">'+i.l+'</td><td style="color:var(--text3);font-size:12px">'+i.c+'</td><td><div style="display:flex;gap:4px"><button class="cb" onclick="setCk(\''+i.k+'\',\'ok\',this)">OK</button><button class="cb" onclick="setCk(\''+i.k+'\',\'nok\',this)">NOK</button><button class="cb" onclick="setCk(\''+i.k+'\',\'na\',this)">N/A</button></div></td><td id="c_'+i.k+'">—</td>';tb.appendChild(tr);});}
 function autoUnbal(a,b,c,out){const r=calcUnbal(E(a)?.value,E(b)?.value,E(c)?.value);const o=E(out);if(o)o.textContent=r?r+'%':'—';}
 function onTg(t){const eq=S.eq.find(e=>e.tag===t);if(!eq)return;E('f-bde').value=eq.de||'';E('f-bnde').value=eq.nde||'';}
 function setCk(k,v,b){S.cf.ck[k]=v;b.closest('div').querySelectorAll('.cb').forEach(x=>x.className='cb');b.className='cb '+v;const m={ok:'<span class="badge b-ok">OK</span>',nok:'<span class="badge b-nk">NOK</span>',na:'<span class="badge b-no">N/A</span>'};const el=E('c_'+k);if(el)el.innerHTML=m[v]||'—';}
 function chkV(inp,sid){const tw=E('f-tag-wrap');const t=tw?.querySelector('input')?.dataset?.val||'';const eq=S.eq.find(e=>e.tag===t),al=eqAl(eq),da=eqDa(eq),v=parseFloat(inp.value)||0;inp.className='vi'+(v>=da?' danger':v>=al?' alarm':'');const s=E(sid);if(s)s.innerHTML=v>=da?'<span class="badge b-nk">Danger</span>':v>=al?'<span class="badge b-al">Alarm</span>':'<span class="badge b-ok">Normal</span>';}
 function selS(n,el){document.querySelectorAll('.so').forEach(b=>b.className='so');el.className='so s'+n;S.cf.sev=String(n);E('f-sev').value=n;}
-async function saveR(){const tw=E('f-tag-wrap');const tag=tw?.querySelector('input')?.dataset?.val||'';if(!tag){toast('เลือก Equipment Tag','error');return;}const btn=E('svb');btn.disabled=true;btn.textContent='⏳ Saving...';
-const bdc=E('f-bdc-wrap')?.querySelector('input')?.dataset?.val||'ok';
-const bnc=E('f-bnc-wrap')?.querySelector('input')?.dataset?.val||'ok';
-const pu=E('f-pu-wrap')?.querySelector('input')?.dataset?.val||'PM';
+function ssVal(wid,def=''){const inp=E(wid)?.querySelector('input.ss-input');return(inp?.dataset?.val&&inp.dataset.val.trim())||def;}
+async function saveR(){const tag=ssVal('f-tag-wrap');if(!tag){toast('เลือก Equipment Tag','error');return;}const btn=E('svb');btn.disabled=true;btn.textContent='⏳ Saving...';
+const bdc=ssVal('f-bdc-wrap','ok');
+const bnc=ssVal('f-bnc-wrap','ok');
+const pu=ssVal('f-pu-wrap','PM');
 const cuU=calcUnbal(E('ecu')?.value,E('ecv')?.value,E('ecw')?.value);
 const vuU=calcUnbal(E('evu')?.value,E('evv')?.value,E('evw')?.value);
 const rec={date:E('f-dt').value,wo:E('f-wo').value,tag,purp:pu,insp:E('f-ins').value,appr:E('f-app').value,ck:{...S.cf.ck},
