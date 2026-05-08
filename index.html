@@ -2,733 +2,739 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>PM Inspection System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PM Inspection System — GPSC TCC Plant GEN</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script>const firebaseConfig={apiKey:"AIzaSyAIIFtJVieyqEpLmqqqn6cOqT_VOICuxmw",authDomain:"check-sheet-motor.firebaseapp.com",projectId:"check-sheet-motor",storageBucket:"check-sheet-motor.firebasestorage.app",messagingSenderId:"726291252984",appId:"1:726291252984:web:952912afbe890c4546dd0d"};</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAIIFtJVieyqEpLmqqqn6cOqT_VOICuxmw",
+  authDomain: "check-sheet-motor.firebaseapp.com",
+  projectId: "check-sheet-motor",
+  storageBucket: "check-sheet-motor.firebasestorage.app",
+  messagingSenderId: "726291252984",
+  appId: "1:726291252984:web:952912afbe890c4546dd0d",
+  measurementId: "G-E18NGH74FQ"
+};
+</script>
 <style>
-:root{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2128;--bg4:#22272e;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);--text:#e6edf3;--text2:#8b949e;--text3:#6e7681;--accent:#58a6ff;--accent2:#1f6feb;--green:#3fb950;--green-bg:rgba(63,185,80,.1);--amber:#d29922;--amber-bg:rgba(210,153,34,.12);--red:#f85149;--red-bg:rgba(248,81,73,.1);--purple:#bc8cff;--font:'IBM Plex Sans Thai',sans-serif;--mono:'IBM Plex Mono',monospace;--r:8px;--rl:12px;--sw:220px}
-*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
-::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+:root{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2128;--bg4:#22272e;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);--text:#e6edf3;--text2:#8b949e;--text3:#6e7681;--accent:#58a6ff;--accent2:#1f6feb;--green:#3fb950;--green-bg:rgba(63,185,80,.1);--amber:#d29922;--amber-bg:rgba(210,153,34,.12);--red:#f85149;--red-bg:rgba(248,81,73,.1);--purple:#bc8cff;--font:'IBM Plex Sans Thai',sans-serif;--mono:'IBM Plex Mono',monospace;--radius:8px;--radius-lg:12px;--sidebar-w:220px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 #login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
-.login-box{width:380px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rl);padding:36px;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.login-box{width:380px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:36px;box-shadow:0 24px 64px rgba(0,0,0,.5)}
 .login-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px}
-.login-logo i{width:44px;height:44px;background:var(--accent2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;font-style:normal}
-.login-err{background:var(--red-bg);border:1px solid rgba(248,81,73,.3);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:14px;display:none}
-.app{display:flex;height:100vh;overflow:hidden}.sidebar{width:var(--sw);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.login-logo-icon{width:44px;height:44px;background:var(--accent2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff}
+.login-logo-text{font-size:16px;font-weight:600}.login-logo-sub{font-size:12px;color:var(--text3)}
+.login-title{font-size:22px;font-weight:600;margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--text3);margin-bottom:24px}
+.login-err{background:var(--red-bg);border:1px solid rgba(248,81,73,.3);border-radius:var(--radius);padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:14px;display:none}
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.topbar{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;flex-shrink:0}
+.topbar{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;flex-shrink:0;background:var(--bg)}
 .content{flex:1;overflow-y:auto;padding:24px}
-.sidebar-logo{padding:16px;border-bottom:1px solid var(--border)}.logo-badge{display:flex;align-items:center;gap:10px}
-.logo-i{width:34px;height:34px;background:var(--accent2);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0}
+.sidebar-logo{padding:16px;border-bottom:1px solid var(--border)}
+.logo-badge{display:flex;align-items:center;gap:10px}
+.logo-icon{width:34px;height:34px;background:var(--accent2);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0}
+.logo-text{font-size:13px;font-weight:600;line-height:1.2}.logo-sub{font-size:10px;color:var(--text3)}
 .sidebar-nav{flex:1;padding:8px;overflow-y:auto}
-.nav-s{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;padding:12px 8px 5px}
-.nav-i{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r);cursor:pointer;color:var(--text2);font-size:13px;margin-bottom:1px;transition:all .15s}
-.nav-i:hover{background:var(--bg3);color:var(--text)}.nav-i.active{background:rgba(88,166,255,.12);color:var(--accent)}
-.nav-ic{font-size:15px;width:18px;text-align:center;flex-shrink:0}
+.nav-section{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;padding:12px 8px 5px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius);cursor:pointer;color:var(--text2);font-size:13px;margin-bottom:1px;transition:all .15s}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:rgba(88,166,255,.12);color:var(--accent)}
+.nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0}
 .nav-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;font-family:var(--mono)}
 .sidebar-user{padding:12px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.u-av{width:30px;height:30px;border-radius:50%;background:rgba(88,166,255,.15);border:1px solid rgba(88,166,255,.25);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--accent);flex-shrink:0}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:rgba(88,166,255,.15);border:1px solid rgba(88,166,255,.25);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--accent);flex-shrink:0}
+.user-name{font-size:12px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-email{font-size:10px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sidebar-clock{padding:8px 16px 14px;font-size:11px;color:var(--text3);font-family:var(--mono)}
-.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}.topbar-date{font-size:12px;color:var(--text3);font-family:var(--mono)}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:12px;cursor:pointer;font-family:var(--font);transition:all .15s;white-space:nowrap}
+.topbar-title{font-size:15px;font-weight:600}.topbar-breadcrumb{font-size:12px;color:var(--text3)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.topbar-date{font-size:12px;color:var(--text3);font-family:var(--mono)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:12px;cursor:pointer;font-family:var(--font);transition:all .15s;white-space:nowrap}
 .btn:hover{background:var(--bg4)}.btn:disabled{opacity:.5;cursor:default}
-.btn-p{background:var(--accent2);border-color:var(--accent2);color:#fff}.btn-p:hover{background:var(--accent)}
-.btn-s{background:var(--green-bg);border-color:rgba(63,185,80,.3);color:var(--green)}
-.btn-d{background:var(--red-bg);border-color:rgba(248,81,73,.3);color:var(--red)}
+.btn-primary{background:var(--accent2);border-color:var(--accent2);color:#fff}.btn-primary:hover{background:var(--accent)}
+.btn-success{background:var(--green-bg);border-color:rgba(63,185,80,.3);color:var(--green)}
+.btn-danger{background:var(--red-bg);border-color:rgba(248,81,73,.3);color:var(--red)}
 .btn-sm{padding:4px 10px;font-size:11px}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:16px 18px;margin-bottom:16px}
-.card-t{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:16px}
+.card-title{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
 .metric-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-.mc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:16px;position:relative;overflow:hidden}
-.mc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-.mc.m1::after{background:var(--accent)}.mc.m2::after{background:var(--green)}.mc.m3::after{background:var(--amber)}.mc.m4::after{background:var(--red)}
-.ml{font-size:11px;color:var(--text3);margin-bottom:6px}.mv{font-size:26px;font-weight:600;font-family:var(--mono);line-height:1}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.fg{display:flex;flex-direction:column;gap:5px}.fl{font-size:11px;color:var(--text3);font-weight:500}
-.fi,.fs,.ft{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:7px 10px;font-size:13px;color:var(--text);font-family:var(--font);width:100%;transition:border-color .15s}
-.fi:focus,.fs:focus,.ft:focus{outline:none;border-color:var(--accent2);box-shadow:0 0 0 3px rgba(31,111,235,.15)}
-.fs option{background:var(--bg3)}.ft{resize:vertical;min-height:70px;line-height:1.5}
-/* Searchable Select */
-.ss-wrap{position:relative}.ss-input{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:7px 28px 7px 10px;font-size:13px;color:var(--text);font-family:var(--font);width:100%;cursor:pointer}
-.ss-input:focus{outline:none;border-color:var(--accent2)}.ss-arrow{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text3);pointer-events:none}
-.ss-drop{position:absolute;top:100%;left:0;right:0;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);max-height:180px;overflow-y:auto;z-index:50;display:none;margin-top:2px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
-.ss-drop.open{display:block}.ss-opt{padding:7px 10px;font-size:12px;cursor:pointer;color:var(--text2)}.ss-opt:hover,.ss-opt.hl{background:rgba(88,166,255,.12);color:var(--accent)}
-.ss-none{padding:7px 10px;font-size:11px;color:var(--text3);font-style:italic}
-/* Unit toggle */
-.unit-grp{display:flex;gap:0;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;height:30px}
-.unit-btn{padding:2px 8px;font-size:10px;border:none;background:var(--bg3);color:var(--text3);cursor:pointer;font-family:var(--font);transition:all .15s}
-.unit-btn.active{background:var(--accent2);color:#fff}
+.metric-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;position:relative;overflow:hidden}
+.metric-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.metric-card.m-blue::after{background:var(--accent)}.metric-card.m-green::after{background:var(--green)}.metric-card.m-amber::after{background:var(--amber)}.metric-card.m-red::after{background:var(--red)}
+.metric-label{font-size:11px;color:var(--text3);margin-bottom:6px}
+.metric-val{font-size:26px;font-weight:600;font-family:var(--mono);line-height:1}
+.metric-sub{font-size:11px;color:var(--text3);margin-top:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:11px;color:var(--text3);font-weight:500}
+.form-input,.form-select,.form-textarea{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:7px 10px;font-size:13px;color:var(--text);font-family:var(--font);width:100%;transition:border-color .15s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--accent2);box-shadow:0 0 0 3px rgba(31,111,235,.15)}
+.form-select option{background:var(--bg3)}.form-textarea{resize:vertical;min-height:70px;line-height:1.5}
 .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
-.b-ok{background:var(--green-bg);color:var(--green);border:1px solid rgba(63,185,80,.2)}
-.b-al{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(210,153,34,.2)}
-.b-nk{background:var(--red-bg);color:var(--red);border:1px solid rgba(248,81,73,.2)}
-.b-in{background:rgba(88,166,255,.1);color:var(--accent);border:1px solid rgba(88,166,255,.2)}
-.b-no{background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
-.cht{width:100%;border-collapse:collapse}
-.cht th{font-size:11px;color:var(--text3);font-weight:500;text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)}
-.cht td{padding:8px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
-.cht tr:last-child td{border-bottom:none}
-.cb{padding:3px 10px;border-radius:12px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text3);transition:all .15s}
-.cb.ok{background:var(--green-bg);color:var(--green);border-color:rgba(63,185,80,.3)}
-.cb.nok{background:var(--red-bg);color:var(--red);border-color:rgba(248,81,73,.3)}
-.cb.na{background:rgba(139,148,158,.1);color:var(--text3)}
-.vt{width:100%;border-collapse:collapse}
-.vt th{font-size:11px;color:var(--text3);text-align:center;padding:6px 4px;border-bottom:1px solid var(--border);font-weight:500}
-.vt th:first-child{text-align:left}.vt td{padding:6px 4px;border-bottom:1px solid var(--border)}
-.vt tr:last-child td{border-bottom:none}.vt td:first-child{font-size:12px;color:var(--text2);white-space:nowrap}
-.vi{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:5px 6px;font-size:13px;color:var(--text);font-family:var(--mono);text-align:center;width:72px;transition:all .15s}
-.vi:focus{outline:none;border-color:var(--accent2)}.vi.alarm{border-color:rgba(210,153,34,.5);background:rgba(210,153,34,.05)}.vi.danger{border-color:rgba(248,81,73,.5);background:rgba(248,81,73,.05)}
-.vi-ro{background:var(--bg4);border:1px solid var(--border);border-radius:5px;padding:5px 6px;font-size:12px;color:var(--amber);font-family:var(--mono);text-align:center;width:72px}
+.badge-ok{background:var(--green-bg);color:var(--green);border:1px solid rgba(63,185,80,.2)}
+.badge-alarm{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(210,153,34,.2)}
+.badge-nok{background:var(--red-bg);color:var(--red);border:1px solid rgba(248,81,73,.2)}
+.badge-info{background:rgba(88,166,255,.1);color:var(--accent);border:1px solid rgba(88,166,255,.2)}
+.badge-none{background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
+.check-table{width:100%;border-collapse:collapse}
+.check-table th{font-size:11px;color:var(--text3);font-weight:500;text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)}
+.check-table td{padding:8px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+.check-table tr:last-child td{border-bottom:none}
+.ct-btn{padding:3px 10px;border-radius:12px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text3);transition:all .15s}
+.ct-btn.ok{background:var(--green-bg);color:var(--green);border-color:rgba(63,185,80,.3)}
+.ct-btn.nok{background:var(--red-bg);color:var(--red);border-color:rgba(248,81,73,.3)}
+.ct-btn.na{background:rgba(139,148,158,.1);color:var(--text3);border-color:rgba(139,148,158,.2)}
+.vib-table{width:100%;border-collapse:collapse}
+.vib-table th{font-size:11px;color:var(--text3);text-align:center;padding:6px 4px;border-bottom:1px solid var(--border);font-weight:500}
+.vib-table th:first-child{text-align:left}
+.vib-table td{padding:6px 4px;border-bottom:1px solid var(--border)}
+.vib-table tr:last-child td{border-bottom:none}
+.vib-table td:first-child{font-size:12px;color:var(--text2);white-space:nowrap}
+.vib-input{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:5px 6px;font-size:13px;color:var(--text);font-family:var(--mono);text-align:center;width:80px;transition:all .15s}
+.vib-input:focus{outline:none;border-color:var(--accent2)}
+.vib-input.alarm{border-color:rgba(210,153,34,.5);background:rgba(210,153,34,.05)}
+.vib-input.danger{border-color:rgba(248,81,73,.5);background:rgba(248,81,73,.05)}
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
-.d-g{background:var(--green);box-shadow:0 0 6px rgba(63,185,80,.5)}.d-a{background:var(--amber);box-shadow:0 0 6px rgba(210,153,34,.5)}.d-r{background:var(--red);box-shadow:0 0 6px rgba(248,81,73,.5)}.d-x{background:var(--text3)}
-.eq-i{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--rl);margin-bottom:8px;background:var(--bg3)}
-.eq-av{width:38px;height:38px;border-radius:8px;background:rgba(88,166,255,.12);border:1px solid rgba(88,166,255,.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--accent);font-family:var(--mono);flex-shrink:0}
-.ht{width:100%;border-collapse:collapse}.ht th{font-size:11px;color:var(--text3);font-weight:500;text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);background:var(--bg3);white-space:nowrap}
-.ht td{padding:10px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}.ht tr:hover td{background:var(--bg3)}
+.dot-green{background:var(--green);box-shadow:0 0 6px rgba(63,185,80,.5)}
+.dot-amber{background:var(--amber);box-shadow:0 0 6px rgba(210,153,34,.5)}
+.dot-red{background:var(--red);box-shadow:0 0 6px rgba(248,81,73,.5)}
+.dot-gray{background:var(--text3)}
+.eq-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:8px;background:var(--bg3);transition:border-color .15s}
+.eq-item:hover{border-color:var(--border2)}
+.eq-avatar{width:38px;height:38px;border-radius:8px;background:rgba(88,166,255,.12);border:1px solid rgba(88,166,255,.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--accent);font-family:var(--mono);flex-shrink:0}
+.hist-table{width:100%;border-collapse:collapse}
+.hist-table th{font-size:11px;color:var(--text3);font-weight:500;text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);background:var(--bg3);white-space:nowrap}
+.hist-table td{padding:10px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+.hist-table tr:hover td{background:var(--bg3)}
 .mono{font-family:var(--mono);font-size:12px}
-.ab{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:var(--r);margin-bottom:10px;font-size:13px}
-.a-am{background:var(--amber-bg);border:1px solid rgba(210,153,34,.25);color:var(--amber)}
-.a-re{background:var(--red-bg);border:1px solid rgba(248,81,73,.25);color:var(--red)}
-.sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.so{padding:10px 14px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:12px;color:var(--text2);transition:all .15s;display:flex;align-items:center;gap:8px}
-.so.s1{border-color:rgba(248,81,73,.5);background:var(--red-bg);color:var(--red)}
-.so.s2{border-color:rgba(210,153,34,.5);background:var(--amber-bg);color:var(--amber)}
-.so.s3,.so.s4{border-color:rgba(88,166,255,.4);background:rgba(88,166,255,.08);color:var(--accent)}
-.so.s5{border-color:rgba(63,185,80,.4);background:var(--green-bg);color:var(--green)}
-.mo{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center}
-.mo.open{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rl);max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.5)}
-.mh{padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.mb{padding:18px 20px}.mf{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
-.mc-btn{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:2px 6px;border-radius:4px}
-.mc-btn:hover{color:var(--text);background:var(--bg3)}
-.toast-c{position:fixed;bottom:24px;right:24px;z-index:200;display:flex;flex-direction:column;gap:8px}
-.toast{background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);padding:10px 16px;font-size:13px;max-width:320px;display:flex;align-items:center;gap:8px;animation:si .2s ease;box-shadow:0 8px 24px rgba(0,0,0,.3)}
-.toast.ok{border-left:3px solid var(--green)}.toast.er{border-left:3px solid var(--red)}.toast.wa{border-left:3px solid var(--amber)}
-@keyframes si{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.st{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
-.itab{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px}
-.it{padding:8px 16px;cursor:pointer;font-size:13px;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
-.it.active{color:var(--accent);border-bottom-color:var(--accent)}
-.cw{position:relative;width:100%}
-.et{width:100%;border-collapse:collapse}
-.et th{font-size:11px;color:var(--text3);font-weight:500;text-align:center;padding:6px 8px;border-bottom:1px solid var(--border)}
-.et th:first-child{text-align:left}.et td{padding:6px 4px;border-bottom:1px solid var(--border);text-align:center}
-.et td:first-child{text-align:left;font-size:12px;color:var(--text2)}
-.dl{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)}
-.dl-l{color:var(--text3);font-size:12px}.dl-v{font-family:var(--mono);font-size:13px;text-align:right}
-.sec-h{font-size:11px;font-weight:600;color:var(--accent);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.05em}
-@media print{.sidebar,.topbar,.toast-c,.mf,.mh button,.mh .mc-btn,.btn,.ss-drop{display:none!important}.mo{position:static!important;background:none!important}.modal{max-height:none!important;width:100%!important;border:none!important;box-shadow:none!important;border-radius:0!important}.mb{padding:0!important}body{background:#fff!important;color:#000!important}*{color:#000!important;border-color:#ccc!important}.badge{border:1px solid #999!important}.dl{border-color:#ddd!important}.sec-h{color:#1a5fb4!important}.content{overflow:visible!important;height:auto!important}.main{overflow:visible!important}.app{display:block!important;height:auto!important;overflow:visible!important}.card{break-inside:avoid;border:1px solid #ddd!important}.mc{border:1px solid #ddd!important}.metric-row{grid-template-columns:repeat(4,1fr)!important}.g2{grid-template-columns:1fr 1fr!important}canvas{max-height:200px!important}}
-@media(max-width:900px){.metric-row{grid-template-columns:1fr 1fr}.g3,.g4{grid-template-columns:1fr 1fr}.sidebar{display:none}}
+.alert-banner{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:var(--radius);margin-bottom:10px;font-size:13px}
+.alert-amber{background:var(--amber-bg);border:1px solid rgba(210,153,34,.25);color:var(--amber)}
+.alert-red{background:var(--red-bg);border:1px solid rgba(248,81,73,.25);color:var(--red)}
+.sev-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.sev-option{padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;font-size:12px;color:var(--text2);transition:all .15s;display:flex;align-items:center;gap:8px}
+.sev-option.sel-1{border-color:rgba(248,81,73,.5);background:var(--red-bg);color:var(--red)}
+.sev-option.sel-2{border-color:rgba(210,153,34,.5);background:var(--amber-bg);color:var(--amber)}
+.sev-option.sel-3{border-color:rgba(88,166,255,.4);background:rgba(88,166,255,.08);color:var(--accent)}
+.sev-option.sel-4{border-color:rgba(88,166,255,.3);background:rgba(88,166,255,.05);color:var(--accent)}
+.sev-option.sel-5{border-color:rgba(63,185,80,.4);background:var(--green-bg);color:var(--green)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.modal-header{padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:15px;font-weight:600}
+.modal-close{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:2px 6px;border-radius:4px}
+.modal-close:hover{color:var(--text);background:var(--bg3)}
+.modal-body{padding:18px 20px}.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+.toast-container{position:fixed;bottom:24px;right:24px;z-index:200;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--bg4);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 16px;font-size:13px;max-width:320px;display:flex;align-items:center;gap:8px;animation:slideIn .2s ease;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.toast.success{border-left:3px solid var(--green)}.toast.error{border-left:3px solid var(--red)}.toast.warning{border-left:3px solid var(--amber)}
+@keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.section-title{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.inner-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px}
+.inner-tab{padding:8px 16px;cursor:pointer;font-size:13px;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.inner-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.chart-wrap{position:relative;width:100%}
+.elec-test-table{width:100%;border-collapse:collapse}
+.elec-test-table th{font-size:11px;color:var(--text3);font-weight:500;text-align:center;padding:6px 8px;border-bottom:1px solid var(--border)}
+.elec-test-table th:first-child{text-align:left}
+.elec-test-table td{padding:6px 4px;border-bottom:1px solid var(--border);text-align:center}
+.elec-test-table td:first-child{text-align:left;font-size:12px;color:var(--text2)}
+.elec-test-table tr:last-child td{border-bottom:none}
+.drop-zone{border:2px dashed var(--border2);border-radius:var(--radius-lg);padding:30px;text-align:center;color:var(--text3);transition:all .2s;cursor:pointer}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:rgba(88,166,255,.05);color:var(--accent)}
+.import-preview{max-height:300px;overflow:auto;margin-top:12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg3)}
+.import-preview table{width:100%;border-collapse:collapse;font-size:12px}
+.import-preview th{background:var(--bg4);padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);font-weight:500;color:var(--text3);position:sticky;top:0}
+.import-preview td{padding:5px 8px;border-bottom:1px solid var(--border);color:var(--text2)}
+@media(max-width:900px){.metric-row{grid-template-columns:1fr 1fr}.grid3,.grid4{grid-template-columns:1fr 1fr}.sidebar{display:none}}
 </style>
 </head>
 <body>
-<div class="toast-c" id="toasts"></div>
-<div id="login-screen"><div class="login-box">
-  <div class="login-logo"><i>PM</i><div><div style="font-size:16px;font-weight:600">PM Inspection System</div><div style="font-size:12px;color:var(--text3)">GPSC — TCC Plant GEN</div></div></div>
-  <div style="font-size:22px;font-weight:600;margin-bottom:6px">เข้าสู่ระบบ</div>
-  <div style="font-size:13px;color:var(--text3);margin-bottom:24px">ใช้ Email/Password ที่ Admin กำหนด</div>
-  <div class="login-err" id="login-err"></div>
-  <div class="fg" style="margin-bottom:12px"><label class="fl">Email</label><input class="fi" type="email" id="login-email" placeholder="your@email.com"></div>
-  <div class="fg" style="margin-bottom:20px"><label class="fl">Password</label><input class="fi" type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
-  <button class="btn btn-p" style="width:100%;justify-content:center;padding:10px" onclick="doLogin()" id="login-btn">เข้าสู่ระบบ</button>
-</div></div>
+<div class="toast-container" id="toasts"></div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo"><div class="login-logo-icon">PM</div><div><div class="login-logo-text">PM Inspection System</div><div class="login-logo-sub">GPSC — TCC Plant GEN</div></div></div>
+    <div class="login-title">เข้าสู่ระบบ</div>
+    <div class="login-sub">ใช้ Email/Password ที่ Admin กำหนด</div>
+    <div class="login-err" id="login-err"></div>
+    <div class="form-group" style="margin-bottom:12px"><label class="form-label">Email</label><input class="form-input" type="email" id="login-email" placeholder="your@email.com"></div>
+    <div class="form-group" style="margin-bottom:20px"><label class="form-label">Password</label><input class="form-input" type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:10px" onclick="doLogin()" id="login-btn">เข้าสู่ระบบ</button>
+  </div>
+</div>
+
+<!-- APP -->
 <div class="app" id="main-app" style="display:none">
 <aside class="sidebar">
-  <div class="sidebar-logo"><div class="logo-badge"><div class="logo-i" id="logo-icon">PM</div><div><div style="font-size:13px;font-weight:600;line-height:1.2" id="logo-line1">PM Inspection</div><div style="font-size:10px;color:var(--text3)" id="logo-line2">TCC Plant GEN</div></div></div></div>
+  <div class="sidebar-logo"><div class="logo-badge"><div class="logo-icon">PM</div><div><div class="logo-text">PM Inspection</div><div class="logo-sub">TCC Plant GEN</div></div></div></div>
   <nav class="sidebar-nav">
-    <div class="nav-s">Overview</div>
-    <div class="nav-i active" id="nav-dashboard" onclick="go('dashboard',this)"><span class="nav-ic">◈</span> Dashboard</div>
-    <div class="nav-i" id="nav-alerts" onclick="go('alerts',this)"><span class="nav-ic">⚠</span> Alerts <span class="nav-badge" id="acnt" style="display:none">0</span></div>
-    <div class="nav-s">PM Operations</div>
-    <div class="nav-i" id="nav-checksheet" onclick="go('checksheet',this)"><span class="nav-ic">✎</span> PM Check Sheet</div>
-    <div class="nav-i" id="nav-history" onclick="go('history',this)"><span class="nav-ic">☰</span> PM History</div>
-    <div class="nav-i" id="nav-trends" onclick="go('trends',this)"><span class="nav-ic">↗</span> Trends</div>
-    <div class="nav-i" id="nav-alarmlog" onclick="go('alarmlog',this)"><span class="nav-ic">🔔</span> Alarm Log</div>
-    <div class="nav-s">Master Data</div>
-    <div class="nav-i" id="nav-equipment" onclick="go('equipment',this)"><span class="nav-ic">⊞</span> Equipment</div>
-    <div class="nav-i" id="nav-settings" onclick="go('settings',this)"><span class="nav-ic">⚙</span> Settings</div>
+    <div class="nav-section">Overview</div>
+    <div class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard',this)"><span class="nav-icon">◈</span> Dashboard</div>
+    <div class="nav-item" id="nav-alerts" onclick="showPage('alerts',this)"><span class="nav-icon">⚠</span> Alerts <span class="nav-badge" id="alert-count" style="display:none">0</span></div>
+    <div class="nav-section">PM Operations</div>
+    <div class="nav-item" id="nav-checksheet" onclick="showPage('checksheet',this)"><span class="nav-icon">✎</span> PM Check Sheet</div>
+    <div class="nav-item" id="nav-history" onclick="showPage('history',this)"><span class="nav-icon">☰</span> PM History</div>
+    <div class="nav-item" id="nav-trends" onclick="showPage('trends',this)"><span class="nav-icon">↗</span> Trend Analysis</div>
+    <div class="nav-section">Data</div>
+    <div class="nav-item" id="nav-import" onclick="showPage('import',this)"><span class="nav-icon">⬆</span> Import Excel</div>
+    <div class="nav-item" id="nav-equipment" onclick="showPage('equipment',this)"><span class="nav-icon">⊞</span> Equipment</div>
+    <div class="nav-item" id="nav-settings" onclick="showPage('settings',this)"><span class="nav-icon">⚙</span> Settings</div>
   </nav>
-  <div class="sidebar-user"><div class="u-av" id="uav">?</div><div style="flex:1;overflow:hidden"><div style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="uname">—</div><div style="font-size:10px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="uemail">—</div></div></div>
-  <div class="sidebar-clock" id="sclock"></div>
+  <div class="sidebar-user"><div class="user-avatar" id="user-avatar">?</div><div style="flex:1;overflow:hidden"><div class="user-name" id="user-name">—</div><div class="user-email" id="user-email">—</div></div></div>
+  <div class="sidebar-clock" id="sidebar-clock"></div>
 </aside>
+
 <div class="main">
-  <div class="topbar"><div><div style="font-size:15px;font-weight:600" id="ptitle">Dashboard</div><div style="font-size:12px;color:var(--text3)"><span id="pplant">GEN-Phase1-Water</span> › <span id="pbc">Overview</span></div></div>
-    <div class="topbar-right"><div class="topbar-date" id="tdate"></div>
-      <button class="btn btn-sm btn-p" onclick="go('checksheet',E('nav-checksheet'))">+ New PM</button>
-      <button class="btn btn-sm btn-d" onclick="doLogout()">Logout</button>
+  <div class="topbar">
+    <div><div class="topbar-title" id="page-title">Dashboard</div><div class="topbar-breadcrumb">4261 GEN-Phase1-Water (23) › <span id="page-bc">Overview</span></div></div>
+    <div class="topbar-right">
+      <div class="topbar-date" id="top-date"></div>
+      <button class="btn btn-sm" onclick="showPage('import',document.getElementById('nav-import'))">⬆ Import</button>
+      <button class="btn btn-sm btn-primary" onclick="showPage('checksheet',document.getElementById('nav-checksheet'))">+ New PM</button>
+      <button class="btn btn-sm btn-danger" onclick="doLogout()">Logout</button>
     </div>
   </div>
   <div class="content" id="content"></div>
 </div>
 </div>
-<!-- Equipment Modal -->
-<div class="mo" id="meq"><div class="modal" style="width:650px"><div class="mh"><div style="font-size:15px;font-weight:600" id="meqt">Add Equipment</div><button class="mc-btn" onclick="cm('meq')">✕</button></div>
-<div class="mb"><div class="g2" style="gap:12px;margin-bottom:12px">
-<div class="fg"><label class="fl">Tag No.*</label><input class="fi" id="eq-tag" placeholder="P-201X"></div>
-<div class="fg"><label class="fl">Module for</label><input class="fi" id="eq-module" placeholder="CF Export P201X"></div>
-<div class="fg"><label class="fl">Manufacturer</label><input class="fi" id="eq-mfg" placeholder="Reliance"></div>
-<div class="fg"><label class="fl">Serial No.</label><input class="fi" id="eq-sn" placeholder="1MAZJ9073 G00X"></div>
-<div class="fg"><label class="fl">Power</label><div style="display:flex;gap:6px;align-items:center"><input class="fi" id="eq-power" type="number" placeholder="250" style="flex:1"><div class="unit-grp"><button class="unit-btn active" onclick="togU(this,'eq-pwrU','kW')">kW</button><button class="unit-btn" onclick="togU(this,'eq-pwrU','HP')">HP</button></div><input type="hidden" id="eq-pwrU" value="kW"></div></div>
-<div class="fg"><label class="fl">Weight</label><div style="display:flex;gap:6px;align-items:center"><input class="fi" id="eq-weight" type="number" placeholder="2268" style="flex:1"><div class="unit-grp"><button class="unit-btn" onclick="togU(this,'eq-wtU','kg')">kg</button><button class="unit-btn active" onclick="togU(this,'eq-wtU','lbs')">lbs</button></div><input type="hidden" id="eq-wtU" value="lbs"></div></div>
-<div class="fg"><label class="fl">Stat. Volts</label><input class="fi" id="eq-volts" placeholder="380YD"></div>
-<div class="fg"><label class="fl">Stat. Amps</label><input class="fi" id="eq-amps" placeholder="323A"></div>
-<div class="fg"><label class="fl">Frequency (Hz)</label><input class="fi" id="eq-freq" type="number" placeholder="50"></div>
-<div class="fg"><label class="fl">Speed (RPM)</label><input class="fi" id="eq-speed" type="number" placeholder="2970"></div>
-<div class="fg"><label class="fl">Insulation Class</label><input class="fi" id="eq-ins" placeholder="F"></div>
-<div class="fg"><label class="fl">Duty</label><input class="fi" id="eq-duty" placeholder="CONT"></div>
-</div>
-<div style="font-size:12px;font-weight:600;color:var(--text3);margin:6px 0 8px">BEARING INFO</div>
-<div class="g2" style="gap:12px;margin-bottom:12px">
-<div class="fg"><label class="fl">DE Bearing</label><input class="fi" id="eq-de" placeholder="65BC03J3OX"></div>
-<div class="fg"><label class="fl">NDE Bearing</label><input class="fi" id="eq-nde" placeholder="65BC03J3OX"></div>
-</div>
-<div style="font-size:12px;font-weight:600;color:var(--text3);margin:6px 0 8px">INSTALLATION</div>
-<div class="g2" style="gap:12px;margin-bottom:12px">
-<div class="fg"><label class="fl">Load Type</label><input class="fi" id="eq-loadtype" placeholder="Pump"></div>
-<div class="fg"><label class="fl">Location</label><input class="fi" id="eq-location" placeholder="Pump room"></div>
-</div>
-<div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">ALARM LIMITS — MOTOR</div>
-<div class="g2" style="gap:12px;margin-bottom:10px">
-<div class="fg"><label class="fl">Motor Vib Alarm (mm/s)</label><input class="fi" id="eq-mval" type="number" step="0.1" value="4.5"></div>
-<div class="fg"><label class="fl">Motor Vib Danger (mm/s)</label><input class="fi" id="eq-mvda" type="number" step="0.1" value="7.1"></div>
-</div>
-<div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">ALARM LIMITS — PUMP</div>
-<div class="g2" style="gap:12px">
-<div class="fg"><label class="fl">Pump Vib Alarm (mm/s)</label><input class="fi" id="eq-pval" type="number" step="0.1" value="4.5"></div>
-<div class="fg"><label class="fl">Pump Vib Danger (mm/s)</label><input class="fi" id="eq-pvda" type="number" step="0.1" value="7.1"></div>
+
+<!-- MODAL: Equipment -->
+<div class="modal-overlay" id="modal-eq"><div class="modal">
+  <div class="modal-header"><div class="modal-title" id="modal-eq-title">Add Equipment</div><button class="modal-close" onclick="closeModal('modal-eq')">✕</button></div>
+  <div class="modal-body">
+    <div class="grid2" style="gap:12px;margin-bottom:12px">
+      <div class="form-group"><label class="form-label">Tag No. *</label><input class="form-input" id="eq-tag" placeholder="P-201X"></div>
+      <div class="form-group"><label class="form-label">Module for</label><input class="form-input" id="eq-module" placeholder="CF Export P201X"></div>
+      <div class="form-group"><label class="form-label">Manufacturer</label><input class="form-input" id="eq-mfg" placeholder="Reliance"></div>
+      <div class="form-group"><label class="form-label">Serial No.</label><input class="form-input" id="eq-sn" placeholder="1MAZJ9073 G00X"></div>
+      <div class="form-group"><label class="form-label">Power (HP)</label><input class="form-input" id="eq-power" type="number" placeholder="250"></div>
+      <div class="form-group"><label class="form-label">Stat. Volts</label><input class="form-input" id="eq-volts" placeholder="380YD"></div>
+      <div class="form-group"><label class="form-label">Stat. Amps</label><input class="form-input" id="eq-amps" placeholder="323A"></div>
+      <div class="form-group"><label class="form-label">Speed (RPM)</label><input class="form-input" id="eq-speed" type="number" placeholder="2970"></div>
+    </div>
+    <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px;margin-top:6px">BEARING INFO</div>
+    <div class="grid2" style="gap:12px;margin-bottom:12px">
+      <div class="form-group"><label class="form-label">DE Bearing (Drive End)</label><input class="form-input" id="eq-de" placeholder="65BC03J3OX"></div>
+      <div class="form-group"><label class="form-label">NDE Bearing (Non-Drive End)</label><input class="form-input" id="eq-nde" placeholder="65BC03J3OX"></div>
+    </div>
+    <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">ALARM LIMITS</div>
+    <div class="grid2" style="gap:12px">
+      <div class="form-group"><label class="form-label">Vibration Alarm (mm/s)</label><input class="form-input" id="eq-vib-alarm" type="number" step="0.1" value="4.5"></div>
+      <div class="form-group"><label class="form-label">Vibration Danger (mm/s)</label><input class="form-input" id="eq-vib-danger" type="number" step="0.1" value="7.1"></div>
+    </div>
+  </div>
+  <div class="modal-footer"><button class="btn" onclick="closeModal('modal-eq')">Cancel</button><button class="btn btn-primary" onclick="saveEquipment()">Save</button></div>
 </div></div>
-<div class="mf"><button class="btn" onclick="cm('meq')">Cancel</button><button class="btn btn-p" onclick="saveEq()">Save</button></div>
+
+<!-- MODAL: Detail -->
+<div class="modal-overlay" id="modal-detail"><div class="modal" style="width:680px">
+  <div class="modal-header"><div class="modal-title" id="modal-detail-title">PM Record</div><button class="modal-close" onclick="closeModal('modal-detail')">✕</button></div>
+  <div class="modal-body" id="modal-detail-body"></div>
+  <div class="modal-footer"><button class="btn" onclick="closeModal('modal-detail')">Close</button></div>
 </div></div>
-<!-- Detail Modal -->
-<div class="mo" id="mdet"><div class="modal" style="width:800px" id="mdet-inner"><div class="mh"><div style="font-size:15px;font-weight:600" id="mdett">PM Record</div><div style="display:flex;gap:8px;align-items:center"><button class="btn btn-sm" onclick="exportPDF()">🖨 Export PDF</button><button class="mc-btn" onclick="cm('mdet')">✕</button></div></div><div class="mb" id="mdetb"></div></div></div>
+
 <script>
-firebase.initializeApp(firebaseConfig);const auth=firebase.auth(),db=firebase.firestore();
-let S={eq:[],rec:[],alogs:[],set:{di:'',da:'',plant:'GEN-Phase1-Water',co:'426 GEN',area:'Pump room',site:'TCC Plant GEN',logoIcon:'PM',logoLine1:'PM Inspection',logoLine2:'TCC Plant GEN'},
-// ── MCC Module Inspection rows ──
-mcc:[
-  {k:'mcc_module',  l:'Module condition',       c:'Fairly clean, No damage',     act:['Cleaning','N/A']},
-  {k:'mcc_magnetic',l:'Magnetic',               c:'No damage, Normal contact',   act:['Re-Tight','N/A']},
-  {k:'mcc_lamp',    l:'Lamp Status',            c:'Fairly clean, No damage',     act:['Cleaning','N/A']},
-  {k:'mcc_terminal',l:'Connection at terminal', c:'Tight and Clean',             act:['Re-Tight','N/A']},
-  {k:'mcc_cables',  l:'Cables',                 c:'No damage on insulation',     act:['Cleaning','N/A']},
-  {k:'mcc_switch',  l:'Switch',                 c:'Fairly clean, No damage',     act:['Cleaning','N/A']},
-  {k:'mcc_earth',   l:'Earth connection',       c:'Tight, Fairly clean',         act:['Re-Tight','N/A']}
-],
-// ── Motor Inspection rows ──
-mot:[
-  {k:'mot_shaft',   l:'Shaft and Coupling',     c:'Fairly clean/No damage',      act:['Cleaning','N/A']},
-  {k:'mot_fan',     l:'Fan/Cover',              c:'Fairly clean/No damage',      act:['Cleaning','N/A']},
-  {k:'mot_frame',   l:'Frame',                  c:'Fairly clean/No damage',      act:['Cleaning','N/A']},
-  {k:'mot_bolts',   l:'Bolts at Foundation',    c:'Tight/No damage',             act:['Re-Tight','N/A']},
-  {k:'mot_tbox',    l:'Terminal box',           c:'Fairly clean/No damage',      act:['Cleaning','N/A']},
-  {k:'mot_cable',   l:'Cable',                  c:'Fairly clean/No damage',      act:['Cleaning','N/A']},
-  {k:'mot_earth',   l:'Earth cable',            c:'Tight/No damage',             act:['Re-Tight','N/A']}
-],
-sl:{1:'Immediate attention',2:'Correct ASAP',3:'Correct at next opportunity',4:'Monitor more frequently',5:'No action required'},
-sc:{1:'#f85149',2:'#d29922',3:'#58a6ff',4:'#58a6ff',5:'#3fb950'},
-cf:{ck:{},sev:'5'},usr:null};
+// ══════════ FIREBASE ══════════
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth(),db=firebase.firestore();
 
-const E=id=>document.getElementById(id);
-const fd=d=>{if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'});};
-const now=()=>new Date().toISOString().slice(0,10);
-const gv=id=>parseFloat(E(id)?.value)||0;
+// ══════════ STATE ══════════
+let S={
+  equipment:[],records:[],
+  settings:{defaultInspector:'',defaultApprover:'',plant:'4261 GEN-Phase1-Water (23)',company:'426 GEN',area:'Pump room',site:'TCC Plant GEN'},
+  checkItems:[
+    {key:'module',label:'Module condition',criteria:'Fairly clean, No damage'},
+    {key:'magnetic',label:'Magnetic',criteria:'No damage, Normal contact'},
+    {key:'lamp',label:'Lamp Status',criteria:'Fairly clean, No damage'},
+    {key:'terminal',label:'Connection at terminal',criteria:'Tight and Clean'},
+    {key:'cables',label:'Cables',criteria:'No damage on insulation'},
+    {key:'switch',label:'Switch',criteria:'Fairly clean, No damage'},
+    {key:'earth',label:'Earth connection',criteria:'Tight, Fairly clean'},
+  ],
+  sevL:{1:'Immediate attention',2:'Correct ASAP',3:'Correct at next opportunity',4:'Monitor more frequently',5:'No action required'},
+  sevC:{1:'#f85149',2:'#d29922',3:'#58a6ff',4:'#58a6ff',5:'#3fb950'},
+  cf:{checks:{},severity:'5'},
+  currentUser:null, importData:null,
+};
 
-function toast(m,t){const c=E('toasts'),d=document.createElement('div');d.className='toast '+(t==='error'?'er':t==='warning'?'wa':'ok');d.innerHTML='<span>'+({ok:'✓',er:'✕',wa:'⚠'}[d.className.split(' ')[1]]||'✓')+'</span> '+m;c.appendChild(d);setTimeout(()=>d.remove(),3500);}
-function om(id){E(id).classList.add('open')}function cm(id){E(id).classList.remove('open')}
-function applyLogo(){E('logo-icon').textContent=S.set.logoIcon||'PM';E('logo-line1').textContent=S.set.logoLine1||'PM Inspection';E('logo-line2').textContent=S.set.logoLine2||'TCC Plant GEN';E('pplant').textContent=S.set.plant||'';}
-function togU(btn,hidId,val){btn.parentElement.querySelectorAll('.unit-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');E(hidId).value=val;}
-
-// ══════ Searchable Select ══════
-function mkSS(id,opts,ph,onChange){
-const w=document.createElement('div');w.className='ss-wrap';
-const inp=document.createElement('input');inp.className='ss-input';inp.placeholder=ph||'— Select —';inp.id=id;inp.setAttribute('autocomplete','off');
-const arrow=document.createElement('span');arrow.className='ss-arrow';arrow.textContent='▾';
-const drop=document.createElement('div');drop.className='ss-drop';
-w.appendChild(inp);w.appendChild(arrow);w.appendChild(drop);
-let val='';
-function render(filter){drop.innerHTML='';const f=filter?filter.toLowerCase():'';const fl=opts.filter(o=>!f||o.label.toLowerCase().includes(f)||o.value.toLowerCase().includes(f));
-if(!fl.length){drop.innerHTML='<div class="ss-none">ไม่พบ</div>';return;}
-fl.forEach(o=>{const d=document.createElement('div');d.className='ss-opt';d.textContent=o.label;
-d.onmousedown=e=>{e.preventDefault();val=o.value;inp.value=o.label;inp.dataset.val=o.value;drop.classList.remove('open');if(onChange)onChange(o.value);};drop.appendChild(d);});}
-function show(){drop.classList.add('open');const cur=opts.find(o=>o.value===val);render((!cur||inp.value===cur.label)?'':inp.value);}
-function close(){drop.classList.remove('open');if(val){const o=opts.find(x=>x.value===val);if(o)inp.value=o.label;else{inp.value='';inp.dataset.val='';val='';}}else{inp.value='';inp.dataset.val='';}}
-inp.addEventListener('focus',show);inp.addEventListener('input',e=>render(e.target.value));
-inp.addEventListener('blur',()=>setTimeout(close,150));
-inp.addEventListener('keydown',e=>{if(e.key==='Escape')close();else if(e.key==='Enter'){const f=drop.querySelector('.ss-opt');if(f)f.onmousedown&&f.onmousedown(e);}});
-w.setVal=v=>{val=v;const o=opts.find(x=>x.value===v);inp.value=o?o.label:'';inp.dataset.val=v;};
-w.getVal=()=>val;
-return w;}
-function ssVal(wid,def=''){const inp=E(wid)?.querySelector('input.ss-input');return(inp?.dataset?.val&&inp.dataset.val.trim())||def;}
-
-// ══════ Unbalance ══════
-function calcUnbal(a,b,c){const arr=[a,b,c].map(Number).filter(v=>!isNaN(v)&&v!==0);if(arr.length<3)return'';const avg=(arr[0]+arr[1]+arr[2])/3;if(avg===0)return'0.00';const mx=Math.max(Math.abs(arr[0]-avg),Math.abs(arr[1]-avg),Math.abs(arr[2]-avg));return((mx/avg)*100).toFixed(2);}
-function autoUnbal(a,b,c,out){const r=calcUnbal(E(a)?.value,E(b)?.value,E(c)?.value);const o=E(out);if(o)o.textContent=r?r+'%':'—';}
-
-// ══════ Equipment helpers — SEPARATE Motor/Pump alarm limits ══════
-function eqMAl(eq){return parseFloat(eq?.motorVibAlarm||eq?.vibAlarm||eq?.val||4.5);}
-function eqMDa(eq){return parseFloat(eq?.motorVibDanger||eq?.vibDanger||eq?.vda||7.1);}
-function eqPAl(eq){return parseFloat(eq?.pumpVibAlarm||eq?.vibAlarm||eq?.val||4.5);}
-function eqPDa(eq){return parseFloat(eq?.pumpVibDanger||eq?.vibDanger||eq?.vda||7.1);}
-
-function V(r,k){const v=r.vib||{};const m={mDV:'mDeV',mDH:'mDeH',mDA:'mDeA',mNV:'mNdeV',mNH:'mNdeH',pDV:'pDeV',pDH:'pDeH',pDA:'pDeA',pNV:'pNdeV',pNH:'pNdeH'};return+(v[k]??v[m[k]]??0);}
-
-// Max vibration helper for history display
-function maxMotorVib(r){return Math.max(V(r,'mDV'),V(r,'mDH'),V(r,'mDA')||0,V(r,'mNV'),V(r,'mNH'),r.vib?.mNA||0);}
-function maxPumpVib(r){return Math.max(V(r,'pDV'),V(r,'pDH'),V(r,'pDA')||0,V(r,'pNV'),V(r,'pNH'),r.vib?.pNA||0);}
-
-// ══════ ALARM LOGIC — Feature 6: suppress if latest record is normal ══════
-function getAl(){
-  const a=[];
-  S.eq.forEach(eq=>{
-    const rs=[...S.rec.filter(r=>r.tag===eq.tag)].sort((a,b)=>b.date.localeCompare(a.date));
-    if(!rs.length)return;
-    const latest=rs[0]; // most recent record per equipment
-    const mH=V(latest,'mDH'),pH=V(latest,'pDH');
-    const mDa=eqMDa(eq),mAl=eqMAl(eq),pDa=eqPDa(eq),pAl=eqPAl(eq);
-    // Only alert if latest record is still in alarm state
-    if(pH>=pDa)a.push({lv:'danger',tag:eq.tag,msg:'Pump DE-H DANGER: '+pH.toFixed(2),date:latest.date,id:latest.id});
-    else if(pH>=pAl)a.push({lv:'alarm',tag:eq.tag,msg:'Pump DE-H Alarm: '+pH.toFixed(2),date:latest.date,id:latest.id});
-    if(mH>=mDa)a.push({lv:'danger',tag:eq.tag,msg:'Motor DE-H DANGER: '+mH.toFixed(2),date:latest.date,id:latest.id});
-    else if(mH>=mAl)a.push({lv:'alarm',tag:eq.tag,msg:'Motor DE-H Alarm: '+mH.toFixed(2),date:latest.date,id:latest.id});
-  });
-  return a;
+// ══════════ AUTH ══════════
+auth.onAuthStateChanged(async u=>{
+  if(u){
+    S.currentUser=u;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('main-app').style.display='flex';
+    const ini=u.displayName?u.displayName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase():u.email.slice(0,2).toUpperCase();
+    $('user-avatar').textContent=ini;$('user-name').textContent=u.displayName||u.email.split('@')[0];$('user-email').textContent=u.email;
+    await loadAll();showPage('dashboard',$('nav-dashboard'));
+  } else {document.getElementById('login-screen').style.display='flex';document.getElementById('main-app').style.display='none';}
+});
+async function doLogin(){
+  const e=$('login-email').value.trim(),p=$('login-pass').value,err=$('login-err'),btn=$('login-btn');
+  if(!e||!p){err.textContent='กรุณากรอก Email และ Password';err.style.display='block';return;}
+  btn.textContent='กำลังเข้าสู่ระบบ...';btn.disabled=true;err.style.display='none';
+  try{await auth.signInWithEmailAndPassword(e,p);}catch(x){
+    const m={'auth/user-not-found':'ไม่พบ Email นี้','auth/wrong-password':'Password ไม่ถูกต้อง','auth/invalid-credential':'Email หรือ Password ไม่ถูกต้อง','auth/too-many-requests':'พยายามมากเกินไป รอสักครู่'};
+    err.textContent=m[x.code]||x.message;err.style.display='block';btn.textContent='เข้าสู่ระบบ';btn.disabled=false;
+  }
 }
-
-// ══════ ALARM LOG — save & load from Firestore ══════
-// Use deterministic doc ID = tag_date_loc to prevent duplicates
-function alarmDocId(tag,date,loc){return (tag+'_'+date+'_'+loc).replace(/[^a-zA-Z0-9_\-]/g,'_');}
-
-async function saveAlarmLog(entries){
-  if(!entries.length)return;
-  const b=db.batch();
-  entries.forEach(e=>{
-    const docId=alarmDocId(e.tag,e.date,e.loc);
-    b.set(db.collection('alarmlog').doc(docId),{...e,savedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:false});
-  });
-  await b.commit();
-}
-
-// After saving a PM record, detect new alarms and persist them
-async function persistNewAlarms(rec){
-  const eq=S.eq.find(e=>e.tag===rec.tag);if(!eq)return;
-  const entries=[];const ts=rec.date;
-  const mH=V(rec,'mDH'),pH=V(rec,'pDH');
-  if(pH>=eqPDa(eq))entries.push({type:'danger',tag:rec.tag,loc:'Pump_DE-H',val:pH,limit:eqPDa(eq),wo:rec.wo||'',date:ts});
-  else if(pH>=eqPAl(eq))entries.push({type:'alarm',tag:rec.tag,loc:'Pump_DE-H',val:pH,limit:eqPAl(eq),wo:rec.wo||'',date:ts});
-  if(mH>=eqMDa(eq))entries.push({type:'danger',tag:rec.tag,loc:'Motor_DE-H',val:mH,limit:eqMDa(eq),wo:rec.wo||'',date:ts});
-  else if(mH>=eqMAl(eq))entries.push({type:'alarm',tag:rec.tag,loc:'Motor_DE-H',val:mH,limit:eqMAl(eq),wo:rec.wo||'',date:ts});
-  if(entries.length)await saveAlarmLog(entries);
-}
-
-// Backfill: scan ALL existing records, write alarm log for any that exceed limits
-// Uses deterministic doc IDs so re-running never creates duplicates
-async function backfillAlarmLog(){
-  const entries=[];
-  S.rec.forEach(rec=>{
-    const eq=S.eq.find(e=>e.tag===rec.tag);if(!eq)return;
-    const mH=V(rec,'mDH'),pH=V(rec,'pDH');
-    if(pH>=eqPDa(eq))entries.push({type:'danger',tag:rec.tag,loc:'Pump_DE-H',val:pH,limit:eqPDa(eq),wo:rec.wo||'',date:rec.date});
-    else if(pH>=eqPAl(eq))entries.push({type:'alarm',tag:rec.tag,loc:'Pump_DE-H',val:pH,limit:eqPAl(eq),wo:rec.wo||'',date:rec.date});
-    if(mH>=eqMDa(eq))entries.push({type:'danger',tag:rec.tag,loc:'Motor_DE-H',val:mH,limit:eqMDa(eq),wo:rec.wo||'',date:rec.date});
-    else if(mH>=eqMAl(eq))entries.push({type:'alarm',tag:rec.tag,loc:'Motor_DE-H',val:mH,limit:eqMAl(eq),wo:rec.wo||'',date:rec.date});
-  });
-  if(!entries.length)return;
-  await saveAlarmLog(entries);
-  // Reload alarm log from Firestore
-  const snap=await db.collection('alarmlog').orderBy('date','desc').limit(200).get();
-  S.alogs=snap.docs.map(d=>({id:d.id,...d.data()}));
-  toast('สร้าง Alarm Log จาก '+entries.length+' records แล้ว');
-}
-
-function ub(){const a=getAl();E('acnt').textContent=a.length;E('acnt').style.display=a.length?'':'none';}
-
-// ══════ AUTH ══════
-auth.onAuthStateChanged(async u=>{if(u){S.usr=u;E('login-screen').style.display='none';E('main-app').style.display='flex';const i=u.email.slice(0,2).toUpperCase();E('uav').textContent=i;E('uname').textContent=u.displayName||u.email.split('@')[0];E('uemail').textContent=u.email;await loadAll();go('dashboard',E('nav-dashboard'));}else{E('login-screen').style.display='flex';E('main-app').style.display='none';}});
-async function doLogin(){const e=E('login-email').value.trim(),p=E('login-pass').value,err=E('login-err'),btn=E('login-btn');if(!e||!p){err.textContent='กรุณากรอก Email/Password';err.style.display='block';return;}btn.textContent='...';btn.disabled=true;err.style.display='none';try{await auth.signInWithEmailAndPassword(e,p);}catch(x){const m={'auth/invalid-credential':'Email หรือ Password ไม่ถูกต้อง','auth/too-many-requests':'รอสักครู่'};err.textContent=m[x.code]||x.message;err.style.display='block';btn.textContent='เข้าสู่ระบบ';btn.disabled=false;}}
 function doLogout(){if(confirm('ออกจากระบบ?'))auth.signOut();}
 
-async function loadAll(){try{
-  const [es,rs,ss,al]=await Promise.all([
-    db.collection('equipment').get(),
-    db.collection('records').orderBy('date','desc').get(),
-    db.collection('settings').doc('global').get(),
-    db.collection('alarmlog').orderBy('date','desc').limit(200).get()
-  ]);
-  S.eq=es.docs.map(d=>({id:d.id,...d.data()}));
-  S.rec=rs.docs.map(d=>({id:d.id,...d.data()}));
-  S.alogs=al.docs.map(d=>({id:d.id,...d.data()}));
-  if(ss.exists)S.set={...S.set,...ss.data()};
-  const sf=await db.collection('settings').doc('_seeded').get();if(!sf.exists)await seed();
-  // Auto-backfill: write alarm log for any existing records that exceed limits
-  // Safe to run every time — deterministic doc IDs prevent duplicates
-  await backfillAlarmLog();
-  applyLogo();ub();
-}catch(e){toast('Error: '+e.message,'error');}}
+// ══════════ FIRESTORE ══════════
+async function loadAll(){
+  try{
+    const es=await db.collection('equipment').get();S.equipment=es.docs.map(d=>({id:d.id,...d.data()}));
+    const rs=await db.collection('records').orderBy('date','desc').get();S.records=rs.docs.map(d=>({id:d.id,...d.data()}));
+    const ss=await db.collection('settings').doc('global').get();if(ss.exists)S.settings={...S.settings,...ss.data()};
+    if(!S.equipment.length)await seedData();
+    updateBadge();
+  }catch(e){console.error(e);toast('โหลดข้อมูลผิดพลาด: '+e.message,'error');}
+}
+async function seedData(){
+  const eqs=[
+    {tag:'P-201A',module:'CF Export P201A',mfg:'Reliance',sn:'1MAZJ9073 G003',power:'250',volts:'380YD',amps:'323A',speed:'2970',de:'65BC03J3OX',nde:'65BC03J3OX',vibAlarm:4.5,vibDanger:7.1},
+    {tag:'P-201B',module:'CF Export P201B',mfg:'Reliance',sn:'1MAZJ9073 G001',power:'250',volts:'380YD',amps:'323A',speed:'2970',de:'65BC03J3OX',nde:'65BC03J3OX',vibAlarm:4.5,vibDanger:7.1},
+    {tag:'P-201S',module:'CF Export P201S',mfg:'Reliance',sn:'1MAZJ9073 G002',power:'250',volts:'380YD',amps:'323A',speed:'2970',de:'65BC03J3OX',nde:'65BC03J3OX',vibAlarm:4.5,vibDanger:7.1},
+  ];
+  const recs=[
+    {date:'2026-04-16',wo:'30000088621',tag:'P-201A',inspector:'Rittiras',approver:'Sanan',purpose:'PM',checks:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},bearing:{de:'65BC03J3OX',nde:'65BC03J3OX',deCondition:'ok',ndeCondition:'ok'},vib:{mDeV:0.78,mDeH:0.82,mDeA:0.91,mNdeV:0.67,mNdeH:1.09,pDeV:3.25,pDeH:4.8,pNdeV:1.56,pNdeH:0},elec:{cu:266,cv:270,cw:260,vu:412,vv:412,vw:411},staticTest:{irUV:0,irVW:0,irWU:0,irUVWG:0,wrU:0,wrV:0,wrW:0,wrUnbal:0,piRatio:0},severity:'5',results:'Cleaned/Re-grease\n- Vibration >> Pump DE-H alarm level\n- Voltage/Current >> Normal\n- Noise >> Normal'},
+    {date:'2026-04-16',wo:'30000088627',tag:'P-201B',inspector:'Rittiras',approver:'Sanan',purpose:'PM',checks:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},bearing:{de:'65BC03J3OX',nde:'65BC03J3OX',deCondition:'ok',ndeCondition:'ok'},vib:{mDeV:1.5,mDeH:1.34,mDeA:0.6,mNdeV:0.88,mNdeH:1.39,pDeV:2.81,pDeH:3.96,pNdeV:1.6,pNdeH:0},elec:{cu:282,cv:287,cw:285,vu:399,vv:400,vw:399},staticTest:{irUV:0,irVW:0,irWU:0,irUVWG:0,wrU:0,wrV:0,wrW:0,wrUnbal:0,piRatio:0},severity:'5',results:'Cleaned/Re-grease\n- Vibration >> Normal\n- Voltage/Current >> Normal\n- Noise >> Normal'},
+    {date:'2026-04-16',wo:'30000088632',tag:'P-201S',inspector:'Rittiras',approver:'Sanan',purpose:'PM',checks:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},bearing:{de:'65BC03J3OX',nde:'65BC03J3OX',deCondition:'ok',ndeCondition:'ok'},vib:{mDeV:0.62,mDeH:0.81,mDeA:0.52,mNdeV:0.67,mNdeH:0.78,pDeV:3.02,pDeH:6.5,pNdeV:1.6,pNdeH:0},elec:{cu:233,cv:236,cw:232,vu:401,vv:401,vw:401},staticTest:{irUV:0,irVW:0,irWU:0,irUVWG:0,wrU:0,wrV:0,wrW:0,wrUnbal:0,piRatio:0},severity:'5',results:'Cleaned/Re-grease\n- Vibration >> DE-H alarm level\n- Voltage/Current >> Normal\n- Noise >> Normal'},
+  ];
+  const b=db.batch();
+  eqs.forEach(e=>b.set(db.collection('equipment').doc(e.tag),e));
+  recs.forEach(r=>b.set(db.collection('records').doc(),{...r,createdAt:firebase.firestore.FieldValue.serverTimestamp()}));
+  await b.commit();await loadAll();toast('โหลดข้อมูลตัวอย่างแล้ว','success');
+}
 
-async function seed(){
-const eqs=[
-  {tag:'P-201A',module:'CF Export P201A',mfg:'Reliance',sn:'1MAZJ9073 G003',power:'250',powerUnit:'HP',weight:'2268',weightUnit:'lbs',volts:'380YD',amps:'323A',freq:'50',speed:'2970',ins:'F',duty:'CONT',de:'65BC03J3OX',nde:'65BC03J3OX',loadtype:'Pump',location:'Pump room',motorVibAlarm:4.5,motorVibDanger:7.1,pumpVibAlarm:4.5,pumpVibDanger:7.1},
-  {tag:'P-201B',module:'CF Export P201B',mfg:'Reliance',sn:'1MAZJ9073 G001',power:'250',powerUnit:'HP',weight:'2268',weightUnit:'lbs',volts:'380YD',amps:'323A',freq:'50',speed:'2970',ins:'F',duty:'CONT',de:'65BC03J3OX',nde:'65BC03J3OX',loadtype:'Pump',location:'Pump room',motorVibAlarm:4.5,motorVibDanger:7.1,pumpVibAlarm:4.5,pumpVibDanger:7.1},
-  {tag:'P-201S',module:'CF Export P201S',mfg:'Reliance',sn:'1MAZJ9073 G002',power:'250',powerUnit:'HP',weight:'2268',weightUnit:'lbs',volts:'380YD',amps:'323A',freq:'50',speed:'2970',ins:'F',duty:'CONT',de:'65BC03J3OX',nde:'65BC03J3OX',loadtype:'Pump',location:'Pump room',motorVibAlarm:4.5,motorVibDanger:7.1,pumpVibAlarm:4.5,pumpVibDanger:7.1}
-];
-const recs=[
-  {date:'2026-04-16',wo:'30000088621',tag:'P-201A',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{},vib:{mDV:0.78,mDH:0.82,mDA:0.91,mNV:0.67,mNH:1.09,mNA:0,pDV:3.25,pDH:4.8,pDA:0,pNV:1.56,pNH:0,pNA:0},el:{cu:266,cv:270,cw:260,vu:412,vv:412,vw:411},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},sev:'5',res:'Cleaned/Re-grease. Pump DE-H alarm.'},
-  {date:'2026-04-16',wo:'30000088627',tag:'P-201B',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{},vib:{mDV:1.5,mDH:1.34,mDA:0.6,mNV:0.88,mNH:1.39,mNA:0,pDV:2.81,pDH:3.96,pDA:0,pNV:1.6,pNH:0,pNA:0},el:{cu:282,cv:287,cw:285,vu:399,vv:400,vw:399},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},sev:'5',res:'Cleaned/Re-grease. Normal.'},
-  {date:'2026-04-16',wo:'30000088632',tag:'P-201S',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{},vib:{mDV:0.62,mDH:0.81,mDA:0.52,mNV:0.67,mNH:0.78,mNA:0,pDV:3.02,pDH:6.5,pDA:0,pNV:1.6,pNH:0,pNA:0},el:{cu:233,cv:236,cw:232,vu:401,vv:401,vw:401},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},sev:'5',res:'Pump DE-H alarm.'},
-  {date:'2026-03-01',wo:'30000087100',tag:'P-201A',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{},vib:{mDV:0.65,mDH:0.70,mDA:0.80,mNV:0.60,mNH:0.95,mNA:0,pDV:2.80,pDH:3.50,pDA:0,pNV:1.40,pNH:0,pNA:0},el:{cu:264,cv:268,cw:258,vu:410,vv:411,vw:409},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},sev:'5',res:'Normal.'},
-  {date:'2026-02-01',wo:'30000086200',tag:'P-201A',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{},vib:{mDV:0.60,mDH:0.65,mDA:0.75,mNV:0.55,mNH:0.88,mNA:0,pDV:2.60,pDH:3.10,pDA:0,pNV:1.30,pNH:0,pNA:0},el:{cu:263,cv:267,cw:257,vu:411,vv:411,vw:410},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},sev:'5',res:'Normal.'}
-];
-const b=db.batch();
-eqs.forEach(e=>b.set(db.collection('equipment').doc(e.tag),e));
-recs.forEach(r=>b.set(db.collection('records').doc(),{...r,ts:firebase.firestore.FieldValue.serverTimestamp(),by:'seed'}));
-b.set(db.collection('settings').doc('_seeded'),{done:true,at:firebase.firestore.FieldValue.serverTimestamp()});
-await b.commit();
-const [es2,rs2,al2]=await Promise.all([db.collection('equipment').get(),db.collection('records').orderBy('date','desc').get(),db.collection('alarmlog').orderBy('date','desc').limit(200).get()]);
-S.eq=es2.docs.map(d=>({id:d.id,...d.data()}));
-S.rec=rs2.docs.map(d=>({id:d.id,...d.data()}));
-S.alogs=al2.docs.map(d=>({id:d.id,...d.data()}));
-toast('โหลดข้อมูลตัวอย่างเรียบร้อย');}
+// ══════════ UTILS ══════════
+const $=id=>document.getElementById(id);
+const fmtDate=d=>{if(!d)return'—';const dt=new Date(d+'T00:00:00');return dt.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'});};
+const now=()=>new Date().toISOString().slice(0,10);
+function toast(m,t='success'){const c=$('toasts'),d=document.createElement('div');d.className=`toast ${t}`;d.innerHTML=`<span>${{success:'✓',error:'✕',warning:'⚠'}[t]||'•'}</span> ${m}`;c.appendChild(d);setTimeout(()=>d.remove(),3500);}
+function openModal(id){$(id).classList.add('open');}function closeModal(id){$(id).classList.remove('open');}
+function getAlerts(){const a=[];S.records.forEach(r=>{const eq=S.equipment.find(e=>e.tag===r.tag);if(!eq)return;const al=eq.vibAlarm||4.5,da=eq.vibDanger||7.1;const p=r.vib?.pDeH||0,m=r.vib?.mDeH||0;if(p>=da)a.push({level:'danger',tag:r.tag,msg:`Pump DE-H DANGER: ${p} mm/s`,date:r.date,id:r.id});else if(p>=al)a.push({level:'alarm',tag:r.tag,msg:`Pump DE-H Alarm: ${p} mm/s`,date:r.date,id:r.id});if(m>=da)a.push({level:'danger',tag:r.tag,msg:`Motor DE-H DANGER: ${m} mm/s`,date:r.date,id:r.id});else if(m>=al)a.push({level:'alarm',tag:r.tag,msg:`Motor DE-H Alarm: ${m} mm/s`,date:r.date,id:r.id});});return a;}
+function updateBadge(){const a=getAlerts();$('alert-count').textContent=a.length;$('alert-count').style.display=a.length?'':'none';}
 
-// Navigation
-function go(p,n){document.querySelectorAll('.nav-i').forEach(x=>x.classList.remove('active'));if(n)n.classList.add('active');
-const t={dashboard:'Dashboard',alerts:'Alerts',checksheet:'PM Check Sheet',history:'PM History',trends:'Trends',alarmlog:'Alarm Log',equipment:'Equipment',settings:'Settings'};
-E('ptitle').textContent=t[p]||p;E('pbc').textContent=t[p]||p;
-const c=E('content');c.innerHTML='';
-({dashboard:pgDash,alerts:pgAlert,checksheet:pgCheck,history:pgHist,trends:pgTrend,alarmlog:pgAlarmLog,equipment:pgEq,settings:pgSet})[p]?.(c);ub();}
+// ══════════ PAGES ══════════
+function showPage(p,nav){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(nav)nav.classList.add('active');
+  const t={dashboard:'Dashboard',alerts:'Alerts',checksheet:'PM Check Sheet',history:'PM History',trends:'Trend Analysis',import:'Import Excel',equipment:'Equipment',settings:'Settings'};
+  $('page-title').textContent=t[p]||p;$('page-bc').textContent=t[p]||p;
+  const c=$('content');c.innerHTML='';
+  ({dashboard:renderDash,alerts:renderAlerts,checksheet:renderCheck,history:renderHist,trends:renderTrends,import:renderImport,equipment:renderEq,settings:renderSet})[p]?.(c);
+  updateBadge();
+}
 
 // ══════════ DASHBOARD ══════════
-function pgDash(el){
-  const al=getAl(),lp=S.rec.reduce((m,r)=>r.date>m?r.date:m,''),ac=[...new Set(al.map(a=>a.tag))].length;
-  el.innerHTML='<div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button class="btn btn-sm" onclick="printDash()">🖨 Export Dashboard PDF</button></div>';
-  al.slice(0,3).forEach(a=>{el.innerHTML+='<div class="ab '+(a.lv==='danger'?'a-re':'a-am')+'"><span>'+(a.lv==='danger'?'⛔':'⚠')+'</span><b>'+a.tag+'</b>: '+a.msg+'<span style="margin-left:auto;font-size:11px;opacity:.7">'+fd(a.date)+'</span></div>';});
-  el.innerHTML+='<div class="metric-row"><div class="mc m1"><div class="ml">Equipment</div><div class="mv" style="color:var(--accent)">'+S.eq.length+'</div></div><div class="mc m2"><div class="ml">PM Records</div><div class="mv" style="color:var(--green)">'+S.rec.length+'</div></div><div class="mc m3"><div class="ml">Alerts</div><div class="mv" style="color:var(--amber)">'+ac+'</div></div><div class="mc m4"><div class="ml">Last PM</div><div class="mv" style="font-size:16px;color:var(--text)">'+fd(lp)+'</div></div></div>';
-  let sh='';S.eq.forEach(eq=>{const rs=S.rec.filter(r=>r.tag===eq.tag).sort((a,b)=>b.date.localeCompare(a.date)),la=rs[0],p=la?V(la,'pDH'):0;
-    const al2=p>=eqPAl(eq),da2=p>=eqPDa(eq),dc=!la?'d-x':da2?'d-r':al2?'d-a':'d-g',bc=!la?'b-no':da2?'b-nk':al2?'b-al':'b-ok',bt=!la?'N/A':da2?'Danger':al2?'Alarm':'Normal';
-    sh+='<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)"><span class="dot '+dc+'"></span><div style="flex:1"><div style="font-weight:600">'+eq.tag+'</div><div style="font-size:11px;color:var(--text3)">'+(eq.module||eq.mod||'')+'</div></div><span class="badge '+bc+'">'+bt+'</span>'+(la?'<span class="mono" style="color:var(--text3)">P:'+p.toFixed(2)+'</span>':'')+'</div>';});
-  el.innerHTML+='<div class="g2"><div class="card"><div class="card-t">Equipment Status</div>'+sh+'</div><div class="card"><div class="card-t">Vibration — 6 Latest PM</div><div class="cw" style="height:240px"><canvas id="dv"></canvas></div></div></div>';
-  el.innerHTML+='<div class="card"><div class="card-t">Current & Voltage</div><div class="g2" style="gap:16px"><div class="cw" style="height:200px"><canvas id="dc"></canvas></div><div class="cw" style="height:200px"><canvas id="du"></canvas></div></div></div>';
-  // Feature 5: Take 6 latest PM records across all equipment
+function renderDash(el){
+  const alerts=getAlerts(),lastPM=S.records.reduce((m,r)=>r.date>m?r.date:m,'');
+  const alC=[...new Set(alerts.map(a=>a.tag))].length;
+  alerts.slice(0,3).forEach(a=>{el.innerHTML+=`<div class="alert-banner ${a.level==='danger'?'alert-red':'alert-amber'}"><span>${a.level==='danger'?'⛔':'⚠'}</span><strong>${a.tag}</strong>: ${a.msg}<span style="margin-left:auto;font-size:11px;opacity:.7">${fmtDate(a.date)}</span></div>`;});
+  el.innerHTML+=`<div class="metric-row">
+    <div class="metric-card m-blue"><div class="metric-label">Equipment</div><div class="metric-val" style="color:var(--accent)">${S.equipment.length}</div></div>
+    <div class="metric-card m-green"><div class="metric-label">PM Records</div><div class="metric-val" style="color:var(--green)">${S.records.length}</div></div>
+    <div class="metric-card m-amber"><div class="metric-label">Alerts</div><div class="metric-val" style="color:var(--amber)">${alC}</div></div>
+    <div class="metric-card m-red"><div class="metric-label">Last PM</div><div class="metric-val" style="font-size:16px;color:var(--text)">${fmtDate(lastPM)}</div></div>
+  </div>`;
+  // Status + Vib chart
+  let statusHTML='';
+  S.equipment.forEach(eq=>{
+    const recs=S.records.filter(r=>r.tag===eq.tag).sort((a,b)=>b.date.localeCompare(a.date));
+    const last=recs[0],p=last?.vib?.pDeH||0;
+    const alarm=p>=(eq.vibAlarm||4.5),danger=p>=(eq.vibDanger||7.1);
+    const dc=!last?'dot-gray':danger?'dot-red':alarm?'dot-amber':'dot-green';
+    const bc=!last?'badge-none':danger?'badge-nok':alarm?'badge-alarm':'badge-ok';
+    const bt=!last?'No data':danger?'Danger':alarm?'Alarm':'Normal';
+    statusHTML+=`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span class="dot ${dc}"></span>
+      <div style="flex:1"><div style="font-weight:600">${eq.tag}</div><div style="font-size:11px;color:var(--text3)">${eq.module||''} | <b>DE:</b> ${eq.de||'—'} <b>NDE:</b> ${eq.nde||'—'}</div></div>
+      <span class="badge ${bc}">${bt}</span>
+      ${last?`<span class="mono" style="color:var(--text3)">P.DE-H: ${p.toFixed(2)}</span>`:''}
+    </div>`;
+  });
+  el.innerHTML+=`<div class="grid2"><div class="card"><div class="card-title">Equipment Status & Bearing</div>${statusHTML}</div>
+    <div class="card"><div class="card-title">Vibration — Latest (mm/s)</div><div class="chart-wrap" style="height:240px"><canvas id="d-vib"></canvas></div></div></div>`;
+  el.innerHTML+=`<div class="card"><div class="card-title">Current & Voltage</div><div class="grid2" style="gap:16px"><div class="chart-wrap" style="height:200px"><canvas id="d-cur"></canvas></div><div class="chart-wrap" style="height:200px"><canvas id="d-vol"></canvas></div></div></div>`;
+
   setTimeout(()=>{
-    const sorted=[...S.rec].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6).reverse();
-    const lb=sorted.map(r=>r.tag+' '+r.date.slice(5));
-    const co=()=>({responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:10}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:9},maxRotation:40}}}});
-    if(E('dv'))new Chart(E('dv'),{type:'bar',data:{labels:lb,datasets:[{label:'Motor DE-H',data:sorted.map(r=>V(r,'mDH')),backgroundColor:'rgba(88,166,255,.7)',borderRadius:4},{label:'Pump DE-H',data:sorted.map(r=>V(r,'pDH')),backgroundColor:'rgba(210,153,34,.7)',borderRadius:4}]},options:co()});
-    if(E('dc'))new Chart(E('dc'),{type:'bar',data:{labels:sorted.map(r=>r.tag),datasets:[{label:'U',data:sorted.map(r=>(r.el||r.elec||{}).cu||0),backgroundColor:'rgba(63,185,80,.7)',borderRadius:4},{label:'V',data:sorted.map(r=>(r.el||r.elec||{}).cv||0),backgroundColor:'rgba(63,185,80,.45)',borderRadius:4},{label:'W',data:sorted.map(r=>(r.el||r.elec||{}).cw||0),backgroundColor:'rgba(63,185,80,.25)',borderRadius:4}]},options:{...co(),plugins:{...co().plugins,title:{display:true,text:'Current (A)',color:'#8b949e',font:{size:11}}}}});
-    if(E('du'))new Chart(E('du'),{type:'bar',data:{labels:sorted.map(r=>r.tag),datasets:[{label:'U',data:sorted.map(r=>(r.el||r.elec||{}).vu||0),backgroundColor:'rgba(188,140,255,.7)',borderRadius:4},{label:'V',data:sorted.map(r=>(r.el||r.elec||{}).vv||0),backgroundColor:'rgba(188,140,255,.45)',borderRadius:4},{label:'W',data:sorted.map(r=>(r.el||r.elec||{}).vw||0),backgroundColor:'rgba(188,140,255,.25)',borderRadius:4}]},options:{...co(),scales:{y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:9},maxRotation:40}}},plugins:{...co().plugins,title:{display:true,text:'Voltage (V)',color:'#8b949e',font:{size:11}}}}});
+    const tags=S.equipment.map(e=>e.tag),lt={};S.records.forEach(r=>{if(!lt[r.tag]||r.date>lt[r.tag].date)lt[r.tag]=r;});
+    const co=t=>({responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:10}},title:{display:!!t,text:t,color:'#8b949e',font:{size:11}}},scales:{y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:10}}}}});
+    if($('d-vib'))new Chart($('d-vib'),{type:'bar',data:{labels:tags,datasets:[{label:'Motor DE-H',data:tags.map(t=>lt[t]?.vib?.mDeH||0),backgroundColor:'rgba(88,166,255,.7)',borderRadius:4},{label:'Pump DE-H',data:tags.map(t=>lt[t]?.vib?.pDeH||0),backgroundColor:'rgba(210,153,34,.7)',borderRadius:4}]},options:{...co(''),scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}},title:{display:true,text:'mm/s',color:'#8b949e',font:{size:10}}},x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:10}}}}}});
+    if($('d-cur'))new Chart($('d-cur'),{type:'bar',data:{labels:tags,datasets:[{label:'U',data:tags.map(t=>lt[t]?.elec?.cu||0),backgroundColor:'rgba(63,185,80,.7)',borderRadius:4},{label:'V',data:tags.map(t=>lt[t]?.elec?.cv||0),backgroundColor:'rgba(63,185,80,.45)',borderRadius:4},{label:'W',data:tags.map(t=>lt[t]?.elec?.cw||0),backgroundColor:'rgba(63,185,80,.25)',borderRadius:4}]},options:co('Current (A)')});
+    if($('d-vol'))new Chart($('d-vol'),{type:'bar',data:{labels:tags,datasets:[{label:'U',data:tags.map(t=>lt[t]?.elec?.vu||0),backgroundColor:'rgba(188,140,255,.7)',borderRadius:4},{label:'V',data:tags.map(t=>lt[t]?.elec?.vv||0),backgroundColor:'rgba(188,140,255,.45)',borderRadius:4},{label:'W',data:tags.map(t=>lt[t]?.elec?.vw||0),backgroundColor:'rgba(188,140,255,.25)',borderRadius:4}]},options:{...co('Voltage (V)'),scales:{y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:10}}}}}});
   },100);
 }
-function printDash(){window.print();}
 
 // ══════════ ALERTS ══════════
-function pgAlert(el){const a=getAl();if(!a.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px"><div style="font-size:32px;margin-bottom:12px">✓</div><div style="color:var(--green);font-size:16px;font-weight:600">No active alerts</div><div style="color:var(--text3);font-size:13px;margin-top:6px">Latest PM records are all within limits</div></div>';return;}a.forEach(x=>{el.innerHTML+='<div class="ab '+(x.lv==='danger'?'a-re':'a-am')+'" style="cursor:pointer" onclick="showD(\''+x.id+'\')"><span>'+(x.lv==='danger'?'⛔':'⚠')+'</span><div style="flex:1"><b>'+x.tag+'</b> — '+x.msg+'</div><span style="font-size:11px;opacity:.7">'+fd(x.date)+'</span></div>';});}
+function renderAlerts(el){
+  const a=getAlerts();
+  if(!a.length){el.innerHTML=`<div class="card" style="text-align:center;padding:40px"><div style="font-size:32px;margin-bottom:12px">✓</div><div style="color:var(--green);font-size:16px;font-weight:600">No active alerts</div></div>`;return;}
+  a.forEach(x=>{el.innerHTML+=`<div class="alert-banner ${x.level==='danger'?'alert-red':'alert-amber'}" style="cursor:pointer" onclick="showDetail('${x.id}')"><span>${x.level==='danger'?'⛔':'⚠'}</span><div style="flex:1"><b>${x.tag}</b> — ${x.msg}</div><span style="font-size:11px;opacity:.7">${fmtDate(x.date)}</span></div>`;});
+}
 
 // ══════════ CHECK SHEET ══════════
-function pgCheck(el){S.cf={ck:{},sev:'5'};
-const eqOpts=S.eq.map(e=>({value:e.tag,label:e.tag+(e.module?' — '+e.module:'')}));
-const purpOpts=[{value:'PM',label:'PM'},{value:'Routine',label:'Routine'},{value:'Investigation',label:'Investigation'},{value:'CM',label:'CM'}];
-const brgOpts=[{value:'ok',label:'OK'},{value:'alarm',label:'Alarm'},{value:'nok',label:'NOK-Replace'}];
-el.innerHTML=
-'<div class="card"><div class="st" style="margin-bottom:14px">📋 Work Order Info</div>'+
-'<div class="g4" style="margin-bottom:12px">'+
-'<div class="fg"><label class="fl">WO No.</label><input class="fi" id="f-wo"></div>'+
-'<div class="fg"><label class="fl">Equipment Tag *</label><div id="f-tag-wrap"></div></div>'+
-'<div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="f-dt" value="'+now()+'"></div>'+
-'<div class="fg"><label class="fl">Purpose</label><div id="f-pu-wrap"></div></div>'+
-'<div class="fg"><label class="fl">Inspector</label><input class="fi" id="f-ins" value="'+(S.set.di||'')+'"></div>'+
-'<div class="fg"><label class="fl">Approved by</label><input class="fi" id="f-app" value="'+(S.set.da||'')+'"></div>'+
-'</div></div>'+
-'<div class="card"><div class="st" style="margin-bottom:14px">🔩 Bearing Info</div><div class="g4">'+
-'<div class="fg"><label class="fl">DE Bearing No.</label><input class="fi" id="f-bde"></div>'+
-'<div class="fg"><label class="fl">DE Condition</label><div id="f-bdc-wrap"></div></div>'+
-'<div class="fg"><label class="fl">NDE Bearing No.</label><input class="fi" id="f-bnde"></div>'+
-'<div class="fg"><label class="fl">NDE Condition</label><div id="f-bnc-wrap"></div></div>'+
-'</div></div>'+
-// ── Feature 1: MCC Module Inspection ──
-'<div class="card"><div class="st" style="margin-bottom:14px">🔌 MCC Module Inspection</div>'+
-'<div style="overflow-x:auto"><table class="cht"><thead><tr>'+
-'<th style="min-width:160px">Item</th><th>Criteria</th><th>As Found</th><th>Action</th><th>As Left</th></tr></thead>'+
-'<tbody id="mcc-body"></tbody></table></div></div>'+
-// ── Feature 2: Motor Inspection ──
-'<div class="card"><div class="st" style="margin-bottom:14px">🔧 Motor Inspection</div>'+
-'<div style="overflow-x:auto"><table class="cht"><thead><tr>'+
-'<th style="min-width:160px">Item</th><th>Criteria</th><th>As Found</th><th>Action</th><th>As Left</th></tr></thead>'+
-'<tbody id="mot-body"></tbody></table></div></div>'+
-// ── Vibration ──
-'<div class="card"><div class="st" style="margin-bottom:14px">〰 Vibration (mm/s)</div>'+
-'<div class="g2" style="gap:16px">'+
-'<div><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px">🔵 MOTOR</div>'+
-'<table class="vt"><thead><tr><th>Pos</th><th>V</th><th>H</th><th>A</th><th>Status</th></tr></thead><tbody>'+
-'<tr><td>DE</td><td><input class="vi" id="vmDV" type="number" step=".01"></td><td><input class="vi" id="vmDH" type="number" step=".01" oninput="chkVm(this,\'smD\')"></td><td><input class="vi" id="vmDA" type="number" step=".01"></td><td id="smD">—</td></tr>'+
-'<tr><td>NDE</td><td><input class="vi" id="vmNV" type="number" step=".01"></td><td><input class="vi" id="vmNH" type="number" step=".01" oninput="chkVm(this,\'smN\')"></td><td><input class="vi" id="vmNA" type="number" step=".01"></td><td id="smN">—</td></tr>'+
-'</tbody></table></div>'+
-'<div><div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:8px">🟡 PUMP</div>'+
-'<table class="vt"><thead><tr><th>Pos</th><th>V</th><th>H</th><th>A</th><th>Status</th></tr></thead><tbody>'+
-'<tr><td>DE</td><td><input class="vi" id="vpDV" type="number" step=".01"></td><td><input class="vi" id="vpDH" type="number" step=".01" oninput="chkVp(this,\'spD\')"></td><td><input class="vi" id="vpDA" type="number" step=".01"></td><td id="spD">—</td></tr>'+
-'<tr><td>NDE</td><td><input class="vi" id="vpNV" type="number" step=".01"></td><td><input class="vi" id="vpNH" type="number" step=".01"></td><td><input class="vi" id="vpNA" type="number" step=".01"></td><td>—</td></tr>'+
-'</tbody></table></div></div></div>'+
-// ── Electrical ──
-'<div class="card"><div class="st" style="margin-bottom:14px">⚡ Voltage & Current</div>'+
-'<table class="et"><thead><tr><th>Phase</th><th>U</th><th>V</th><th>W</th><th>Unbal%</th></tr></thead><tbody>'+
-'<tr><td>Current (A)</td><td><input class="vi" id="ecu" type="number" oninput="autoUnbal(\'ecu\',\'ecv\',\'ecw\',\'ecUn\')"></td><td><input class="vi" id="ecv" type="number" oninput="autoUnbal(\'ecu\',\'ecv\',\'ecw\',\'ecUn\')"></td><td><input class="vi" id="ecw" type="number" oninput="autoUnbal(\'ecu\',\'ecv\',\'ecw\',\'ecUn\')"></td><td><span class="vi-ro" id="ecUn">—</span></td></tr>'+
-'<tr><td>Voltage (V)</td><td><input class="vi" id="evu" type="number" oninput="autoUnbal(\'evu\',\'evv\',\'evw\',\'evUn\')"></td><td><input class="vi" id="evv" type="number" oninput="autoUnbal(\'evu\',\'evv\',\'evw\',\'evUn\')"></td><td><input class="vi" id="evw" type="number" oninput="autoUnbal(\'evu\',\'evv\',\'evw\',\'evUn\')"></td><td><span class="vi-ro" id="evUn">—</span></td></tr>'+
-'</tbody></table></div>'+
-// ── Static Test ──
-'<div class="card"><div class="st" style="margin-bottom:14px">🧪 Electrical Static Test</div>'+
-'<div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:10px">INSULATION RESISTANCE (MΩ)</div>'+
-'<table class="et"><thead><tr><th>Test</th><th>U-V</th><th>V-W</th><th>W-U</th><th>UVW-G</th></tr></thead><tbody>'+
-'<tr><td>IR @ Vdc</td><td><input class="vi" id="irUV" type="number" step=".01"></td><td><input class="vi" id="irVW" type="number" step=".01"></td><td><input class="vi" id="irWU" type="number" step=".01"></td><td><input class="vi" id="irG" type="number" step=".01"></td></tr>'+
-'</tbody></table><div style="margin-top:8px;font-size:12px;color:var(--text3)">PI (R10/R1): <input class="vi" id="irPI" type="number" step=".01" style="width:80px"></div>'+
-'<div style="font-size:12px;font-weight:600;color:var(--text3);margin-top:16px;margin-bottom:10px">WINDING RESISTANCE (Ω)</div>'+
-'<table class="et"><thead><tr><th>Phase</th><th>U</th><th>V</th><th>W</th><th>Unbal%</th></tr></thead><tbody>'+
-'<tr><td>WR @ °C</td><td><input class="vi" id="wrU" type="number" step=".001" oninput="autoUnbal(\'wrU\',\'wrV\',\'wrW\',\'wrUn\')"></td><td><input class="vi" id="wrV" type="number" step=".001" oninput="autoUnbal(\'wrU\',\'wrV\',\'wrW\',\'wrUn\')"></td><td><input class="vi" id="wrW" type="number" step=".001" oninput="autoUnbal(\'wrU\',\'wrV\',\'wrW\',\'wrUn\')"></td><td><span class="vi-ro" id="wrUn">—</span></td></tr>'+
-'</tbody></table>'+
-'<div style="font-size:12px;font-weight:600;color:var(--text3);margin-top:16px;margin-bottom:10px">WINDING INDUCTANCE (mH)</div>'+
-'<table class="et"><thead><tr><th>Phase</th><th>U</th><th>V</th><th>W</th><th>Unbal%</th></tr></thead><tbody>'+
-'<tr><td>WI @ °C</td><td><input class="vi" id="wiU" type="number" step=".01" oninput="autoUnbal(\'wiU\',\'wiV\',\'wiW\',\'wiUn\')"></td><td><input class="vi" id="wiV" type="number" step=".01" oninput="autoUnbal(\'wiU\',\'wiV\',\'wiW\',\'wiUn\')"></td><td><input class="vi" id="wiW" type="number" step=".01" oninput="autoUnbal(\'wiU\',\'wiV\',\'wiW\',\'wiUn\')"></td><td><span class="vi-ro" id="wiUn">—</span></td></tr>'+
-'</tbody></table></div>'+
-// ── Results ──
-'<div class="card"><div class="st" style="margin-bottom:14px">📝 Results & Severity</div>'+
-'<div class="fg" style="margin-bottom:14px"><label class="fl">Results</label><textarea class="ft" id="f-res" rows="4"></textarea></div>'+
-'<div class="fl" style="margin-bottom:8px">Severity:</div>'+
-'<div class="sg"><div class="so" onclick="selS(1,this)">⛔ Immediate</div><div class="so" onclick="selS(2,this)">⚠ Correct ASAP</div><div class="so" onclick="selS(3,this)">🔧 Next opportunity</div><div class="so" onclick="selS(4,this)">👁 Monitor</div><div class="so s5" onclick="selS(5,this)">✓ No action</div></div>'+
-'<input type="hidden" id="f-sev" value="5"></div>'+
-'<div style="display:flex;gap:10px;justify-content:flex-end;margin-bottom:24px">'+
-'<button class="btn" onclick="pgCheck(E(\'content\'))">Clear</button>'+
-'<button class="btn btn-s" id="svb" onclick="saveR()">✓ Save to Firestore</button></div>';
+function renderCheck(el){
+  S.cf={checks:{},severity:'5'};
+  el.innerHTML=`
+  <div class="card"><div class="section-title" style="margin-bottom:14px">📋 Work Order Info</div>
+    <div class="grid4" style="margin-bottom:12px">
+      <div class="form-group"><label class="form-label">Work Order No.</label><input class="form-input" id="f-wo" placeholder="30000088XXX"></div>
+      <div class="form-group"><label class="form-label">Equipment Tag *</label><select class="form-select" id="f-tag" onchange="onTagChg()"><option value="">— Select —</option>${S.equipment.map(e=>`<option value="${e.tag}">${e.tag} — ${e.module||''}</option>`).join('')}</select></div>
+      <div class="form-group"><label class="form-label">Service Date</label><input class="form-input" type="date" id="f-date" value="${now()}"></div>
+      <div class="form-group"><label class="form-label">Purpose</label><select class="form-select" id="f-purpose"><option value="PM">PM</option><option value="Routine">Routine</option><option value="Investigation">Investigation</option><option value="CM">CM</option></select></div>
+      <div class="form-group"><label class="form-label">Inspector</label><input class="form-input" id="f-inspector" value="${S.settings.defaultInspector||''}"></div>
+      <div class="form-group"><label class="form-label">Approved by</label><input class="form-input" id="f-approver" value="${S.settings.defaultApprover||''}"></div>
+    </div>
+  </div>
 
-// Append searchable selects
-const sTag=mkSS('f-tag',eqOpts,eqOpts.length?'Search equipment...':'(No equipment)',onTg);E('f-tag-wrap').appendChild(sTag);
-const sPu=mkSS('f-pu',purpOpts,'Purpose...');sPu.setVal('PM');E('f-pu-wrap').appendChild(sPu);
-const sBdc=mkSS('f-bdc',brgOpts,'Condition...');sBdc.setVal('ok');E('f-bdc-wrap').appendChild(sBdc);
-const sBnc=mkSS('f-bnc',brgOpts,'Condition...');sBnc.setVal('ok');E('f-bnc-wrap').appendChild(sBnc);
+  <div class="card"><div class="section-title" style="margin-bottom:14px">⚙ Machine Data</div>
+    <div class="grid4"><div class="form-group"><label class="form-label">Module for</label><input class="form-input" id="f-module"></div><div class="form-group"><label class="form-label">Power (HP)</label><input class="form-input" id="f-power"></div><div class="form-group"><label class="form-label">Volts</label><input class="form-input" id="f-volts"></div><div class="form-group"><label class="form-label">Amps</label><input class="form-input" id="f-amps"></div><div class="form-group"><label class="form-label">Speed (RPM)</label><input class="form-input" id="f-speed"></div><div class="form-group"><label class="form-label">MFG</label><input class="form-input" id="f-mfg"></div><div class="form-group"><label class="form-label">S/N</label><input class="form-input" id="f-sn"></div></div>
+  </div>
 
-// Build inspection tables (5-column: Item, Criteria, As Found, Action, As Left)
-function buildInspTable(tbodyId,rows,prefix){
-  const tb=E(tbodyId);if(!tb)return;
-  rows.forEach(i=>{
-    const tr=document.createElement('tr');
-    const afBtns=`<div style="display:flex;gap:3px">
-      <button class="cb" onclick="setCk('${prefix}${i.k}','ok',this)">OK</button>
-      <button class="cb" onclick="setCk('${prefix}${i.k}','nok',this)">NOK</button>
-      <button class="cb" onclick="setCk('${prefix}${i.k}','na',this)">N/A</button></div>`;
-    const actBtns=i.act.map(a=>`<button class="cb" onclick="setCkAct('${prefix}${i.k}_act','${a}',this)">${a}</button>`).join(' ');
-    const alBtns=`<div style="display:flex;gap:3px">
-      <button class="cb" onclick="setCk('${prefix}${i.k}_al','ok',this)">OK</button>
-      <button class="cb" onclick="setCk('${prefix}${i.k}_al','nok',this)">NOK</button>
-      <button class="cb" onclick="setCk('${prefix}${i.k}_al','na',this)">N/A</button></div>`;
-    tr.innerHTML=`<td style="font-weight:500;font-size:12px">${i.l}</td><td style="color:var(--text3);font-size:11px">${i.c}</td><td>${afBtns}</td><td><div style="display:flex;gap:3px">${actBtns}</div></td><td>${alBtns}</td>`;
-    tb.appendChild(tr);
-  });
+  <div class="card"><div class="section-title" style="margin-bottom:14px">🔩 Bearing Info</div>
+    <div class="grid4">
+      <div class="form-group"><label class="form-label">DE Bearing No.</label><input class="form-input" id="f-brg-de" placeholder="65BC03J3OX"></div>
+      <div class="form-group"><label class="form-label">DE Condition</label><select class="form-select" id="f-brg-de-cond"><option value="ok">OK — Normal</option><option value="alarm">Alarm — Noisy</option><option value="nok">NOK — Replace needed</option></select></div>
+      <div class="form-group"><label class="form-label">NDE Bearing No.</label><input class="form-input" id="f-brg-nde" placeholder="65BC03J3OX"></div>
+      <div class="form-group"><label class="form-label">NDE Condition</label><select class="form-select" id="f-brg-nde-cond"><option value="ok">OK — Normal</option><option value="alarm">Alarm — Noisy</option><option value="nok">NOK — Replace needed</option></select></div>
+    </div>
+  </div>
+
+  <div class="card"><div class="section-title" style="margin-bottom:14px">🔍 General Inspection</div>
+    <table class="check-table"><thead><tr><th>Item</th><th>Criteria</th><th>As Found</th><th>As Left</th></tr></thead><tbody id="check-tbody"></tbody></table>
+  </div>
+
+  <div class="card"><div class="section-title" style="margin-bottom:14px">〰 Vibration (mm/s)</div>
+    <table class="vib-table"><thead><tr><th>Position</th><th>Vertical (V)</th><th>Horizontal (H)</th><th>Axial (A)</th><th>Status</th></tr></thead><tbody>
+      <tr><td>Motor — DE</td><td><input class="vib-input" id="v-m-de-v" type="number" step="0.01"></td><td><input class="vib-input" id="v-m-de-h" type="number" step="0.01" oninput="chkV(this,'m-de')"></td><td><input class="vib-input" id="v-m-de-a" type="number" step="0.01"></td><td id="st-m-de">—</td></tr>
+      <tr><td>Motor — NDE</td><td><input class="vib-input" id="v-m-nde-v" type="number" step="0.01"></td><td><input class="vib-input" id="v-m-nde-h" type="number" step="0.01" oninput="chkV(this,'m-nde')"></td><td><input class="vib-input" id="v-m-nde-a" type="number" step="0.01"></td><td id="st-m-nde">—</td></tr>
+      <tr><td>Pump — DE</td><td><input class="vib-input" id="v-p-de-v" type="number" step="0.01"></td><td><input class="vib-input" id="v-p-de-h" type="number" step="0.01" oninput="chkV(this,'p-de')"></td><td><input class="vib-input" id="v-p-de-a" type="number" step="0.01"></td><td id="st-p-de">—</td></tr>
+      <tr><td>Pump — NDE</td><td><input class="vib-input" id="v-p-nde-v" type="number" step="0.01"></td><td><input class="vib-input" id="v-p-nde-h" type="number" step="0.01"></td><td><input class="vib-input" id="v-p-nde-a" type="number" step="0.01"></td><td>—</td></tr>
+    </tbody></table>
+  </div>
+
+  <div class="card"><div class="section-title" style="margin-bottom:14px">⚡ Voltage & Current</div>
+    <table class="elec-test-table"><thead><tr><th>Phase</th><th>U</th><th>V</th><th>W</th></tr></thead><tbody>
+      <tr><td>Current (A)</td><td><input class="vib-input" id="e-cu" type="number"></td><td><input class="vib-input" id="e-cv" type="number"></td><td><input class="vib-input" id="e-cw" type="number"></td></tr>
+      <tr><td>Voltage (V)</td><td><input class="vib-input" id="e-vu" type="number"></td><td><input class="vib-input" id="e-vv" type="number"></td><td><input class="vib-input" id="e-vw" type="number"></td></tr>
+    </tbody></table>
+  </div>
+
+  <div class="card"><div class="section-title" style="margin-bottom:14px">🧪 Electrical Static Test</div>
+    <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:10px">WINDING INSULATION RESISTANCE (MΩ)</div>
+    <table class="elec-test-table"><thead><tr><th>Phase</th><th>U-V</th><th>V-W</th><th>W-U</th><th>U+V+W to G</th></tr></thead><tbody>
+      <tr><td>IR @ Vdc</td><td><input class="vib-input" id="ir-uv" type="number" step="0.01"></td><td><input class="vib-input" id="ir-vw" type="number" step="0.01"></td><td><input class="vib-input" id="ir-wu" type="number" step="0.01"></td><td><input class="vib-input" id="ir-uvwg" type="number" step="0.01"></td></tr>
+    </tbody></table>
+    <div style="font-size:11px;color:var(--text3);margin-top:6px">PI test (3.3/6.6 kV) : R10/R1 = <input class="vib-input" id="ir-pi" type="number" step="0.01" style="width:80px"></div>
+
+    <div style="font-size:12px;font-weight:600;color:var(--text3);margin-top:16px;margin-bottom:10px">WINDING RESISTANCE (Ω)</div>
+    <table class="elec-test-table"><thead><tr><th>Phase</th><th>U</th><th>V</th><th>W</th><th>Unbalance %</th></tr></thead><tbody>
+      <tr><td>WR @ °C</td><td><input class="vib-input" id="wr-u" type="number" step="0.001"></td><td><input class="vib-input" id="wr-v" type="number" step="0.001"></td><td><input class="vib-input" id="wr-w" type="number" step="0.001"></td><td><input class="vib-input" id="wr-unbal" type="number" step="0.01"></td></tr>
+    </tbody></table>
+
+    <div style="font-size:12px;font-weight:600;color:var(--text3);margin-top:16px;margin-bottom:10px">WINDING INDUCTANCE (mH)</div>
+    <table class="elec-test-table"><thead><tr><th>Phase</th><th>U</th><th>V</th><th>W</th><th>Unbalance %</th></tr></thead><tbody>
+      <tr><td>WI @ °C</td><td><input class="vib-input" id="wi-u" type="number" step="0.01"></td><td><input class="vib-input" id="wi-v" type="number" step="0.01"></td><td><input class="vib-input" id="wi-w" type="number" step="0.01"></td><td><input class="vib-input" id="wi-unbal" type="number" step="0.01"></td></tr>
+    </tbody></table>
+  </div>
+
+  <div class="card"><div class="section-title" style="margin-bottom:14px">📝 Results & Severity</div>
+    <div class="form-group" style="margin-bottom:14px"><label class="form-label">Results</label><textarea class="form-textarea" id="f-results" rows="4" placeholder="Cleaned/Re-grease, Vibration, Voltage/Current, Noise..."></textarea></div>
+    <div class="form-label" style="margin-bottom:8px">Severity:</div>
+    <div class="sev-grid">
+      <div class="sev-option" onclick="selSev(1,this)"><span style="color:var(--red)">⛔</span> Immediate attention</div>
+      <div class="sev-option" onclick="selSev(2,this)"><span style="color:var(--amber)">⚠</span> Correct ASAP</div>
+      <div class="sev-option" onclick="selSev(3,this)"><span style="color:var(--accent)">🔧</span> Correct at next opportunity</div>
+      <div class="sev-option" onclick="selSev(4,this)"><span style="color:var(--accent)">👁</span> Monitor more frequently</div>
+      <div class="sev-option sel-5" onclick="selSev(5,this)"><span style="color:var(--green)">✓</span> No action required</div>
+    </div>
+    <input type="hidden" id="f-severity" value="5">
+  </div>
+  <div style="display:flex;gap:10px;justify-content:flex-end;margin-bottom:24px"><button class="btn" onclick="renderCheck($('content'))">Clear</button><button class="btn btn-success" id="save-btn" onclick="saveRec()">✓ Save to Firestore</button></div>`;
+
+  const tb=$('check-tbody');S.checkItems.forEach(item=>{const tr=document.createElement('tr');tr.innerHTML=`<td style="font-weight:500">${item.label}</td><td style="color:var(--text3);font-size:12px">${item.criteria}</td><td><div style="display:flex;gap:4px"><button class="ct-btn" onclick="setCk('${item.key}','ok',this)">OK</button><button class="ct-btn" onclick="setCk('${item.key}','nok',this)">NOK</button><button class="ct-btn" onclick="setCk('${item.key}','na',this)">N/A</button></div></td><td id="ck-${item.key}">—</td>`;tb.appendChild(tr);});
 }
-buildInspTable('mcc-body',S.mcc,'');
-buildInspTable('mot-body',S.mot,'');}
 
-function setCk(k,v,b){S.cf.ck[k]=v;b.closest('div').querySelectorAll('.cb').forEach(x=>x.className='cb');b.className='cb '+v;}
-function setCkAct(k,v,b){S.cf.ck[k]=v;b.closest('div').querySelectorAll('.cb').forEach(x=>x.className='cb');b.className='cb ok';}
-function onTg(t){const eq=S.eq.find(e=>e.tag===t);if(!eq)return;E('f-bde').value=eq.de||'';E('f-bnde').value=eq.nde||'';}
-// Feature 3: separate Motor and Pump alarm check
-function chkVm(inp,sid){const t=ssVal('f-tag-wrap');const eq=S.eq.find(e=>e.tag===t),al=eqMAl(eq),da=eqMDa(eq),v=parseFloat(inp.value)||0;inp.className='vi'+(v>=da?' danger':v>=al?' alarm':'');const s=E(sid);if(s)s.innerHTML=v>=da?'<span class="badge b-nk">Danger</span>':v>=al?'<span class="badge b-al">Alarm</span>':'<span class="badge b-ok">Normal</span>';}
-function chkVp(inp,sid){const t=ssVal('f-tag-wrap');const eq=S.eq.find(e=>e.tag===t),al=eqPAl(eq),da=eqPDa(eq),v=parseFloat(inp.value)||0;inp.className='vi'+(v>=da?' danger':v>=al?' alarm':'');const s=E(sid);if(s)s.innerHTML=v>=da?'<span class="badge b-nk">Danger</span>':v>=al?'<span class="badge b-al">Alarm</span>':'<span class="badge b-ok">Normal</span>';}
-function selS(n,el){document.querySelectorAll('.so').forEach(b=>b.className='so');el.className='so s'+n;S.cf.sev=String(n);E('f-sev').value=n;}
-function ssVal(wid,def=''){const inp=E(wid)?.querySelector('input.ss-input');return(inp?.dataset?.val&&inp.dataset.val.trim())||def;}
-async function saveR(){const tag=ssVal('f-tag-wrap');if(!tag){toast('เลือก Equipment Tag','error');return;}const btn=E('svb');btn.disabled=true;btn.textContent='⏳ Saving...';
-const cuU=calcUnbal(E('ecu')?.value,E('ecv')?.value,E('ecw')?.value);
-const vuU=calcUnbal(E('evu')?.value,E('evv')?.value,E('evw')?.value);
-const rec={date:E('f-dt').value,wo:E('f-wo').value,tag,purp:ssVal('f-pu-wrap','PM'),insp:E('f-ins').value,appr:E('f-app').value,ck:{...S.cf.ck},
-brg:{de:E('f-bde')?.value||'',nde:E('f-bnde')?.value||'',deC:ssVal('f-bdc-wrap','ok'),ndeC:ssVal('f-bnc-wrap','ok')},
-vib:{mDV:gv('vmDV'),mDH:gv('vmDH'),mDA:gv('vmDA'),mNV:gv('vmNV'),mNH:gv('vmNH'),mNA:gv('vmNA'),pDV:gv('vpDV'),pDH:gv('vpDH'),pDA:gv('vpDA'),pNV:gv('vpNV'),pNH:gv('vpNH'),pNA:gv('vpNA')},
-el:{cu:gv('ecu'),cv:gv('ecv'),cw:gv('ecw'),cuUn:cuU,vu:gv('evu'),vv:gv('evv'),vw:gv('evw'),vuUn:vuU},
-st:{irUV:gv('irUV'),irVW:gv('irVW'),irWU:gv('irWU'),irG:gv('irG'),pi:gv('irPI'),wrU:gv('wrU'),wrV:gv('wrV'),wrW:gv('wrW'),wrUn:calcUnbal(E('wrU')?.value,E('wrV')?.value,E('wrW')?.value),wiU:gv('wiU'),wiV:gv('wiV'),wiW:gv('wiW'),wiUn:calcUnbal(E('wiU')?.value,E('wiV')?.value,E('wiW')?.value)},
-sev:E('f-sev').value||'5',res:E('f-res').value,ts:firebase.firestore.FieldValue.serverTimestamp(),by:S.usr?.email||''};
-try{const ref=await db.collection('records').add(rec);const full={id:ref.id,...rec};S.rec.unshift(full);
-await persistNewAlarms(full); // Feature 7: save alarm log
-const al2=await db.collection('alarmlog').orderBy('date','desc').limit(200).get();S.alogs=al2.docs.map(d=>({id:d.id,...d.data()}));
-ub();toast('บันทึก '+tag+' สำเร็จ ✓');pgCheck(E('content'));}catch(e){toast('Error: '+e.message,'error');btn.disabled=false;btn.textContent='✓ Save';}}
+function onTagChg(){const t=$('f-tag')?.value,eq=S.equipment.find(e=>e.tag===t);if(!eq)return;const f={module:'f-module',power:'f-power',volts:'f-volts',amps:'f-amps',speed:'f-speed',mfg:'f-mfg',sn:'f-sn'};Object.entries(f).forEach(([k,id])=>{if($(id))$(id).value=eq[k]||'';});if($('f-brg-de'))$('f-brg-de').value=eq.de||'';if($('f-brg-nde'))$('f-brg-nde').value=eq.nde||'';}
+function setCk(k,v,btn){S.cf.checks[k]=v;btn.closest('div').querySelectorAll('.ct-btn').forEach(b=>b.className='ct-btn');btn.className=`ct-btn ${v}`;const a={ok:'<span class="badge badge-ok">OK</span>',nok:'<span class="badge badge-nok">NOK</span>',na:'<span class="badge badge-none">N/A</span>'};const el=$(`ck-${k}`);if(el)el.innerHTML=a[v]||'—';}
+function chkV(inp,pos){const t=$('f-tag')?.value,eq=S.equipment.find(e=>e.tag===t);const al=eq?.vibAlarm||4.5,da=eq?.vibDanger||7.1;const v=parseFloat(inp.value)||0;inp.className='vib-input'+(v>=da?' danger':v>=al?' alarm':'');const st=$(`st-${pos}`);if(st)st.innerHTML=v>=da?'<span class="badge badge-nok">Danger</span>':v>=al?'<span class="badge badge-alarm">Alarm</span>':'<span class="badge badge-ok">Normal</span>';}
+function selSev(n,el){document.querySelectorAll('.sev-option').forEach(b=>b.className='sev-option');el.className=`sev-option sel-${n}`;S.cf.severity=String(n);$('f-severity').value=n;}
+
+async function saveRec(){
+  const tag=$('f-tag')?.value;if(!tag){toast('เลือก Equipment Tag','error');return;}
+  const btn=$('save-btn');btn.disabled=true;btn.textContent='⏳ Saving...';
+  const gv=id=>parseFloat($(id)?.value)||0;
+  const rec={
+    date:$('f-date').value,wo:$('f-wo').value,tag,purpose:$('f-purpose').value,inspector:$('f-inspector').value,approver:$('f-approver').value,
+    checks:{...S.cf.checks},
+    bearing:{de:$('f-brg-de')?.value||'',nde:$('f-brg-nde')?.value||'',deCondition:$('f-brg-de-cond')?.value||'ok',ndeCondition:$('f-brg-nde-cond')?.value||'ok'},
+    vib:{mDeV:gv('v-m-de-v'),mDeH:gv('v-m-de-h'),mDeA:gv('v-m-de-a'),mNdeV:gv('v-m-nde-v'),mNdeH:gv('v-m-nde-h'),pDeV:gv('v-p-de-v'),pDeH:gv('v-p-de-h'),pNdeV:gv('v-p-nde-v'),pNdeH:gv('v-p-nde-h')},
+    elec:{cu:gv('e-cu'),cv:gv('e-cv'),cw:gv('e-cw'),vu:gv('e-vu'),vv:gv('e-vv'),vw:gv('e-vw')},
+    staticTest:{irUV:gv('ir-uv'),irVW:gv('ir-vw'),irWU:gv('ir-wu'),irUVWG:gv('ir-uvwg'),piRatio:gv('ir-pi'),wrU:gv('wr-u'),wrV:gv('wr-v'),wrW:gv('wr-w'),wrUnbal:gv('wr-unbal'),wiU:gv('wi-u'),wiV:gv('wi-v'),wiW:gv('wi-w'),wiUnbal:gv('wi-unbal')},
+    severity:$('f-severity').value||'5',results:$('f-results').value,
+    createdAt:firebase.firestore.FieldValue.serverTimestamp(),createdBy:S.currentUser?.email||'',
+  };
+  try{const ref=await db.collection('records').add(rec);S.records.unshift({id:ref.id,...rec});updateBadge();toast(`บันทึก ${tag} เรียบร้อย ✓`);renderCheck($('content'));}catch(e){toast('Error: '+e.message,'error');btn.disabled=false;btn.textContent='✓ Save';}
+}
 
 // ══════════ HISTORY ══════════
-// Feature 4: show max motor vib + max pump vib
-function pgHist(el){
-  const opts=[{value:'',label:'All Equipment'},...S.eq.map(e=>({value:e.tag,label:e.tag}))];
-  el.innerHTML='<div class="card"><div class="sh"><div class="st">PM Records ('+S.rec.length+')</div><div id="htag-wrap" style="width:180px"></div></div>'+
-  '<div style="overflow-x:auto"><table class="ht"><thead><tr>'+
-  '<th>Date</th><th>WO</th><th>Tag</th><th>Brg DE</th>'+
-  '<th title="Max vibration all positions">Motor Vib↑</th>'+
-  '<th title="Max vibration all positions">Pump Vib↑</th>'+
-  '<th>Severity</th><th></th></tr></thead><tbody id="htb"></tbody></table></div></div>';
-  const hw=E('htag-wrap');if(hw){const ss=mkSS('htag',opts,'Filter...',()=>apH());hw.appendChild(ss);}
-  apH();
+function renderHist(el){
+  el.innerHTML=`<div class="card"><div class="section-header"><div class="section-title">PM Records (${S.records.length})</div><div style="display:flex;gap:8px"><select class="form-select" id="h-tag" style="width:150px" onchange="applyH()"><option value="">All</option>${S.equipment.map(e=>`<option value="${e.tag}">${e.tag}</option>`).join('')}</select></div></div><div style="overflow-x:auto"><table class="hist-table"><thead><tr><th>Date</th><th>WO</th><th>Tag</th><th>Brg DE</th><th>Pump DE-H</th><th>IR U-V</th><th>WR Unbal%</th><th>Severity</th><th></th></tr></thead><tbody id="h-tb"></tbody></table></div></div>`;
+  applyH();
 }
-function apH(){const hw=E('htag-wrap');const f=hw?.querySelector('input')?.dataset?.val||'';let rs=[...S.rec].sort((a,b)=>b.date.localeCompare(a.date));if(f)rs=rs.filter(r=>r.tag===f);
-const tb=E('htb');if(!tb)return;tb.innerHTML='';
-rs.forEach(r=>{const eq=S.eq.find(e=>e.tag===r.tag);
-  const mv=maxMotorVib(r),pv=maxPumpVib(r);
-  const mAl=mv>=eqMAl(eq),mDa=mv>=eqMDa(eq);
-  const pAl=pv>=eqPAl(eq),pDa=pv>=eqPDa(eq);
-  tb.innerHTML+='<tr>'+
-    '<td class="mono">'+r.date+'</td>'+
-    '<td class="mono" style="color:var(--text3)">'+(r.wo||'—')+'</td>'+
-    '<td style="font-weight:600">'+r.tag+'</td>'+
-    '<td style="font-size:12px;color:var(--text3)">'+(r.brg?.de||eq?.de||'—')+'</td>'+
-    '<td><span class="mono">'+mv.toFixed(2)+'</span> <span class="badge '+(mDa?'b-nk':mAl?'b-al':'b-ok')+'">'+(mDa?'Danger':mAl?'Alarm':'OK')+'</span></td>'+
-    '<td><span class="mono">'+pv.toFixed(2)+'</span> <span class="badge '+(pDa?'b-nk':pAl?'b-al':'b-ok')+'">'+(pDa?'Danger':pAl?'Alarm':'OK')+'</span></td>'+
-    '<td style="font-size:11px;color:'+(S.sc[r.sev||r.severity]||'')+'">● '+(S.sl[r.sev||r.severity]||'—')+'</td>'+
-    '<td><div style="display:flex;gap:4px"><button class="btn btn-sm btn-p" onclick="showD(\''+r.id+'\')">View</button><button class="btn btn-sm btn-d" onclick="delRec(\''+r.id+'\')">Del</button></div></td></tr>';});
-if(!rs.length)tb.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text3)">No records</td></tr>';}
-async function delRec(id){const r=S.rec.find(x=>x.id===id);if(!r)return;if(!confirm('ลบ record '+r.tag+' ('+r.date+') ?\nจะไม่สามารถกู้คืนได้'))return;try{await db.collection('records').doc(id).delete();S.rec=S.rec.filter(x=>x.id!==id);ub();apH();toast('ลบเรียบร้อย','warning');}catch(e){toast('Error: '+e.message,'error');}}
+function applyH(){
+  const tf=$('h-tag')?.value||'';
+  let recs=[...S.records].sort((a,b)=>b.date.localeCompare(a.date));
+  if(tf)recs=recs.filter(r=>r.tag===tf);
+  const tb=$('h-tb');if(!tb)return;tb.innerHTML='';
+  recs.forEach(r=>{
+    const eq=S.equipment.find(e=>e.tag===r.tag),p=r.vib?.pDeH||0;
+    const al=p>=(eq?.vibAlarm||4.5),da=p>=(eq?.vibDanger||7.1);
+    tb.innerHTML+=`<tr><td class="mono">${r.date}</td><td class="mono" style="color:var(--text3)">${r.wo||'—'}</td><td style="font-weight:600">${r.tag}</td>
+      <td style="font-size:12px;color:var(--text3)">${r.bearing?.de||'—'}</td>
+      <td><span class="mono">${p.toFixed(2)}</span> <span class="badge ${da?'badge-nok':al?'badge-alarm':'badge-ok'}">${da?'Danger':al?'Alarm':'OK'}</span></td>
+      <td class="mono">${r.staticTest?.irUV||'—'}</td>
+      <td class="mono">${r.staticTest?.wrUnbal||'—'}</td>
+      <td style="font-size:11px;color:${S.sevC[r.severity]||''}">● ${S.sevL[r.severity]||'—'}</td>
+      <td><button class="btn btn-sm" onclick="showDetail('${r.id}')">View</button></td></tr>`;
+  });
+  if(!recs.length)tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text3)">No records</td></tr>';
+}
 
-// ══════════ DETAIL MODAL ══════════
-function showD(id){
-const r=S.rec.find(x=>x.id===id);if(!r)return;
-const eq=S.eq.find(e=>e.tag===r.tag);
-const vst=(v,al,da)=>v>=da?`<b style="color:var(--red)">${v}⛔</b>`:v>=al?`<b style="color:var(--amber)">${v}⚠</b>`:`${v}`;
-const bst=c=>c==='ok'?'<span class="badge b-ok">OK</span>':c==='alarm'?'<span class="badge b-al">Alarm</span>':'<span class="badge b-nk">NOK</span>';
-const ckst=v=>v==='ok'?'<span class="badge b-ok">OK</span>':v==='nok'?'<span class="badge b-nk">NOK</span>':v==='na'?'<span class="badge b-no">N/A</span>':'—';
-const ck=r.ck||{};const el2=r.el||r.elec||{};const st2=r.st||{};
-E('mdett').textContent='PM Record — '+r.tag+' | '+fd(r.date);
-let h='<div style="text-align:center;font-size:16px;font-weight:600;margin-bottom:4px">'+(S.set.logoLine1||'PM Inspection')+'</div><div style="text-align:center;font-size:12px;color:var(--text3);margin-bottom:16px">'+(S.set.logoLine2||'TCC Plant GEN')+'</div>';
-h+='<div class="sec-h">📊 Quick Dashboard</div>';
-h+='<div class="g2" style="gap:12px;margin-bottom:4px"><div class="cw" style="height:180px"><canvas id="dv-mini"></canvas></div><div class="cw" style="height:180px"><canvas id="de-mini"></canvas></div></div>';
-h+='<div class="sec-h">📋 Work Order</div>';
-h+=`<div class="dl"><span class="dl-l">Date</span><span class="dl-v">${fd(r.date)}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">WO No.</span><span class="dl-v">${r.wo||'—'}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Tag</span><span class="dl-v" style="font-weight:600">${r.tag}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Module</span><span class="dl-v">${eq?.module||eq?.mod||'—'}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Purpose</span><span class="dl-v"><span class="badge b-in">${r.purp||r.purpose||'PM'}</span></span></div>`;
-h+=`<div class="dl"><span class="dl-l">Inspector</span><span class="dl-v">${r.insp||r.inspector||'—'}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Approved by</span><span class="dl-v">${r.appr||r.approver||'—'}</span></div>`;
-h+='<div class="sec-h">⊞ Machine Data</div>';
-h+=`<div class="dl"><span class="dl-l">Manufacturer / S.N.</span><span class="dl-v">${eq?.mfg||'—'} / ${eq?.sn||'—'}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Power / Weight</span><span class="dl-v">${eq?.power||'—'} ${eq?.powerUnit||'HP'} / ${eq?.weight||'—'} ${eq?.weightUnit||'lbs'}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Volts / Amps / RPM</span><span class="dl-v">${eq?.volts||'—'} / ${eq?.amps||'—'} / ${eq?.speed||'—'}</span></div>`;
-h+='<div class="sec-h">🔩 Bearing</div>';
-h+=`<div class="dl"><span class="dl-l">DE — ${r.brg?.de||eq?.de||'—'}</span><span class="dl-v">${bst(r.brg?.deC)}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">NDE — ${r.brg?.nde||eq?.nde||'—'}</span><span class="dl-v">${bst(r.brg?.ndeC)}</span></div>`;
-// MCC Module Inspection display
-h+='<div class="sec-h">🔌 MCC Module Inspection</div>';
-S.mcc.forEach(i=>{const af=ck[i.k],act=ck[i.k+'_act'],al2=ck[i.k+'_al'];h+=`<div class="dl"><span class="dl-l">${i.l}</span><span class="dl-v" style="display:flex;gap:6px;flex-wrap:wrap">AF:${ckst(af)} Act:<span class="badge b-no">${act||'—'}</span> AL:${ckst(al2)}</span></div>`;});
-// Motor Inspection display
-h+='<div class="sec-h">🔧 Motor Inspection</div>';
-S.mot.forEach(i=>{const af=ck[i.k],act=ck[i.k+'_act'],al2=ck[i.k+'_al'];h+=`<div class="dl"><span class="dl-l">${i.l}</span><span class="dl-v" style="display:flex;gap:6px;flex-wrap:wrap">AF:${ckst(af)} Act:<span class="badge b-no">${act||'—'}</span> AL:${ckst(al2)}</span></div>`;});
-h+='<div class="sec-h">〰 Vibration (mm/s)</div>';
-const mAl=eqMAl(eq),mDa=eqMDa(eq),pAl=eqPAl(eq),pDa=eqPDa(eq);
-h+=`<div class="dl"><span class="dl-l">Motor DE — V/H/A</span><span class="dl-v">${V(r,'mDV')} / ${vst(V(r,'mDH'),mAl,mDa)} / ${V(r,'mDA')}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Motor NDE — V/H/A</span><span class="dl-v">${V(r,'mNV')} / ${V(r,'mNH')} / ${r.vib?.mNA||0}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Pump DE — V/H/A</span><span class="dl-v">${V(r,'pDV')} / ${vst(V(r,'pDH'),pAl,pDa)} / ${V(r,'pDA')||0}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Pump NDE — V/H/A</span><span class="dl-v">${V(r,'pNV')} / ${V(r,'pNH')} / ${r.vib?.pNA||0}</span></div>`;
-h+='<div class="sec-h">⚡ Electrical</div>';
-h+=`<div class="dl"><span class="dl-l">Current U/V/W</span><span class="dl-v">${el2.cu||0} / ${el2.cv||0} / ${el2.cw||0} A <span style="color:var(--amber)">(Unbal: ${el2.cuUn||calcUnbal(el2.cu,el2.cv,el2.cw)||'—'}%)</span></span></div>`;
-h+=`<div class="dl"><span class="dl-l">Voltage U/V/W</span><span class="dl-v">${el2.vu||0} / ${el2.vv||0} / ${el2.vw||0} V <span style="color:var(--amber)">(Unbal: ${el2.vuUn||calcUnbal(el2.vu,el2.vv,el2.vw)||'—'}%)</span></span></div>`;
-h+='<div class="sec-h">🧪 Static Test</div>';
-h+=`<div class="dl"><span class="dl-l">IR (MΩ) UV/VW/WU</span><span class="dl-v">${st2.irUV||'—'} / ${st2.irVW||'—'} / ${st2.irWU||'—'}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">WR (Ω) U/V/W</span><span class="dl-v">${st2.wrU||'—'} / ${st2.wrV||'—'} / ${st2.wrW||'—'} <span style="color:var(--amber)">(${st2.wrUn||'—'}%)</span></span></div>`;
-h+=`<div class="dl"><span class="dl-l">WI (mH) U/V/W</span><span class="dl-v">${st2.wiU||'—'} / ${st2.wiV||'—'} / ${st2.wiW||'—'} <span style="color:var(--amber)">(${st2.wiUn||'—'}%)</span></span></div>`;
-h+='<div class="sec-h">📝 Results</div>';
-h+=`<div class="dl"><span class="dl-l">Severity</span><span class="dl-v" style="color:${S.sc[r.sev||r.severity]||''}">● ${S.sl[r.sev||r.severity]||'—'}</span></div>`;
-h+=`<div style="font-size:13px;color:var(--text2);white-space:pre-line;margin-top:8px;padding:10px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border)">${r.res||r.results||'—'}</div>`;
-E('mdetb').innerHTML=h;om('mdet');
-setTimeout(()=>{
-  const vLabels=['M-DE-V','M-DE-H','M-DE-A','M-NDE-V','M-NDE-H','M-NDE-A','P-DE-V','P-DE-H','P-DE-A','P-NDE-V','P-NDE-H','P-NDE-A'];
-  const vData=[V(r,'mDV'),V(r,'mDH'),V(r,'mDA'),V(r,'mNV'),V(r,'mNH'),r.vib?.mNA||0,V(r,'pDV'),V(r,'pDH'),V(r,'pDA')||0,V(r,'pNV'),V(r,'pNH'),r.vib?.pNA||0];
-  const vColors=vData.map((v,i)=>{const isM=i<6,al=isM?mAl:pAl,da=isM?mDa:pDa;return v>=da?'rgba(248,81,73,.8)':v>=al?'rgba(210,153,34,.8)':'rgba(88,166,255,.7)';});
-  if(E('dv-mini'))new Chart(E('dv-mini'),{type:'bar',data:{labels:vLabels,datasets:[{data:vData,backgroundColor:vColors,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},title:{display:true,text:'Vibration (mm/s)',color:'#8b949e',font:{size:10}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:9}}},x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:8},maxRotation:45}}}}});
-  if(E('de-mini'))new Chart(E('de-mini'),{type:'bar',data:{labels:['Cu','Cv','Cw','Vu','Vv','Vw'],datasets:[{data:[el2.cu||0,el2.cv||0,el2.cw||0,el2.vu||0,el2.vv||0,el2.vw||0],backgroundColor:['rgba(63,185,80,.7)','rgba(63,185,80,.5)','rgba(63,185,80,.3)','rgba(188,140,255,.7)','rgba(188,140,255,.5)','rgba(188,140,255,.3)'],borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},title:{display:true,text:'Current & Voltage',color:'#8b949e',font:{size:10}}},scales:{y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:9}}},x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:9}}}}}});
-},100);}
-function exportPDF(){window.print();}
-
-// ══════════ ALARM LOG PAGE — Feature 7 ══════════
-function pgAlarmLog(el){
-  // Build header without nested quote conflicts
-  const wrap=document.createElement('div');wrap.className='card';
-  const sh=document.createElement('div');sh.className='sh';sh.style.marginBottom='14px';
-  const title=document.createElement('div');title.className='st';title.textContent='🔔 Alarm Log ('+S.alogs.length+')';
-  const btns=document.createElement('div');btns.style.cssText='display:flex;gap:6px';
-  const bRescan=document.createElement('button');bRescan.className='btn btn-sm btn-s';bRescan.textContent='↺ Re-scan';
-  bRescan.onclick=()=>backfillAlarmLog().then(()=>pgAlarmLog(el));
-  const bClear=document.createElement('button');bClear.className='btn btn-sm btn-d';bClear.textContent='Clear All';
-  bClear.onclick=clearAlarmLog;
-  btns.append(bRescan,bClear);sh.append(title,btns);wrap.appendChild(sh);
-  const tbl=document.createElement('div');tbl.style.overflowX='auto';
-  tbl.innerHTML='<table class="ht"><thead><tr><th>Date</th><th>Tag</th><th>Location</th><th>Type</th><th>Value</th><th>Limit</th><th>WO</th></tr></thead><tbody id="alog-tb"></tbody></table>';
-  wrap.appendChild(tbl);el.innerHTML='';el.appendChild(wrap);
-  const tb=E('alog-tb');if(!tb)return;
-  if(!S.alogs.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">ยังไม่มี Alarm Log</td></tr>';return;}
-  S.alogs.forEach(a=>{const isDa=a.type==='danger';tb.innerHTML+=
-    '<tr>'+
-    '<td class="mono">'+a.date+'</td>'+
-    '<td style="font-weight:600">'+a.tag+'</td>'+
-    '<td style="font-size:12px">'+a.loc+'</td>'+
-    '<td><span class="badge '+(isDa?'b-nk':'b-al')+'">'+(isDa?'⛔ Danger':'⚠ Alarm')+'</span></td>'+
-    '<td class="mono" style="color:'+(isDa?'var(--red)':'var(--amber)')+'">'+a.val.toFixed(2)+' mm/s</td>'+
-    '<td class="mono" style="color:var(--text3)">'+a.limit+' mm/s</td>'+
-    '<td style="font-size:12px;color:var(--text3)">'+(a.wo||'—')+'</td></tr>';});}
-async function clearAlarmLog(){if(!confirm('ลบ Alarm Log ทั้งหมด?'))return;
-  try{const snp=await db.collection('alarmlog').get();const b=db.batch();snp.docs.forEach(d=>b.delete(d.ref));await b.commit();S.alogs=[];pgAlarmLog(E('content'));toast('ล้าง Alarm Log แล้ว','warning');}catch(e){toast('Error: '+e.message,'error');}}
+function showDetail(id){
+  const r=S.records.find(x=>x.id===id);if(!r)return;const eq=S.equipment.find(e=>e.tag===r.tag);const p=r.vib?.pDeH||0,al=p>=(eq?.vibAlarm||4.5);
+  $('modal-detail-title').textContent=`PM — ${r.tag} | ${r.date}`;
+  $('modal-detail-body').innerHTML=`
+    <div class="grid3" style="gap:10px;margin-bottom:14px;font-size:13px">
+      <div><span class="form-label">WO</span><div class="mono" style="margin-top:4px">${r.wo||'—'}</div></div>
+      <div><span class="form-label">Date</span><div style="margin-top:4px">${fmtDate(r.date)}</div></div>
+      <div><span class="form-label">Purpose</span><div style="margin-top:4px"><span class="badge badge-info">${r.purpose||'PM'}</span></div></div>
+      <div><span class="form-label">Inspector</span><div style="margin-top:4px">${r.inspector||'—'}</div></div>
+      <div><span class="form-label">Approved</span><div style="margin-top:4px">${r.approver||'—'}</div></div>
+      <div><span class="form-label">Severity</span><div style="margin-top:4px;color:${S.sevC[r.severity]||''}">● ${S.sevL[r.severity]||'—'}</div></div>
+    </div>
+    <hr class="divider">
+    <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">🔩 BEARING</div>
+    <div class="grid2" style="gap:8px;font-size:13px;margin-bottom:14px">
+      <div>DE: <b>${r.bearing?.de||'—'}</b> — ${r.bearing?.deCondition==='ok'?'<span class="badge badge-ok">OK</span>':r.bearing?.deCondition==='alarm'?'<span class="badge badge-alarm">Alarm</span>':'<span class="badge badge-nok">NOK</span>'}</div>
+      <div>NDE: <b>${r.bearing?.nde||'—'}</b> — ${r.bearing?.ndeCondition==='ok'?'<span class="badge badge-ok">OK</span>':r.bearing?.ndeCondition==='alarm'?'<span class="badge badge-alarm">Alarm</span>':'<span class="badge badge-nok">NOK</span>'}</div>
+    </div>
+    <hr class="divider">
+    <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">〰 VIBRATION (mm/s)</div>
+    <div class="grid2" style="gap:6px;font-size:13px;margin-bottom:14px">
+      <div>Motor DE — V:<b>${r.vib?.mDeV||0}</b> H:<b>${r.vib?.mDeH||0}</b> A:<b>${r.vib?.mDeA||0}</b></div>
+      <div>Motor NDE — V:<b>${r.vib?.mNdeV||0}</b> H:<b>${r.vib?.mNdeH||0}</b></div>
+      <div>Pump DE — V:<b>${r.vib?.pDeV||0}</b> H:<b style="color:${al?'var(--amber)':'inherit'}">${p}</b> ${al?'<span class="badge badge-alarm">Alarm</span>':''}</div>
+      <div>Pump NDE — V:<b>${r.vib?.pNdeV||0}</b></div>
+    </div>
+    <hr class="divider">
+    <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">⚡ ELECTRICAL</div>
+    <div class="grid2" style="gap:6px;font-size:13px;margin-bottom:14px">
+      <div>Current — U:<b>${r.elec?.cu||0}</b> V:<b>${r.elec?.cv||0}</b> W:<b>${r.elec?.cw||0}</b></div>
+      <div>Voltage — U:<b>${r.elec?.vu||0}</b> V:<b>${r.elec?.vv||0}</b> W:<b>${r.elec?.vw||0}</b></div>
+    </div>
+    <hr class="divider">
+    <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">🧪 STATIC TEST</div>
+    <div class="grid2" style="gap:6px;font-size:13px;margin-bottom:14px">
+      <div>IR (MΩ) — UV:<b>${r.staticTest?.irUV||'—'}</b> VW:<b>${r.staticTest?.irVW||'—'}</b> WU:<b>${r.staticTest?.irWU||'—'}</b></div>
+      <div>IR UVW-G: <b>${r.staticTest?.irUVWG||'—'}</b> | PI: <b>${r.staticTest?.piRatio||'—'}</b></div>
+      <div>WR (Ω) — U:<b>${r.staticTest?.wrU||'—'}</b> V:<b>${r.staticTest?.wrV||'—'}</b> W:<b>${r.staticTest?.wrW||'—'}</b> Unbal:<b>${r.staticTest?.wrUnbal||'—'}%</b></div>
+      <div>WI (mH) — U:<b>${r.staticTest?.wiU||'—'}</b> V:<b>${r.staticTest?.wiV||'—'}</b> W:<b>${r.staticTest?.wiW||'—'}</b></div>
+    </div>
+    <hr class="divider">
+    <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">📝 RESULTS</div>
+    <div style="font-size:13px;color:var(--text2);white-space:pre-line">${r.results||'—'}</div>`;
+  openModal('modal-detail');
+}
 
 // ══════════ TRENDS ══════════
-let tc=[];
-function pgTrend(el){
-  const opts=S.eq.map(e=>({value:e.tag,label:e.tag+' — '+(e.module||e.mod||'')}));
-  el.innerHTML='<div class="card"><div class="sh"><div class="st">Trend Analysis</div><div id="trt-wrap" style="width:250px"></div></div>'+
-  '<div class="itab"><div class="it active" onclick="trT(0,this)">Motor Vib</div><div class="it" onclick="trT(1,this)">Pump Vib</div><div class="it" onclick="trT(2,this)">Electrical</div></div>'+
-  '<div id="trp0"><div class="g2" style="gap:16px"><div class="cw" style="height:250px"><canvas id="tc-mde"></canvas></div><div class="cw" style="height:250px"><canvas id="tc-mnde"></canvas></div></div></div>'+
-  '<div id="trp1" style="display:none"><div class="g2" style="gap:16px"><div class="cw" style="height:250px"><canvas id="tc-pde"></canvas></div><div class="cw" style="height:250px"><canvas id="tc-pnde"></canvas></div></div></div>'+
-  '<div id="trp2" style="display:none"><div class="g2" style="gap:16px"><div class="cw" style="height:220px"><canvas id="tc-cur"></canvas></div><div class="cw" style="height:220px"><canvas id="tc-vol"></canvas></div></div></div></div>';
-  const tw=E('trt-wrap');if(tw){const ss=mkSS('trt',opts,'Equipment...',()=>drTr());ss.setVal(S.eq[0]?.tag||'');tw.appendChild(ss);}
-  drTr();}
-function trT(n,el){document.querySelectorAll('.it').forEach(b=>b.classList.remove('active'));el.classList.add('active');[0,1,2].forEach(i=>E('trp'+i).style.display=i===n?'':'none');drTr();}
-function drTr(){const tw=E('trt-wrap');const tg=tw?.querySelector('input')?.dataset?.val||S.eq[0]?.tag;const rs=S.rec.filter(r=>r.tag===tg).sort((a,b)=>a.date.localeCompare(b.date)),lb=rs.map(r=>r.date),eq=S.eq.find(e=>e.tag===tg),mAl=eqMAl(eq),mDa=eqMDa(eq),pAl=eqPAl(eq),pDa=eqPDa(eq);
-const co=()=>({responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:10}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}}});
-tc.forEach(c=>c.destroy());tc=[];
-const mk=(id,title,ds,alv,dav)=>{if(!E(id))return;const extra=[];if(alv)extra.push({label:'Alarm',data:rs.map(()=>alv),borderColor:'rgba(210,153,34,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5});if(dav)extra.push({label:'Danger',data:rs.map(()=>dav),borderColor:'rgba(248,81,73,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5});const c=new Chart(E(id),{type:'line',data:{labels:lb,datasets:[...ds,...extra]},options:{...co(),plugins:{...co().plugins,title:{display:true,text:title,color:'#8b949e',font:{size:11}}}}});tc.push(c);};
-mk('tc-mde','Motor DE (V/H/A)',[{label:'V',data:rs.map(r=>V(r,'mDV')),borderColor:'#58a6ff',pointRadius:4,tension:.3,borderWidth:2},{label:'H',data:rs.map(r=>V(r,'mDH')),borderColor:'#d29922',pointRadius:4,tension:.3,borderWidth:2},{label:'A',data:rs.map(r=>V(r,'mDA')),borderColor:'#3fb950',pointRadius:4,tension:.3,borderWidth:2}],mAl,mDa);
-mk('tc-mnde','Motor NDE (V/H/A)',[{label:'V',data:rs.map(r=>V(r,'mNV')),borderColor:'#58a6ff',pointRadius:4,tension:.3,borderWidth:2},{label:'H',data:rs.map(r=>V(r,'mNH')),borderColor:'#d29922',pointRadius:4,tension:.3,borderWidth:2},{label:'A',data:rs.map(r=>r.vib?.mNA||0),borderColor:'#3fb950',pointRadius:4,tension:.3,borderWidth:2}],mAl,mDa);
-mk('tc-pde','Pump DE (V/H/A)',[{label:'V',data:rs.map(r=>V(r,'pDV')),borderColor:'#58a6ff',pointRadius:4,tension:.3,borderWidth:2},{label:'H',data:rs.map(r=>V(r,'pDH')),borderColor:'#d29922',pointRadius:4,tension:.3,borderWidth:2},{label:'A',data:rs.map(r=>V(r,'pDA')||0),borderColor:'#3fb950',pointRadius:4,tension:.3,borderWidth:2}],pAl,pDa);
-mk('tc-pnde','Pump NDE (V/H/A)',[{label:'V',data:rs.map(r=>V(r,'pNV')),borderColor:'#58a6ff',pointRadius:4,tension:.3,borderWidth:2},{label:'H',data:rs.map(r=>V(r,'pNH')),borderColor:'#d29922',pointRadius:4,tension:.3,borderWidth:2},{label:'A',data:rs.map(r=>r.vib?.pNA||0),borderColor:'#3fb950',pointRadius:4,tension:.3,borderWidth:2}],pAl,pDa);
-const co2=()=>({responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:10}}},scales:{y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}}});
-const gc=(r,k)=>{return (r.el||r.elec||{})[k]||0;};
-if(E('tc-cur')){const c=new Chart(E('tc-cur'),{type:'line',data:{labels:lb,datasets:[{label:'U',data:rs.map(r=>gc(r,'cu')),borderColor:'#3fb950',pointRadius:4,tension:.3,borderWidth:2},{label:'V',data:rs.map(r=>gc(r,'cv')),borderColor:'rgba(63,185,80,.5)',pointRadius:4,tension:.3,borderWidth:1.5},{label:'W',data:rs.map(r=>gc(r,'cw')),borderColor:'rgba(63,185,80,.3)',pointRadius:4,tension:.3,borderWidth:1.5}]},options:{...co2(),plugins:{...co2().plugins,title:{display:true,text:'Current (A)',color:'#8b949e',font:{size:11}}}}});tc.push(c);}
-if(E('tc-vol')){const c=new Chart(E('tc-vol'),{type:'line',data:{labels:lb,datasets:[{label:'U',data:rs.map(r=>gc(r,'vu')),borderColor:'#bc8cff',pointRadius:4,tension:.3,borderWidth:2},{label:'V',data:rs.map(r=>gc(r,'vv')),borderColor:'rgba(188,140,255,.5)',pointRadius:4,tension:.3,borderWidth:1.5},{label:'W',data:rs.map(r=>gc(r,'vw')),borderColor:'rgba(188,140,255,.3)',pointRadius:4,tension:.3,borderWidth:1.5}]},options:{...co2(),scales:{y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}},plugins:{...co2().plugins,title:{display:true,text:'Voltage (V)',color:'#8b949e',font:{size:11}}}}});tc.push(c);}}
+let tc1,tc2,tc3;
+function renderTrends(el){
+  el.innerHTML=`<div class="card"><div class="section-header"><div class="section-title">Trend Analysis</div><select class="form-select" id="tr-tag" style="width:180px" onchange="drawTr()">${S.equipment.map(e=>`<option value="${e.tag}">${e.tag}</option>`).join('')}</select></div>
+    <div class="inner-tabs"><div class="inner-tab active" onclick="trT('vib',this)">Vibration</div><div class="inner-tab" onclick="trT('elec',this)">Electrical</div></div>
+    <div id="tr-vib"><div class="chart-wrap" style="height:300px"><canvas id="tc-v"></canvas></div></div>
+    <div id="tr-elec" style="display:none"><div class="grid2" style="gap:16px"><div class="chart-wrap" style="height:220px"><canvas id="tc-c"></canvas></div><div class="chart-wrap" style="height:220px"><canvas id="tc-u"></canvas></div></div></div>
+  </div>`;
+  drawTr();
+}
+function trT(t,el){document.querySelectorAll('.inner-tab').forEach(b=>b.classList.remove('active'));el.classList.add('active');$('tr-vib').style.display=t==='vib'?'':'none';$('tr-elec').style.display=t==='elec'?'':'none';if(t==='elec')drawTr();}
+function drawTr(){
+  const tag=$('tr-tag')?.value||S.equipment[0]?.tag,recs=S.records.filter(r=>r.tag===tag).sort((a,b)=>a.date.localeCompare(b.date));
+  const lb=recs.map(r=>r.date),eq=S.equipment.find(e=>e.tag===tag),al=eq?.vibAlarm||4.5,da=eq?.vibDanger||7.1;
+  const co=t=>({responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:10}},title:{display:!!t,text:t,color:'#8b949e',font:{size:11}}},scales:{y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}}});
+  if(tc1)tc1.destroy();if($('tc-v'))tc1=new Chart($('tc-v'),{type:'line',data:{labels:lb,datasets:[{label:'Pump DE-H',data:recs.map(r=>r.vib?.pDeH||0),borderColor:'#d29922',pointRadius:5,tension:.3,borderWidth:2},{label:'Motor DE-H',data:recs.map(r=>r.vib?.mDeH||0),borderColor:'#58a6ff',pointRadius:5,tension:.3,borderWidth:2},{label:'Alarm',data:recs.map(()=>al),borderColor:'rgba(210,153,34,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5},{label:'Danger',data:recs.map(()=>da),borderColor:'rgba(248,81,73,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5}]},options:co('')});
+  if(tc2)tc2.destroy();if($('tc-c'))tc2=new Chart($('tc-c'),{type:'line',data:{labels:lb,datasets:[{label:'U',data:recs.map(r=>r.elec?.cu||0),borderColor:'#3fb950',pointRadius:4,tension:.3,borderWidth:2},{label:'V',data:recs.map(r=>r.elec?.cv||0),borderColor:'rgba(63,185,80,.5)',pointRadius:4,tension:.3,borderWidth:1.5},{label:'W',data:recs.map(r=>r.elec?.cw||0),borderColor:'rgba(63,185,80,.3)',pointRadius:4,tension:.3,borderWidth:1.5}]},options:co('Current (A)')});
+  if(tc3)tc3.destroy();if($('tc-u'))tc3=new Chart($('tc-u'),{type:'line',data:{labels:lb,datasets:[{label:'U',data:recs.map(r=>r.elec?.vu||0),borderColor:'#bc8cff',pointRadius:4,tension:.3,borderWidth:2},{label:'V',data:recs.map(r=>r.elec?.vv||0),borderColor:'rgba(188,140,255,.5)',pointRadius:4,tension:.3,borderWidth:1.5},{label:'W',data:recs.map(r=>r.elec?.vw||0),borderColor:'rgba(188,140,255,.3)',pointRadius:4,tension:.3,borderWidth:1.5}]},options:{...co('Voltage (V)'),scales:{y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}}}});
+}
+
+// ══════════ IMPORT EXCEL ══════════
+function renderImport(el){
+  el.innerHTML=`
+  <div class="card">
+    <div class="section-title" style="margin-bottom:14px">⬆ Import PM Records from Excel</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px">อัปโหลดไฟล์ Excel (.xlsx / .xls / .csv) ที่มีข้อมูล PM record ระบบจะอ่านข้อมูลแล้วแสดง preview ก่อน import เข้า Firestore</p>
+    <div class="drop-zone" id="drop-zone" onclick="$('file-input').click()" ondrop="handleDrop(event)" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
+      <div style="font-size:24px;margin-bottom:8px">📂</div>
+      <div>Drag & Drop ไฟล์ Excel ลงที่นี่ หรือ <b style="color:var(--accent)">คลิกเพื่อเลือกไฟล์</b></div>
+      <div style="font-size:11px;color:var(--text3);margin-top:6px">รองรับ .xlsx, .xls, .csv</div>
+    </div>
+    <input type="file" id="file-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFile(this.files[0])">
+  </div>
+  <div class="card" id="import-template-card">
+    <div class="section-title" style="margin-bottom:14px">📄 Excel Template</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:12px">คอลัมน์ที่ระบบอ่านได้ (ไม่จำเป็นต้องมีครบทุกคอลัมน์):</p>
+    <div style="font-size:12px;color:var(--text2);line-height:2;font-family:var(--mono);background:var(--bg3);padding:12px;border-radius:var(--radius)">
+      date | tag | wo | purpose | inspector | approver |<br>
+      brg_de | brg_nde | brg_de_cond | brg_nde_cond |<br>
+      vib_mDeV | vib_mDeH | vib_mDeA | vib_mNdeV | vib_mNdeH |<br>
+      vib_pDeV | vib_pDeH | vib_pNdeV | vib_pNdeH |<br>
+      elec_cu | elec_cv | elec_cw | elec_vu | elec_vv | elec_vw |<br>
+      ir_uv | ir_vw | ir_wu | ir_uvwg | pi_ratio |<br>
+      wr_u | wr_v | wr_w | wr_unbal |<br>
+      wi_u | wi_v | wi_w | wi_unbal |<br>
+      severity | results
+    </div>
+    <button class="btn" style="margin-top:12px" onclick="downloadTemplate()">⬇ Download Template Excel</button>
+  </div>
+  <div id="import-preview-area"></div>`;
+}
+
+function handleDrop(e){e.preventDefault();e.currentTarget.classList.remove('drag-over');if(e.dataTransfer.files.length)handleFile(e.dataTransfer.files[0]);}
+
+function handleFile(file){
+  if(!file)return;
+  toast('กำลังอ่านไฟล์...','warning');
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const data=XLSX.utils.sheet_to_json(ws,{defval:''});
+      if(!data.length){toast('ไฟล์ว่าง','error');return;}
+      S.importData=data;
+      renderImportPreview(data);
+      toast(`อ่านได้ ${data.length} rows`,'success');
+    }catch(x){toast('อ่านไฟล์ไม่ได้: '+x.message,'error');}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function renderImportPreview(data){
+  const area=$('import-preview-area');
+  const cols=Object.keys(data[0]);
+  let html=`<div class="card"><div class="section-header"><div class="section-title">Preview (${data.length} rows)</div><button class="btn btn-primary" id="import-btn" onclick="doImport()">⬆ Import ${data.length} records to Firestore</button></div>`;
+  html+=`<div class="import-preview"><table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;
+  data.slice(0,50).forEach(row=>{html+=`<tr>${cols.map(c=>`<td>${row[c]!==undefined?row[c]:''}</td>`).join('')}</tr>`;});
+  if(data.length>50)html+=`<tr><td colspan="${cols.length}" style="text-align:center;padding:10px;color:var(--text3)">... แสดง 50 จาก ${data.length} rows</td></tr>`;
+  html+=`</tbody></table></div></div>`;
+  area.innerHTML=html;
+}
+
+async function doImport(){
+  if(!S.importData||!S.importData.length){toast('ไม่มีข้อมูล','error');return;}
+  const btn=$('import-btn');btn.disabled=true;btn.textContent='⏳ Importing...';
+  let count=0,batch=db.batch();
+  for(const row of S.importData){
+    const rec={
+      date:String(row.date||now()),wo:String(row.wo||''),tag:String(row.tag||''),
+      purpose:String(row.purpose||'PM'),inspector:String(row.inspector||''),approver:String(row.approver||''),
+      checks:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},
+      bearing:{de:String(row.brg_de||''),nde:String(row.brg_nde||''),deCondition:String(row.brg_de_cond||'ok'),ndeCondition:String(row.brg_nde_cond||'ok')},
+      vib:{mDeV:+row.vib_mDeV||0,mDeH:+row.vib_mDeH||0,mDeA:+row.vib_mDeA||0,mNdeV:+row.vib_mNdeV||0,mNdeH:+row.vib_mNdeH||0,pDeV:+row.vib_pDeV||0,pDeH:+row.vib_pDeH||0,pNdeV:+row.vib_pNdeV||0,pNdeH:+row.vib_pNdeH||0},
+      elec:{cu:+row.elec_cu||0,cv:+row.elec_cv||0,cw:+row.elec_cw||0,vu:+row.elec_vu||0,vv:+row.elec_vv||0,vw:+row.elec_vw||0},
+      staticTest:{irUV:+row.ir_uv||0,irVW:+row.ir_vw||0,irWU:+row.ir_wu||0,irUVWG:+row.ir_uvwg||0,piRatio:+row.pi_ratio||0,wrU:+row.wr_u||0,wrV:+row.wr_v||0,wrW:+row.wr_w||0,wrUnbal:+row.wr_unbal||0,wiU:+row.wi_u||0,wiV:+row.wi_v||0,wiW:+row.wi_w||0,wiUnbal:+row.wi_unbal||0},
+      severity:String(row.severity||'5'),results:String(row.results||''),
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),createdBy:S.currentUser?.email||'import',
+    };
+    batch.set(db.collection('records').doc(),rec);count++;
+    if(count%400===0){await batch.commit();batch=db.batch();}
+  }
+  if(count%400!==0)await batch.commit();
+  await loadAll();
+  toast(`Import สำเร็จ ${count} records ✓`);
+  S.importData=null;
+  renderImport($('content'));
+}
+
+function downloadTemplate(){
+  const headers=['date','tag','wo','purpose','inspector','approver','brg_de','brg_nde','brg_de_cond','brg_nde_cond','vib_mDeV','vib_mDeH','vib_mDeA','vib_mNdeV','vib_mNdeH','vib_pDeV','vib_pDeH','vib_pNdeV','vib_pNdeH','elec_cu','elec_cv','elec_cw','elec_vu','elec_vv','elec_vw','ir_uv','ir_vw','ir_wu','ir_uvwg','pi_ratio','wr_u','wr_v','wr_w','wr_unbal','wi_u','wi_v','wi_w','wi_unbal','severity','results'];
+  const example=['2026-04-16','P-201A','30000088621','PM','Rittiras','Sanan','65BC03J3OX','65BC03J3OX','ok','ok','0.78','0.82','0.91','0.67','1.09','3.25','4.8','1.56','0','266','270','260','412','412','411','0','0','0','0','0','0','0','0','0','0','0','0','0','5','Cleaned/Re-grease. Normal.'];
+  const ws=XLSX.utils.aoa_to_sheet([headers,example]);
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'PM_Template');
+  XLSX.writeFile(wb,'PM_Import_Template.xlsx');
+  toast('ดาวน์โหลด Template แล้ว','success');
+}
 
 // ══════════ EQUIPMENT ══════════
-function pgEq(el){el.innerHTML='';const hd=document.createElement('div');hd.className='sh';hd.style.marginBottom='16px';hd.innerHTML='<div class="st">Equipment ('+S.eq.length+')</div><button class="btn btn-p" onclick="addEq()">+ Add</button>';el.appendChild(hd);
-S.eq.forEach(eq=>{const rs=S.rec.filter(r=>r.tag===eq.tag),la=[...rs].sort((a,b)=>b.date.localeCompare(a.date))[0];
-  const mv=la?maxMotorVib(la):0,pv=la?maxPumpVib(la):0;
-  const mAl=mv>=eqMAl(eq)||mv>=eqMDa(eq),pAl=pv>=eqPAl(eq)||pv>=eqPDa(eq);
-  const dc=!la?'d-x':mAl||pAl?'d-a':'d-g';
-  const d=document.createElement('div');d.className='eq-i';
-  d.innerHTML='<div class="eq-av">'+eq.tag.slice(-3)+'</div><div style="flex:1"><div style="font-size:14px;font-weight:600"><span class="dot '+dc+'" style="margin-right:7px"></span>'+eq.tag+'</div>'+
-  '<div style="font-size:11px;color:var(--text3);margin-top:2px">'+(eq.module||eq.mod||'')+' | '+(eq.power||eq.pwr||'')+' '+(eq.powerUnit||'HP')+'</div>'+
-  '<div style="font-size:11px;color:var(--text3);margin-top:2px">Motor Alarm: '+(eq.motorVibAlarm||'—')+' / '+(eq.motorVibDanger||'—')+' mm/s | Pump: '+(eq.pumpVibAlarm||'—')+' / '+(eq.pumpVibDanger||'—')+' mm/s</div>'+
-  '</div><div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="editEq(\''+eq.tag+'\')">Edit</button><button class="btn btn-sm btn-d" onclick="delEq(\''+eq.tag+'\')">Del</button></div>';el.appendChild(d);});}
-const eqFlds=['eq-tag','eq-module','eq-mfg','eq-sn','eq-power','eq-weight','eq-volts','eq-amps','eq-freq','eq-speed','eq-ins','eq-duty','eq-de','eq-nde','eq-loadtype','eq-location'];
-function addEq(){E('meqt').textContent='Add Equipment';eqFlds.forEach(id=>{if(E(id))E(id).value='';});E('eq-mval').value='4.5';E('eq-mvda').value='7.1';E('eq-pval').value='4.5';E('eq-pvda').value='7.1';E('eq-pwrU').value='kW';E('eq-wtU').value='lbs';document.querySelectorAll('#meq .unit-btn').forEach(b=>b.classList.remove('active'));document.querySelector('#meq .unit-btn')?.classList.add('active');om('meq');}
-function editEq(t){const eq=S.eq.find(e=>e.tag===t);if(!eq)return;E('meqt').textContent='Edit — '+t;
-const m={tag:'eq-tag',module:'eq-module',mfg:'eq-mfg',sn:'eq-sn',power:'eq-power',weight:'eq-weight',volts:'eq-volts',amps:'eq-amps',freq:'eq-freq',speed:'eq-speed',ins:'eq-ins',duty:'eq-duty',de:'eq-de',nde:'eq-nde',loadtype:'eq-loadtype',location:'eq-location'};
-Object.entries(m).forEach(([k,id])=>{if(E(id))E(id).value=eq[k]||'';});
-E('eq-mval').value=eq.motorVibAlarm||eq.vibAlarm||4.5;E('eq-mvda').value=eq.motorVibDanger||eq.vibDanger||7.1;
-E('eq-pval').value=eq.pumpVibAlarm||eq.vibAlarm||4.5;E('eq-pvda').value=eq.pumpVibDanger||eq.vibDanger||7.1;
-const pu=eq.powerUnit||'HP';E('eq-pwrU').value=pu;document.querySelectorAll('#meq .unit-grp')[0]?.querySelectorAll('.unit-btn').forEach(b=>b.classList.toggle('active',b.textContent===pu));
-const wu=eq.weightUnit||'lbs';E('eq-wtU').value=wu;document.querySelectorAll('#meq .unit-grp')[1]?.querySelectorAll('.unit-btn').forEach(b=>b.classList.toggle('active',b.textContent===wu));
-om('meq');}
-async function saveEq(){const t=E('eq-tag').value.trim();if(!t){toast('Tag required','error');return;}
-const o={tag:t,module:E('eq-module').value,mfg:E('eq-mfg').value,sn:E('eq-sn').value,power:E('eq-power').value,powerUnit:E('eq-pwrU').value,weight:E('eq-weight').value,weightUnit:E('eq-wtU').value,volts:E('eq-volts').value,amps:E('eq-amps').value,freq:E('eq-freq').value,speed:E('eq-speed').value,ins:E('eq-ins').value,duty:E('eq-duty').value,de:E('eq-de').value,nde:E('eq-nde').value,loadtype:E('eq-loadtype').value,location:E('eq-location').value,
-motorVibAlarm:parseFloat(E('eq-mval').value)||4.5,motorVibDanger:parseFloat(E('eq-mvda').value)||7.1,pumpVibAlarm:parseFloat(E('eq-pval').value)||4.5,pumpVibDanger:parseFloat(E('eq-pvda').value)||7.1};
-try{await db.collection('equipment').doc(t).set(o);const i=S.eq.findIndex(e=>e.tag===t);if(i>=0)S.eq[i]=o;else S.eq.push(o);cm('meq');pgEq(E('content'));toast(t+' saved');}catch(e){toast('Error: '+e.message,'error');}}
-async function delEq(t){if(!confirm('Delete '+t+'?'))return;try{await db.collection('equipment').doc(t).delete();S.eq=S.eq.filter(e=>e.tag!==t);pgEq(E('content'));toast('Deleted '+t,'warning');}catch(e){toast('Error: '+e.message,'error');}}
+function renderEq(el){
+  el.innerHTML='';
+  const hdr=document.createElement('div');hdr.className='section-header';hdr.style.marginBottom='16px';
+  hdr.innerHTML=`<div class="section-title">Equipment (${S.equipment.length})</div><button class="btn btn-primary" onclick="openAddEq()">+ Add equipment</button>`;
+  el.appendChild(hdr);
+  S.equipment.forEach(eq=>{
+    const recs=S.records.filter(r=>r.tag===eq.tag),last=[...recs].sort((a,b)=>b.date.localeCompare(a.date))[0];
+    const p=last?.vib?.pDeH||0,al=p>=(eq.vibAlarm||4.5),da=p>=(eq.vibDanger||7.1);
+    const dc=!last?'dot-gray':da?'dot-red':al?'dot-amber':'dot-green';
+    const d=document.createElement('div');d.className='eq-item';
+    d.innerHTML=`<div class="eq-avatar">${eq.tag.slice(-3)}</div><div style="flex:1">
+      <div style="font-size:14px;font-weight:600"><span class="dot ${dc}" style="margin-right:7px"></span>${eq.tag}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px">${eq.module||''} | ${eq.mfg||''} | ${eq.power||''} HP | ${eq.volts||''} | ${eq.speed||''} RPM</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px">🔩 DE: <b>${eq.de||'—'}</b> | NDE: <b>${eq.nde||'—'}</b> | Records: ${recs.length}</div>
+    </div>
+    <div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="openEditEq('${eq.tag}')">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteEq('${eq.tag}')">Del</button></div>`;
+    el.appendChild(d);
+  });
+}
+
+function openAddEq(){$('modal-eq-title').textContent='Add Equipment';['eq-tag','eq-module','eq-mfg','eq-sn','eq-power','eq-volts','eq-amps','eq-speed','eq-de','eq-nde'].forEach(id=>{if($(id))$(id).value='';});$('eq-vib-alarm').value='4.5';$('eq-vib-danger').value='7.1';openModal('modal-eq');}
+function openEditEq(tag){const eq=S.equipment.find(e=>e.tag===tag);if(!eq)return;$('modal-eq-title').textContent='Edit — '+tag;const m={tag:'eq-tag',module:'eq-module',mfg:'eq-mfg',sn:'eq-sn',power:'eq-power',volts:'eq-volts',amps:'eq-amps',speed:'eq-speed',de:'eq-de',nde:'eq-nde'};Object.entries(m).forEach(([k,id])=>{if($(id))$(id).value=eq[k]||'';});$('eq-vib-alarm').value=eq.vibAlarm||4.5;$('eq-vib-danger').value=eq.vibDanger||7.1;openModal('modal-eq');}
+async function saveEquipment(){
+  const tag=$('eq-tag').value.trim();if(!tag){toast('Tag required','error');return;}
+  const obj={tag,module:$('eq-module').value,mfg:$('eq-mfg').value,sn:$('eq-sn').value,power:$('eq-power').value,volts:$('eq-volts').value,amps:$('eq-amps').value,speed:$('eq-speed').value,de:$('eq-de').value,nde:$('eq-nde').value,vibAlarm:parseFloat($('eq-vib-alarm').value)||4.5,vibDanger:parseFloat($('eq-vib-danger').value)||7.1};
+  try{await db.collection('equipment').doc(tag).set(obj);const i=S.equipment.findIndex(e=>e.tag===tag);if(i>=0)S.equipment[i]=obj;else S.equipment.push(obj);closeModal('modal-eq');renderEq($('content'));toast(`${tag} saved`);}catch(e){toast('Error: '+e.message,'error');}
+}
+async function deleteEq(tag){if(!confirm(`Delete ${tag}?`))return;try{await db.collection('equipment').doc(tag).delete();S.equipment=S.equipment.filter(e=>e.tag!==tag);renderEq($('content'));toast(`Deleted ${tag}`,'warning');}catch(e){toast('Error: '+e.message,'error');}}
 
 // ══════════ SETTINGS ══════════
-function pgSet(el){el.innerHTML='<div class="card"><div class="st" style="margin-bottom:16px">⚙ Settings</div><div class="g2" style="gap:12px;margin-bottom:16px"><div class="fg"><label class="fl">Company</label><input class="fi" id="sco" value="'+(S.set.co||'')+'"></div><div class="fg"><label class="fl">Plant</label><input class="fi" id="spl" value="'+(S.set.plant||'')+'"></div><div class="fg"><label class="fl">Area</label><input class="fi" id="sar" value="'+(S.set.area||'')+'"></div><div class="fg"><label class="fl">Site</label><input class="fi" id="ssi" value="'+(S.set.site||'')+'"></div><div class="fg"><label class="fl">Default Inspector</label><input class="fi" id="sdi" value="'+(S.set.di||'')+'"></div><div class="fg"><label class="fl">Default Approver</label><input class="fi" id="sda" value="'+(S.set.da||'')+'"></div></div><div style="font-size:12px;font-weight:600;color:var(--text3);margin:8px 0">SIDEBAR BRANDING</div><div class="g3" style="gap:12px;margin-bottom:16px"><div class="fg"><label class="fl">Icon Text</label><input class="fi" id="sli" value="'+(S.set.logoIcon||'PM')+'" maxlength="3" style="width:60px"></div><div class="fg"><label class="fl">Line 1</label><input class="fi" id="sl1" value="'+(S.set.logoLine1||'PM Inspection')+'"></div><div class="fg"><label class="fl">Line 2</label><input class="fi" id="sl2" value="'+(S.set.logoLine2||'TCC Plant GEN')+'"></div></div><button class="btn btn-p" onclick="saveSt()">Save Settings</button></div><div class="card"><div class="st" style="margin-bottom:14px">🗄️ Database</div><div style="font-size:13px;color:var(--text2)">Equipment: <b>'+S.eq.length+'</b> | Records: <b>'+S.rec.length+'</b> | Alarm Log: <b>'+S.alogs.length+'</b></div></div>';}
-async function saveSt(){const s={co:E('sco').value,plant:E('spl').value,area:E('sar').value,site:E('ssi').value,di:E('sdi').value,da:E('sda').value,logoIcon:E('sli').value,logoLine1:E('sl1').value,logoLine2:E('sl2').value};try{await db.collection('settings').doc('global').set(s);S.set={...S.set,...s};applyLogo();toast('Saved');}catch(e){toast('Error: '+e.message,'error');}}
+function renderSet(el){
+  el.innerHTML=`<div class="card"><div class="section-title" style="margin-bottom:16px">⚙ Settings</div>
+    <div class="grid2" style="gap:12px;margin-bottom:16px">
+      <div class="form-group"><label class="form-label">Company</label><input class="form-input" id="s-co" value="${S.settings.company||''}"></div>
+      <div class="form-group"><label class="form-label">Plant</label><input class="form-input" id="s-pl" value="${S.settings.plant||''}"></div>
+      <div class="form-group"><label class="form-label">Area</label><input class="form-input" id="s-ar" value="${S.settings.area||''}"></div>
+      <div class="form-group"><label class="form-label">Site</label><input class="form-input" id="s-si" value="${S.settings.site||''}"></div>
+      <div class="form-group"><label class="form-label">Default Inspector</label><input class="form-input" id="s-in" value="${S.settings.defaultInspector||''}"></div>
+      <div class="form-group"><label class="form-label">Default Approver</label><input class="form-input" id="s-ap" value="${S.settings.defaultApprover||''}"></div>
+    </div>
+    <button class="btn btn-primary" onclick="saveSets()">Save settings</button>
+  </div>
+  <div class="card"><div class="section-title" style="margin-bottom:14px">🗄️ Database</div>
+    <div style="font-size:13px;color:var(--text2)">Equipment: <b>${S.equipment.length}</b> | Records: <b>${S.records.length}</b></div>
+    <div style="font-size:11px;color:var(--text3);margin-top:8px">Data stored in Firebase Firestore — syncs across all devices</div>
+  </div>`;
+}
+async function saveSets(){const s={company:$('s-co').value,plant:$('s-pl').value,area:$('s-ar').value,site:$('s-si').value,defaultInspector:$('s-in').value,defaultApprover:$('s-ap').value};try{await db.collection('settings').doc('global').set(s);S.settings={...S.settings,...s};toast('Settings saved');}catch(e){toast('Error: '+e.message,'error');}}
 
-// Clock
-function uClock(){const d=new Date(),s=d.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});const td=E('tdate');if(td)td.textContent=s;const sc=E('sclock');if(sc)sc.textContent=d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
-setInterval(uClock,1000);uClock();
+// ══════════ CLOCK ══════════
+function exportPDF(){window.print();}
+function updateClock(){const d=new Date();const s=d.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});const td=$('top-date');if(td)td.textContent=s;const sc=$('sidebar-clock');if(sc)sc.textContent=d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+setInterval(updateClock,1000);updateClock();
 </script>
-</body></html>
+</body>
+</html>
