@@ -114,7 +114,7 @@
 .dl{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)}
 .dl-l{color:var(--text3);font-size:12px}.dl-v{font-family:var(--mono);font-size:13px}
 .sec-h{font-size:11px;font-weight:600;color:var(--accent);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.05em}
-@media print{.sidebar,.topbar,.toast-c,.mf,.mh button{display:none!important}.mo{position:static!important;background:none!important}.modal{max-height:none!important;width:100%!important;border:none!important;box-shadow:none!important;border-radius:0!important}.mb{padding:0!important}body{background:#fff!important;color:#000!important}*{color:#000!important;border-color:#ccc!important}.badge{border:1px solid #999!important}.dl{border-color:#ddd!important}.sec-h{color:#1a5fb4!important}}
+@media print{.sidebar,.topbar,.toast-c,.mf,.mh button,.mh .mc-btn,.btn{display:none!important}.mo{position:static!important;background:none!important}.modal{max-height:none!important;width:100%!important;border:none!important;box-shadow:none!important;border-radius:0!important}.mb{padding:0!important}body{background:#fff!important;color:#000!important}*{color:#000!important;border-color:#ccc!important}.badge{border:1px solid #999!important}.dl{border-color:#ddd!important}.sec-h{color:#1a5fb4!important}.content{overflow:visible!important;height:auto!important}.main{overflow:visible!important}.app{display:block!important;height:auto!important;overflow:visible!important}.card{break-inside:avoid;border:1px solid #ddd!important}.mc{border:1px solid #ddd!important}.metric-row{grid-template-columns:repeat(4,1fr)!important}.g2{grid-template-columns:1fr 1fr!important}canvas{max-height:200px!important}}
 @media(max-width:900px){.metric-row{grid-template-columns:1fr 1fr}.g3,.g4{grid-template-columns:1fr 1fr}.sidebar{display:none}}
 </style>
 </head>
@@ -157,22 +157,31 @@
   <div class="content" id="content"></div>
 </div>
 </div>
-<!-- Equipment Modal -->
-<div class="mo" id="meq"><div class="modal" style="width:600px"><div class="mh"><div style="font-size:15px;font-weight:600" id="meqt">Add Equipment</div><button class="mc-btn" onclick="cm('meq')">✕</button></div>
+<!-- Equipment Modal (full fields) -->
+<div class="mo" id="meq"><div class="modal" style="width:650px"><div class="mh"><div style="font-size:15px;font-weight:600" id="meqt">Add Equipment</div><button class="mc-btn" onclick="cm('meq')">✕</button></div>
 <div class="mb"><div class="g2" style="gap:12px;margin-bottom:12px">
-<div class="fg"><label class="fl">Tag No.*</label><input class="fi" id="eq-tag"></div>
-<div class="fg"><label class="fl">Module for</label><input class="fi" id="eq-mod"></div>
-<div class="fg"><label class="fl">Manufacturer</label><input class="fi" id="eq-mfg"></div>
-<div class="fg"><label class="fl">Serial No.</label><input class="fi" id="eq-sn"></div>
-<div class="fg"><label class="fl">Power (HP)</label><input class="fi" id="eq-pwr" type="number"></div>
-<div class="fg"><label class="fl">Stat. Volts</label><input class="fi" id="eq-vol"></div>
-<div class="fg"><label class="fl">Stat. Amps</label><input class="fi" id="eq-amp"></div>
-<div class="fg"><label class="fl">Speed (RPM)</label><input class="fi" id="eq-spd" type="number"></div>
+<div class="fg"><label class="fl">Tag No.*</label><input class="fi" id="eq-tag" placeholder="P-201X"></div>
+<div class="fg"><label class="fl">Module for</label><input class="fi" id="eq-module" placeholder="CF Export P201X"></div>
+<div class="fg"><label class="fl">Manufacturer</label><input class="fi" id="eq-mfg" placeholder="Reliance"></div>
+<div class="fg"><label class="fl">Serial No.</label><input class="fi" id="eq-sn" placeholder="1MAZJ9073 G00X"></div>
+<div class="fg"><label class="fl">Power (HP)</label><input class="fi" id="eq-power" type="number" placeholder="250"></div>
+<div class="fg"><label class="fl">Weight (LBS)</label><input class="fi" id="eq-weight" type="number" placeholder="2268"></div>
+<div class="fg"><label class="fl">Stat. Volts</label><input class="fi" id="eq-volts" placeholder="380YD"></div>
+<div class="fg"><label class="fl">Stat. Amps</label><input class="fi" id="eq-amps" placeholder="323A"></div>
+<div class="fg"><label class="fl">Frequency (Hz)</label><input class="fi" id="eq-freq" type="number" placeholder="50"></div>
+<div class="fg"><label class="fl">Speed (RPM)</label><input class="fi" id="eq-speed" type="number" placeholder="2970"></div>
+<div class="fg"><label class="fl">Insulation Class</label><input class="fi" id="eq-ins" placeholder="F"></div>
+<div class="fg"><label class="fl">Duty</label><input class="fi" id="eq-duty" placeholder="CONT"></div>
 </div>
 <div style="font-size:12px;font-weight:600;color:var(--text3);margin:6px 0 8px">BEARING INFO</div>
 <div class="g2" style="gap:12px;margin-bottom:12px">
-<div class="fg"><label class="fl">DE Bearing</label><input class="fi" id="eq-de"></div>
-<div class="fg"><label class="fl">NDE Bearing</label><input class="fi" id="eq-nde"></div>
+<div class="fg"><label class="fl">DE Bearing</label><input class="fi" id="eq-de" placeholder="65BC03J3OX"></div>
+<div class="fg"><label class="fl">NDE Bearing</label><input class="fi" id="eq-nde" placeholder="65BC03J3OX"></div>
+</div>
+<div style="font-size:12px;font-weight:600;color:var(--text3);margin:6px 0 8px">INSTALLATION</div>
+<div class="g2" style="gap:12px;margin-bottom:12px">
+<div class="fg"><label class="fl">Load Type</label><input class="fi" id="eq-loadtype" placeholder="Pump"></div>
+<div class="fg"><label class="fl">Location</label><input class="fi" id="eq-location" placeholder="Pump room"></div>
 </div>
 <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">ALARM LIMITS</div>
 <div class="g2" style="gap:12px">
@@ -181,7 +190,7 @@
 </div></div>
 <div class="mf"><button class="btn" onclick="cm('meq')">Cancel</button><button class="btn btn-p" onclick="saveEq()">Save</button></div>
 </div></div>
-<!-- Detail Modal (View full record + PDF export) -->
+<!-- Detail Modal -->
 <div class="mo" id="mdet"><div class="modal" style="width:750px" id="mdet-inner"><div class="mh"><div style="font-size:15px;font-weight:600" id="mdett">PM Record</div><div style="display:flex;gap:8px;align-items:center"><button class="btn btn-sm" onclick="exportPDF()">🖨 Export PDF</button><button class="mc-btn" onclick="cm('mdet')">✕</button></div></div><div class="mb" id="mdetb"></div></div></div>
 <script>
 firebase.initializeApp(firebaseConfig);const auth=firebase.auth(),db=firebase.firestore();
@@ -199,21 +208,47 @@ auth.onAuthStateChanged(async u=>{if(u){S.usr=u;E('login-screen').style.display=
 async function doLogin(){const e=E('login-email').value.trim(),p=E('login-pass').value,err=E('login-err'),btn=E('login-btn');if(!e||!p){err.textContent='กรุณากรอก Email/Password';err.style.display='block';return;}btn.textContent='...';btn.disabled=true;err.style.display='none';try{await auth.signInWithEmailAndPassword(e,p);}catch(x){const m={'auth/invalid-credential':'Email หรือ Password ไม่ถูกต้อง','auth/too-many-requests':'รอสักครู่'};err.textContent=m[x.code]||x.message;err.style.display='block';btn.textContent='เข้าสู่ระบบ';btn.disabled=false;}}
 function doLogout(){if(confirm('ออกจากระบบ?'))auth.signOut();}
 
-async function loadAll(){try{const es=await db.collection('equipment').get();S.eq=es.docs.map(d=>({id:d.id,...d.data()}));const rs=await db.collection('records').orderBy('date','desc').get();S.rec=rs.docs.map(d=>({id:d.id,...d.data()}));const ss=await db.collection('settings').doc('global').get();if(ss.exists)S.set={...S.set,...ss.data()};if(!S.eq.length)await seed();applyLogo();ub();}catch(e){toast('Error: '+e.message,'error');}}
-async function seed(){const eqs=[{tag:'P-201A',mod:'CF Export P201A',mfg:'Reliance',sn:'1MAZJ9073 G003',pwr:'250',vol:'380YD',amp:'323A',spd:'2970',de:'65BC03J3OX',nde:'65BC03J3OX',val:4.5,vda:7.1},{tag:'P-201B',mod:'CF Export P201B',mfg:'Reliance',sn:'1MAZJ9073 G001',pwr:'250',vol:'380YD',amp:'323A',spd:'2970',de:'65BC03J3OX',nde:'65BC03J3OX',val:4.5,vda:7.1},{tag:'P-201S',mod:'CF Export P201S',mfg:'Reliance',sn:'1MAZJ9073 G002',pwr:'250',vol:'380YD',amp:'323A',spd:'2970',de:'65BC03J3OX',nde:'65BC03J3OX',val:4.5,vda:7.1}];
-const recs=[{date:'2026-04-16',wo:'30000088621',tag:'P-201A',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},vib:{mDV:.78,mDH:.82,mDA:.91,mNV:.67,mNH:1.09,pDV:3.25,pDH:4.8,pNV:1.56,pNH:0},el:{cu:266,cv:270,cw:260,vu:412,vv:412,vw:411},st:{irUV:0,irVW:0,irWU:0,irG:0,pi:0,wrU:0,wrV:0,wrW:0,wrUn:0,wiU:0,wiV:0,wiW:0,wiUn:0},sev:'5',res:'Cleaned/Re-grease\n- Vibration >> Pump DE-H alarm\n- V/I >> Normal\n- Noise >> Normal'},{date:'2026-04-16',wo:'30000088627',tag:'P-201B',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},vib:{mDV:1.5,mDH:1.34,mDA:.6,mNV:.88,mNH:1.39,pDV:2.81,pDH:3.96,pNV:1.6,pNH:0},el:{cu:282,cv:287,cw:285,vu:399,vv:400,vw:399},st:{irUV:0,irVW:0,irWU:0,irG:0,pi:0,wrU:0,wrV:0,wrW:0,wrUn:0,wiU:0,wiV:0,wiW:0,wiUn:0},sev:'5',res:'Cleaned/Re-grease\n- All Normal'},{date:'2026-04-16',wo:'30000088632',tag:'P-201S',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},vib:{mDV:.62,mDH:.81,mDA:.52,mNV:.67,mNH:.78,pDV:3.02,pDH:6.5,pNV:1.6,pNH:0},el:{cu:233,cv:236,cw:232,vu:401,vv:401,vw:401},st:{irUV:0,irVW:0,irWU:0,irG:0,pi:0,wrU:0,wrV:0,wrW:0,wrUn:0,wiU:0,wiV:0,wiW:0,wiUn:0},sev:'5',res:'Cleaned/Re-grease\n- Vibration >> DE-H alarm\n- V/I >> Normal'}];
-const b=db.batch();eqs.forEach(e=>b.set(db.collection('equipment').doc(e.tag),e));recs.forEach(r=>b.set(db.collection('records').doc(),{...r,ts:firebase.firestore.FieldValue.serverTimestamp()}));await b.commit();await loadAll();toast('ข้อมูลตัวอย่างพร้อมแล้ว');}
+async function loadAll(){try{const es=await db.collection('equipment').get();S.eq=es.docs.map(d=>({id:d.id,...d.data()}));const rs=await db.collection('records').orderBy('date','desc').get();S.rec=rs.docs.map(d=>({id:d.id,...d.data()}));const ss=await db.collection('settings').doc('global').get();if(ss.exists)S.set={...S.set,...ss.data()};
+// Seed only once ever — uses a flag in Firestore so updating code never re-seeds
+const sf=await db.collection('settings').doc('_seeded').get();if(!sf.exists)await seed();
+applyLogo();ub();}catch(e){toast('Error: '+e.message,'error');}}
 
-function getAl(){const a=[];S.rec.forEach(r=>{const eq=S.eq.find(e=>e.tag===r.tag);if(!eq)return;const al=eq.val||4.5,da=eq.vda||7.1,p=r.vib?.pDH||0,m=r.vib?.mDH||0;if(p>=da)a.push({lv:'danger',tag:r.tag,msg:'Pump DE-H DANGER: '+p,date:r.date,id:r.id});else if(p>=al)a.push({lv:'alarm',tag:r.tag,msg:'Pump DE-H Alarm: '+p,date:r.date,id:r.id});if(m>=da)a.push({lv:'danger',tag:r.tag,msg:'Motor DE-H DANGER: '+m,date:r.date,id:r.id});else if(m>=al)a.push({lv:'alarm',tag:r.tag,msg:'Motor DE-H Alarm: '+m,date:r.date,id:r.id});});return a;}
+async function seed(){
+const eqs=[
+{tag:'P-201A',module:'CF Export P201A',mfg:'Reliance',sn:'1MAZJ9073 G003',power:'250',weight:'2268',volts:'380YD',amps:'323A',freq:'50',speed:'2970',ins:'F',duty:'CONT',de:'65BC03J3OX',nde:'65BC03J3OX',loadtype:'Pump',location:'Pump room',vibAlarm:4.5,vibDanger:7.1},
+{tag:'P-201B',module:'CF Export P201B',mfg:'Reliance',sn:'1MAZJ9073 G001',power:'250',weight:'2268',volts:'380YD',amps:'323A',freq:'50',speed:'2970',ins:'F',duty:'CONT',de:'65BC03J3OX',nde:'65BC03J3OX',loadtype:'Pump',location:'Pump room',vibAlarm:4.5,vibDanger:7.1},
+{tag:'P-201S',module:'CF Export P201S',mfg:'Reliance',sn:'1MAZJ9073 G002',power:'250',weight:'2268',volts:'380YD',amps:'323A',freq:'50',speed:'2970',ins:'F',duty:'CONT',de:'65BC03J3OX',nde:'65BC03J3OX',loadtype:'Pump',location:'Pump room',vibAlarm:4.5,vibDanger:7.1}
+];
+const recs=[
+{date:'2026-04-16',wo:'30000088621',tag:'P-201A',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},vib:{mDV:0.78,mDH:0.82,mDA:0.91,mNV:0.67,mNH:1.09,pDV:3.25,pDH:4.8,pNV:1.56,pNH:0},el:{cu:266,cv:270,cw:260,vu:412,vv:412,vw:411},st:{irUV:0,irVW:0,irWU:0,irG:0,pi:0,wrU:0,wrV:0,wrW:0,wrUn:0,wiU:0,wiV:0,wiW:0,wiUn:0},sev:'5',res:'Cleaned/Re-grease (Run 2 unit A,S) >> P 13.4 Bar\n- Vibration >> Pump DE horizontal alarm level.\n- Voltage/Current >> Normal\n- Noise >> Normal'},
+{date:'2026-04-16',wo:'30000088627',tag:'P-201B',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},vib:{mDV:1.5,mDH:1.34,mDA:0.6,mNV:0.88,mNH:1.39,pDV:2.81,pDH:3.96,pNV:1.6,pNH:0},el:{cu:282,cv:287,cw:285,vu:399,vv:400,vw:399},st:{irUV:0,irVW:0,irWU:0,irG:0,pi:0,wrU:0,wrV:0,wrW:0,wrUn:0,wiU:0,wiV:0,wiW:0,wiUn:0},sev:'5',res:'Cleaned/Re-grease P=8 bar, Flow 480T/H\n- Vibration >> Normal\n- Voltage/Current >> Normal\n- Noise >> Normal'},
+{date:'2026-04-16',wo:'30000088632',tag:'P-201S',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},vib:{mDV:0.62,mDH:0.81,mDA:0.52,mNV:0.67,mNH:0.78,pDV:3.02,pDH:6.5,pNV:1.6,pNH:0},el:{cu:233,cv:236,cw:232,vu:401,vv:401,vw:401},st:{irUV:0,irVW:0,irWU:0,irG:0,pi:0,wrU:0,wrV:0,wrW:0,wrUn:0,wiU:0,wiV:0,wiW:0,wiUn:0},sev:'5',res:'Cleaned/Re-grease P13.4 bar, Flow 503T/H\n- Vibration >> DE horizontal alarm level.\n- Voltage/Current >> Normal\n- Noise >> Normal'},
+{date:'2026-03-01',wo:'30000087100',tag:'P-201A',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},vib:{mDV:0.65,mDH:0.70,mDA:0.80,mNV:0.60,mNH:0.95,pDV:2.80,pDH:3.50,pNV:1.40,pNH:0},el:{cu:264,cv:268,cw:258,vu:410,vv:411,vw:409},st:{irUV:0,irVW:0,irWU:0,irG:0,pi:0,wrU:0,wrV:0,wrW:0,wrUn:0,wiU:0,wiV:0,wiW:0,wiUn:0},sev:'5',res:'Cleaned/Re-grease. All normal.'},
+{date:'2026-02-01',wo:'30000086200',tag:'P-201A',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},vib:{mDV:0.60,mDH:0.65,mDA:0.75,mNV:0.55,mNH:0.88,pDV:2.60,pDH:3.10,pNV:1.30,pNH:0},el:{cu:263,cv:267,cw:257,vu:411,vv:411,vw:410},st:{irUV:0,irVW:0,irWU:0,irG:0,pi:0,wrU:0,wrV:0,wrW:0,wrUn:0,wiU:0,wiV:0,wiW:0,wiUn:0},sev:'5',res:'Cleaned/Re-grease. All normal.'}
+];
+const b=db.batch();eqs.forEach(e=>b.set(db.collection('equipment').doc(e.tag),e));recs.forEach(r=>b.set(db.collection('records').doc(),{...r,ts:firebase.firestore.FieldValue.serverTimestamp(),by:'seed'}));
+// Mark as seeded — this flag prevents re-seeding when code is updated
+b.set(db.collection('settings').doc('_seeded'),{done:true,at:firebase.firestore.FieldValue.serverTimestamp()});
+await b.commit();
+// Reload data fresh from Firestore
+const es2=await db.collection('equipment').get();S.eq=es2.docs.map(d=>({id:d.id,...d.data()}));const rs2=await db.collection('records').orderBy('date','desc').get();S.rec=rs2.docs.map(d=>({id:d.id,...d.data()}));
+toast('โหลดข้อมูลตัวอย่างเรียบร้อย');}
+
+function getAl(){const a=[];S.rec.forEach(r=>{const eq=S.eq.find(e=>e.tag===r.tag);if(!eq)return;const al=eq.vibAlarm||eq.val||4.5,da=eq.vibDanger||eq.vda||7.1,p=r.vib?.pDH||0,m=r.vib?.mDH||0;if(p>=da)a.push({lv:'danger',tag:r.tag,msg:'Pump DE-H DANGER: '+p,date:r.date,id:r.id});else if(p>=al)a.push({lv:'alarm',tag:r.tag,msg:'Pump DE-H Alarm: '+p,date:r.date,id:r.id});if(m>=da)a.push({lv:'danger',tag:r.tag,msg:'Motor DE-H DANGER: '+m,date:r.date,id:r.id});else if(m>=al)a.push({lv:'alarm',tag:r.tag,msg:'Motor DE-H Alarm: '+m,date:r.date,id:r.id});});return a;}
 function ub(){const a=getAl();E('acnt').textContent=a.length;E('acnt').style.display=a.length?'':'none';}
 function go(p,n){document.querySelectorAll('.nav-i').forEach(x=>x.classList.remove('active'));if(n)n.classList.add('active');const t={dashboard:'Dashboard',alerts:'Alerts',checksheet:'PM Check Sheet',history:'PM History',trends:'Trends',equipment:'Equipment',settings:'Settings'};E('ptitle').textContent=t[p]||p;E('pbc').textContent=t[p]||p;const c=E('content');c.innerHTML='';({dashboard:pgDash,alerts:pgAlert,checksheet:pgCheck,history:pgHist,trends:pgTrend,equipment:pgEq,settings:pgSet})[p]?.(c);ub();}
+// helper: get alarm/danger from equipment (supports both old & new field names)
+function eqAl(eq){return eq?.vibAlarm||eq?.val||4.5;}
+function eqDa(eq){return eq?.vibDanger||eq?.vda||7.1;}
 
 // ══════════ DASHBOARD ══════════
 function pgDash(el){const al=getAl(),lp=S.rec.reduce((m,r)=>r.date>m?r.date:m,''),ac=[...new Set(al.map(a=>a.tag))].length;
+// Export PDF button at top
+el.innerHTML='<div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button class="btn btn-sm" onclick="printDash()">🖨 Export Dashboard PDF</button></div>';
 al.slice(0,3).forEach(a=>{el.innerHTML+='<div class="ab '+(a.lv==='danger'?'a-re':'a-am')+'"><span>'+(a.lv==='danger'?'⛔':'⚠')+'</span><b>'+a.tag+'</b>: '+a.msg+'<span style="margin-left:auto;font-size:11px;opacity:.7">'+fd(a.date)+'</span></div>';});
 el.innerHTML+='<div class="metric-row"><div class="mc m1"><div class="ml">Equipment</div><div class="mv" style="color:var(--accent)">'+S.eq.length+'</div></div><div class="mc m2"><div class="ml">PM Records</div><div class="mv" style="color:var(--green)">'+S.rec.length+'</div></div><div class="mc m3"><div class="ml">Alerts</div><div class="mv" style="color:var(--amber)">'+ac+'</div></div><div class="mc m4"><div class="ml">Last PM</div><div class="mv" style="font-size:16px;color:var(--text)">'+fd(lp)+'</div></div></div>';
-let sh='';S.eq.forEach(eq=>{const rs=S.rec.filter(r=>r.tag===eq.tag).sort((a,b)=>b.date.localeCompare(a.date)),la=rs[0],p=la?.vib?.pDH||0,al2=p>=(eq.val||4.5),da2=p>=(eq.vda||7.1),dc=!la?'d-x':da2?'d-r':al2?'d-a':'d-g',bc=!la?'b-no':da2?'b-nk':al2?'b-al':'b-ok',bt=!la?'N/A':da2?'Danger':al2?'Alarm':'Normal';
-sh+='<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)"><span class="dot '+dc+'"></span><div style="flex:1"><div style="font-weight:600">'+eq.tag+'</div><div style="font-size:11px;color:var(--text3)">'+eq.mod+' | DE:'+eq.de+' NDE:'+eq.nde+'</div></div><span class="badge '+bc+'">'+bt+'</span>'+(la?'<span class="mono" style="color:var(--text3)">P.DE-H:'+p.toFixed(2)+'</span>':'')+'</div>';});
+let sh='';S.eq.forEach(eq=>{const rs=S.rec.filter(r=>r.tag===eq.tag).sort((a,b)=>b.date.localeCompare(a.date)),la=rs[0],p=la?.vib?.pDH||0,al2=p>=eqAl(eq),da2=p>=eqDa(eq),dc=!la?'d-x':da2?'d-r':al2?'d-a':'d-g',bc=!la?'b-no':da2?'b-nk':al2?'b-al':'b-ok',bt=!la?'N/A':da2?'Danger':al2?'Alarm':'Normal';
+sh+='<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)"><span class="dot '+dc+'"></span><div style="flex:1"><div style="font-weight:600">'+eq.tag+'</div><div style="font-size:11px;color:var(--text3)">'+(eq.module||eq.mod||'')+' | DE:'+(eq.de||'')+' NDE:'+(eq.nde||'')+'</div></div><span class="badge '+bc+'">'+bt+'</span>'+(la?'<span class="mono" style="color:var(--text3)">P.DE-H:'+p.toFixed(2)+'</span>':'')+'</div>';});
 el.innerHTML+='<div class="g2"><div class="card"><div class="card-t">Equipment & Bearing</div>'+sh+'</div><div class="card"><div class="card-t">Vibration — Latest</div><div class="cw" style="height:240px"><canvas id="dv"></canvas></div></div></div>';
 el.innerHTML+='<div class="card"><div class="card-t">Current & Voltage</div><div class="g2" style="gap:16px"><div class="cw" style="height:200px"><canvas id="dc"></canvas></div><div class="cw" style="height:200px"><canvas id="du"></canvas></div></div></div>';
 setTimeout(()=>{const tg=S.eq.map(e=>e.tag),lt={};S.rec.forEach(r=>{if(!lt[r.tag]||r.date>lt[r.tag].date)lt[r.tag]=r;});const co=t=>({responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:10}},title:{display:!!t,text:t,color:'#8b949e',font:{size:11}}},scales:{y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:10}}}}});
@@ -226,7 +261,7 @@ function pgAlert(el){const a=getAl();if(!a.length){el.innerHTML='<div class="car
 
 // ══════════ CHECK SHEET ══════════
 function pgCheck(el){S.cf={ck:{},sev:'5'};
-el.innerHTML='<div class="card"><div class="st" style="margin-bottom:14px">📋 Work Order Info</div><div class="g4" style="margin-bottom:12px"><div class="fg"><label class="fl">WO No.</label><input class="fi" id="f-wo"></div><div class="fg"><label class="fl">Equipment Tag *</label><select class="fs" id="f-tag" onchange="onTg()"><option value="">— Select —</option>'+S.eq.map(e=>'<option value="'+e.tag+'">'+e.tag+' — '+e.mod+'</option>').join('')+'</select></div><div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="f-dt" value="'+now()+'"></div><div class="fg"><label class="fl">Purpose</label><select class="fs" id="f-pu"><option value="PM">PM</option><option value="Routine">Routine</option><option value="Investigation">Investigation</option><option value="CM">CM</option></select></div><div class="fg"><label class="fl">Inspector</label><input class="fi" id="f-ins" value="'+(S.set.di||'')+'"></div><div class="fg"><label class="fl">Approved by</label><input class="fi" id="f-app" value="'+(S.set.da||'')+'"></div></div></div>'+
+el.innerHTML='<div class="card"><div class="st" style="margin-bottom:14px">📋 Work Order Info</div><div class="g4" style="margin-bottom:12px"><div class="fg"><label class="fl">WO No.</label><input class="fi" id="f-wo"></div><div class="fg"><label class="fl">Equipment Tag *</label><select class="fs" id="f-tag" onchange="onTg()"><option value="">— Select —</option>'+S.eq.map(e=>'<option value="'+e.tag+'">'+e.tag+' — '+(e.module||e.mod||'')+'</option>').join('')+'</select></div><div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="f-dt" value="'+now()+'"></div><div class="fg"><label class="fl">Purpose</label><select class="fs" id="f-pu"><option value="PM">PM</option><option value="Routine">Routine</option><option value="Investigation">Investigation</option><option value="CM">CM</option></select></div><div class="fg"><label class="fl">Inspector</label><input class="fi" id="f-ins" value="'+(S.set.di||'')+'"></div><div class="fg"><label class="fl">Approved by</label><input class="fi" id="f-app" value="'+(S.set.da||'')+'"></div></div></div>'+
 '<div class="card"><div class="st" style="margin-bottom:14px">🔩 Bearing Info</div><div class="g4"><div class="fg"><label class="fl">DE Bearing No.</label><input class="fi" id="f-bde"></div><div class="fg"><label class="fl">DE Condition</label><select class="fs" id="f-bdc"><option value="ok">OK</option><option value="alarm">Alarm</option><option value="nok">NOK-Replace</option></select></div><div class="fg"><label class="fl">NDE Bearing No.</label><input class="fi" id="f-bnde"></div><div class="fg"><label class="fl">NDE Condition</label><select class="fs" id="f-bnc"><option value="ok">OK</option><option value="alarm">Alarm</option><option value="nok">NOK-Replace</option></select></div></div></div>'+
 '<div class="card"><div class="st" style="margin-bottom:14px">🔍 General Inspection</div><table class="cht"><thead><tr><th>Item</th><th>Criteria</th><th>As Found</th><th>As Left</th></tr></thead><tbody id="ckb"></tbody></table></div>'+
 '<div class="card"><div class="st" style="margin-bottom:14px">〰 Vibration (mm/s)</div><table class="vt"><thead><tr><th>Position</th><th>V</th><th>H</th><th>A</th><th>Status</th></tr></thead><tbody><tr><td>Motor DE</td><td><input class="vi" id="vmDV" type="number" step=".01"></td><td><input class="vi" id="vmDH" type="number" step=".01" oninput="chkV(this,\'smD\')"></td><td><input class="vi" id="vmDA" type="number" step=".01"></td><td id="smD">—</td></tr><tr><td>Motor NDE</td><td><input class="vi" id="vmNV" type="number" step=".01"></td><td><input class="vi" id="vmNH" type="number" step=".01" oninput="chkV(this,\'smN\')"></td><td></td><td id="smN">—</td></tr><tr><td>Pump DE</td><td><input class="vi" id="vpDV" type="number" step=".01"></td><td><input class="vi" id="vpDH" type="number" step=".01" oninput="chkV(this,\'spD\')"></td><td><input class="vi" id="vpDA" type="number" step=".01"></td><td id="spD">—</td></tr><tr><td>Pump NDE</td><td><input class="vi" id="vpNV" type="number" step=".01"></td><td><input class="vi" id="vpNH" type="number" step=".01"></td><td></td><td>—</td></tr></tbody></table></div>'+
@@ -237,7 +272,7 @@ el.innerHTML='<div class="card"><div class="st" style="margin-bottom:14px">📋 
 const tb=E('ckb');S.ci.forEach(i=>{const tr=document.createElement('tr');tr.innerHTML='<td style="font-weight:500">'+i.l+'</td><td style="color:var(--text3);font-size:12px">'+i.c+'</td><td><div style="display:flex;gap:4px"><button class="cb" onclick="setCk(\''+i.k+'\',\'ok\',this)">OK</button><button class="cb" onclick="setCk(\''+i.k+'\',\'nok\',this)">NOK</button><button class="cb" onclick="setCk(\''+i.k+'\',\'na\',this)">N/A</button></div></td><td id="c_'+i.k+'">—</td>';tb.appendChild(tr);});}
 function onTg(){const t=E('f-tag')?.value,eq=S.eq.find(e=>e.tag===t);if(!eq)return;E('f-bde').value=eq.de||'';E('f-bnde').value=eq.nde||'';}
 function setCk(k,v,b){S.cf.ck[k]=v;b.closest('div').querySelectorAll('.cb').forEach(x=>x.className='cb');b.className='cb '+v;const m={ok:'<span class="badge b-ok">OK</span>',nok:'<span class="badge b-nk">NOK</span>',na:'<span class="badge b-no">N/A</span>'};const el=E('c_'+k);if(el)el.innerHTML=m[v]||'—';}
-function chkV(inp,sid){const t=E('f-tag')?.value,eq=S.eq.find(e=>e.tag===t),al=eq?.val||4.5,da=eq?.vda||7.1,v=parseFloat(inp.value)||0;inp.className='vi'+(v>=da?' danger':v>=al?' alarm':'');const s=E(sid);if(s)s.innerHTML=v>=da?'<span class="badge b-nk">Danger</span>':v>=al?'<span class="badge b-al">Alarm</span>':'<span class="badge b-ok">Normal</span>';}
+function chkV(inp,sid){const t=E('f-tag')?.value,eq=S.eq.find(e=>e.tag===t),al=eqAl(eq),da=eqDa(eq),v=parseFloat(inp.value)||0;inp.className='vi'+(v>=da?' danger':v>=al?' alarm':'');const s=E(sid);if(s)s.innerHTML=v>=da?'<span class="badge b-nk">Danger</span>':v>=al?'<span class="badge b-al">Alarm</span>':'<span class="badge b-ok">Normal</span>';}
 function selS(n,el){document.querySelectorAll('.so').forEach(b=>b.className='so');el.className='so s'+n;S.cf.sev=String(n);E('f-sev').value=n;}
 async function saveR(){const tag=E('f-tag')?.value;if(!tag){toast('เลือก Equipment Tag','error');return;}const btn=E('svb');btn.disabled=true;btn.textContent='⏳ Saving...';const gv=id=>parseFloat(E(id)?.value)||0;
 const rec={date:E('f-dt').value,wo:E('f-wo').value,tag,purp:E('f-pu').value,insp:E('f-ins').value,appr:E('f-app').value,ck:{...S.cf.ck},
@@ -248,86 +283,110 @@ st:{irUV:gv('irUV'),irVW:gv('irVW'),irWU:gv('irWU'),irG:gv('irG'),pi:gv('irPI'),
 sev:E('f-sev').value||'5',res:E('f-res').value,ts:firebase.firestore.FieldValue.serverTimestamp(),by:S.usr?.email||''};
 try{const ref=await db.collection('records').add(rec);S.rec.unshift({id:ref.id,...rec});ub();toast('บันทึก '+tag+' สำเร็จ ✓');pgCheck(E('content'));}catch(e){toast('Error: '+e.message,'error');btn.disabled=false;btn.textContent='✓ Save';}}
 
-// ══════════ HISTORY ══════════
+// ══════════ HISTORY (with Delete) ══════════
 function pgHist(el){el.innerHTML='<div class="card"><div class="sh"><div class="st">PM Records ('+S.rec.length+')</div><select class="fs" id="htag" style="width:150px" onchange="apH()"><option value="">All</option>'+S.eq.map(e=>'<option value="'+e.tag+'">'+e.tag+'</option>').join('')+'</select></div><div style="overflow-x:auto"><table class="ht"><thead><tr><th>Date</th><th>WO</th><th>Tag</th><th>Brg DE</th><th>Pump DE-H</th><th>Severity</th><th></th></tr></thead><tbody id="htb"></tbody></table></div></div>';apH();}
-function apH(){const f=E('htag')?.value||'';let rs=[...S.rec].sort((a,b)=>b.date.localeCompare(a.date));if(f)rs=rs.filter(r=>r.tag===f);const tb=E('htb');if(!tb)return;tb.innerHTML='';rs.forEach(r=>{const eq=S.eq.find(e=>e.tag===r.tag),p=r.vib?.pDH||0,al=p>=(eq?.val||4.5),da=p>=(eq?.vda||7.1);tb.innerHTML+='<tr><td class="mono">'+r.date+'</td><td class="mono" style="color:var(--text3)">'+(r.wo||'—')+'</td><td style="font-weight:600">'+r.tag+'</td><td style="font-size:12px;color:var(--text3)">'+(r.brg?.de||'—')+'</td><td><span class="mono">'+p.toFixed(2)+'</span> <span class="badge '+(da?'b-nk':al?'b-al':'b-ok')+'">'+(da?'Danger':al?'Alarm':'OK')+'</span></td><td style="font-size:11px;color:'+(S.sc[r.sev]||'')+'">● '+(S.sl[r.sev]||'—')+'</td><td><button class="btn btn-sm btn-p" onclick="showD(\''+r.id+'\')">View</button></td></tr>';});if(!rs.length)tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text3)">No records</td></tr>';}
+function apH(){const f=E('htag')?.value||'';let rs=[...S.rec].sort((a,b)=>b.date.localeCompare(a.date));if(f)rs=rs.filter(r=>r.tag===f);const tb=E('htb');if(!tb)return;tb.innerHTML='';rs.forEach(r=>{const eq=S.eq.find(e=>e.tag===r.tag),p=r.vib?.pDH||0,al=p>=eqAl(eq),da=p>=eqDa(eq);tb.innerHTML+='<tr><td class="mono">'+r.date+'</td><td class="mono" style="color:var(--text3)">'+(r.wo||'—')+'</td><td style="font-weight:600">'+r.tag+'</td><td style="font-size:12px;color:var(--text3)">'+(r.brg?.de||eq?.de||'—')+'</td><td><span class="mono">'+p.toFixed(2)+'</span> <span class="badge '+(da?'b-nk':al?'b-al':'b-ok')+'">'+(da?'Danger':al?'Alarm':'OK')+'</span></td><td style="font-size:11px;color:'+(S.sc[r.sev]||'')+'">● '+(S.sl[r.sev]||'—')+'</td><td><div style="display:flex;gap:4px"><button class="btn btn-sm btn-p" onclick="showD(\''+r.id+'\')">View</button><button class="btn btn-sm btn-d" onclick="delRec(\''+r.id+'\')">Del</button></div></td></tr>';});if(!rs.length)tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text3)">No records</td></tr>';}
+
+// ══════════ DELETE RECORD ══════════
+async function delRec(id){const r=S.rec.find(x=>x.id===id);if(!r)return;if(!confirm('ลบ record '+r.tag+' ('+r.date+') ?\nการลบจะไม่สามารถกู้คืนได้'))return;try{await db.collection('records').doc(id).delete();S.rec=S.rec.filter(x=>x.id!==id);ub();apH();toast('ลบเรียบร้อย','warning');}catch(e){toast('Error: '+e.message,'error');}}
 
 // ══════════ DETAIL MODAL (FULL) ══════════
 function showD(id){
 const r=S.rec.find(x=>x.id===id);if(!r)return;
-const eq=S.eq.find(e=>e.tag===r.tag),p=r.vib?.pDH||0,al=eq?.val||4.5,da=eq?.vda||7.1;
+const eq=S.eq.find(e=>e.tag===r.tag),p=r.vib?.pDH||0,al=eqAl(eq),da=eqDa(eq);
 const bst=c=>c==='ok'?'<span class="badge b-ok">OK</span>':c==='alarm'?'<span class="badge b-al">Alarm</span>':'<span class="badge b-nk">NOK</span>';
 const vst=v=>v>=da?'<b style="color:var(--red)">'+v+' ⛔</b>':v>=al?'<b style="color:var(--amber)">'+v+' ⚠</b>':'<b>'+v+'</b>';
 const ckst=v=>v==='ok'?'<span class="badge b-ok">OK</span>':v==='nok'?'<span class="badge b-nk">NOK</span>':v==='na'?'<span class="badge b-no">N/A</span>':'—';
+// support both old field names (checks/inspector/approver/results/purpose) and new (ck/insp/appr/res/purp)
+const ck=r.ck||r.checks||{};
+const insp=r.insp||r.inspector||'—';
+const appr=r.appr||r.approver||'—';
+const res=r.res||r.results||'—';
+const purp=r.purp||r.purpose||'PM';
+const sev=r.sev||r.severity||'5';
+
 E('mdett').textContent='PM Record — '+r.tag+' | '+fd(r.date);
 let h='<div style="text-align:center;font-size:16px;font-weight:600;margin-bottom:4px">'+(S.set.logoLine1||'PM Inspection')+'</div><div style="text-align:center;font-size:12px;color:var(--text3);margin-bottom:16px">'+(S.set.logoLine2||'TCC Plant GEN')+' | '+(S.set.co||'')+' | '+(S.set.plant||'')+'</div>';
-// Work Order
 h+='<div class="sec-h">📋 Work Order Info</div>';
 h+='<div class="dl"><span class="dl-l">Date</span><span class="dl-v">'+fd(r.date)+'</span></div>';
 h+='<div class="dl"><span class="dl-l">Work Order No.</span><span class="dl-v">'+(r.wo||'—')+'</span></div>';
 h+='<div class="dl"><span class="dl-l">Equipment Tag</span><span class="dl-v" style="font-weight:600">'+r.tag+'</span></div>';
-h+='<div class="dl"><span class="dl-l">Module</span><span class="dl-v">'+(eq?.mod||'—')+'</span></div>';
-h+='<div class="dl"><span class="dl-l">Purpose</span><span class="dl-v"><span class="badge b-in">'+(r.purp||'PM')+'</span></span></div>';
-h+='<div class="dl"><span class="dl-l">Inspector</span><span class="dl-v">'+(r.insp||'—')+'</span></div>';
-h+='<div class="dl"><span class="dl-l">Approved by</span><span class="dl-v">'+(r.appr||'—')+'</span></div>';
-// Machine
+h+='<div class="dl"><span class="dl-l">Module</span><span class="dl-v">'+(eq?.module||eq?.mod||'—')+'</span></div>';
+h+='<div class="dl"><span class="dl-l">Purpose</span><span class="dl-v"><span class="badge b-in">'+purp+'</span></span></div>';
+h+='<div class="dl"><span class="dl-l">Inspector</span><span class="dl-v">'+insp+'</span></div>';
+h+='<div class="dl"><span class="dl-l">Approved by</span><span class="dl-v">'+appr+'</span></div>';
 h+='<div class="sec-h">⊞ Machine Data</div>';
 h+='<div class="dl"><span class="dl-l">Manufacturer / S.N.</span><span class="dl-v">'+(eq?.mfg||'—')+' / '+(eq?.sn||'—')+'</span></div>';
-h+='<div class="dl"><span class="dl-l">Power / Volts / Amps / RPM</span><span class="dl-v">'+(eq?.pwr||'—')+' HP | '+(eq?.vol||'—')+' | '+(eq?.amp||'—')+' | '+(eq?.spd||'—')+'</span></div>';
-// Bearing
+h+='<div class="dl"><span class="dl-l">Power / Volts / Amps / RPM</span><span class="dl-v">'+(eq?.power||eq?.pwr||'—')+' HP | '+(eq?.volts||eq?.vol||'—')+' | '+(eq?.amps||eq?.amp||'—')+' | '+(eq?.speed||eq?.spd||'—')+'</span></div>';
+h+='<div class="dl"><span class="dl-l">Weight / Freq / Ins / Duty</span><span class="dl-v">'+(eq?.weight||'—')+' LBS | '+(eq?.freq||'—')+' Hz | '+(eq?.ins||'—')+' | '+(eq?.duty||'—')+'</span></div>';
+h+='<div class="dl"><span class="dl-l">Load Type / Location</span><span class="dl-v">'+(eq?.loadtype||'—')+' / '+(eq?.location||'—')+'</span></div>';
 h+='<div class="sec-h">🔩 Bearing</div>';
-h+='<div class="dl"><span class="dl-l">DE — '+(r.brg?.de||'—')+'</span><span class="dl-v">'+bst(r.brg?.deC)+'</span></div>';
-h+='<div class="dl"><span class="dl-l">NDE — '+(r.brg?.nde||'—')+'</span><span class="dl-v">'+bst(r.brg?.ndeC)+'</span></div>';
-// General Inspection
+h+='<div class="dl"><span class="dl-l">DE — '+(r.brg?.de||eq?.de||'—')+'</span><span class="dl-v">'+bst(r.brg?.deC)+'</span></div>';
+h+='<div class="dl"><span class="dl-l">NDE — '+(r.brg?.nde||eq?.nde||'—')+'</span><span class="dl-v">'+bst(r.brg?.ndeC)+'</span></div>';
 h+='<div class="sec-h">🔍 General Inspection</div>';
-S.ci.forEach(i=>{h+='<div class="dl"><span class="dl-l">'+i.l+'</span><span class="dl-v">'+ckst(r.ck?.[i.k])+'</span></div>';});
-// Vibration
+S.ci.forEach(i=>{h+='<div class="dl"><span class="dl-l">'+i.l+'</span><span class="dl-v">'+ckst(ck[i.k])+'</span></div>';});
 h+='<div class="sec-h">〰 Vibration (mm/s)</div>';
-h+='<div class="dl"><span class="dl-l">Motor DE — V / H / A</span><span class="dl-v">'+(r.vib?.mDV||0)+' / '+vst(r.vib?.mDH||0)+' / '+(r.vib?.mDA||0)+'</span></div>';
-h+='<div class="dl"><span class="dl-l">Motor NDE — V / H</span><span class="dl-v">'+(r.vib?.mNV||0)+' / '+(r.vib?.mNH||0)+'</span></div>';
-h+='<div class="dl"><span class="dl-l">Pump DE — V / H / A</span><span class="dl-v">'+(r.vib?.pDV||0)+' / '+vst(r.vib?.pDH||0)+' / '+(r.vib?.pDA||0)+'</span></div>';
-h+='<div class="dl"><span class="dl-l">Pump NDE — V / H</span><span class="dl-v">'+(r.vib?.pNV||0)+' / '+(r.vib?.pNH||0)+'</span></div>';
-// Electrical
+// support old field names (mDeV etc) and new (mDV etc)
+const vb=r.vib||{};
+const mDV=vb.mDV??vb.mDeV??0, mDH=vb.mDH??vb.mDeH??0, mDA=vb.mDA??vb.mDeA??0;
+const mNV=vb.mNV??vb.mNdeV??0, mNH=vb.mNH??vb.mNdeH??0;
+const pDV=vb.pDV??vb.pDeV??0, pDH=vb.pDH??vb.pDeH??0, pDA=vb.pDA??vb.pDeA??0;
+const pNV=vb.pNV??vb.pNdeV??0, pNH=vb.pNH??vb.pNdeH??0;
+h+='<div class="dl"><span class="dl-l">Motor DE — V / H / A</span><span class="dl-v">'+mDV+' / '+vst(mDH)+' / '+mDA+'</span></div>';
+h+='<div class="dl"><span class="dl-l">Motor NDE — V / H</span><span class="dl-v">'+mNV+' / '+mNH+'</span></div>';
+h+='<div class="dl"><span class="dl-l">Pump DE — V / H / A</span><span class="dl-v">'+pDV+' / '+vst(pDH)+' / '+pDA+'</span></div>';
+h+='<div class="dl"><span class="dl-l">Pump NDE — V / H</span><span class="dl-v">'+pNV+' / '+pNH+'</span></div>';
 h+='<div class="sec-h">⚡ Voltage & Current</div>';
-h+='<div class="dl"><span class="dl-l">Current (A) — U / V / W</span><span class="dl-v">'+(r.el?.cu||0)+' / '+(r.el?.cv||0)+' / '+(r.el?.cw||0)+'</span></div>';
-h+='<div class="dl"><span class="dl-l">Voltage (V) — U / V / W</span><span class="dl-v">'+(r.el?.vu||0)+' / '+(r.el?.vv||0)+' / '+(r.el?.vw||0)+'</span></div>';
-// Static Test
+const el2=r.el||r.elec||{};
+h+='<div class="dl"><span class="dl-l">Current (A) — U / V / W</span><span class="dl-v">'+(el2.cu||0)+' / '+(el2.cv||0)+' / '+(el2.cw||0)+'</span></div>';
+h+='<div class="dl"><span class="dl-l">Voltage (V) — U / V / W</span><span class="dl-v">'+(el2.vu||0)+' / '+(el2.vv||0)+' / '+(el2.vw||0)+'</span></div>';
 h+='<div class="sec-h">🧪 Electrical Static Test</div>';
-h+='<div class="dl"><span class="dl-l">IR (MΩ) — UV / VW / WU</span><span class="dl-v">'+(r.st?.irUV||'—')+' / '+(r.st?.irVW||'—')+' / '+(r.st?.irWU||'—')+'</span></div>';
-h+='<div class="dl"><span class="dl-l">IR UVW-G</span><span class="dl-v">'+(r.st?.irG||'—')+'</span></div>';
-h+='<div class="dl"><span class="dl-l">PI Ratio (R10/R1)</span><span class="dl-v">'+(r.st?.pi||'—')+'</span></div>';
-h+='<div class="dl"><span class="dl-l">WR (Ω) — U / V / W</span><span class="dl-v">'+(r.st?.wrU||'—')+' / '+(r.st?.wrV||'—')+' / '+(r.st?.wrW||'—')+'</span></div>';
-h+='<div class="dl"><span class="dl-l">WR Unbalance</span><span class="dl-v">'+(r.st?.wrUn||'—')+' %</span></div>';
-h+='<div class="dl"><span class="dl-l">WI (mH) — U / V / W</span><span class="dl-v">'+(r.st?.wiU||'—')+' / '+(r.st?.wiV||'—')+' / '+(r.st?.wiW||'—')+'</span></div>';
-h+='<div class="dl"><span class="dl-l">WI Unbalance</span><span class="dl-v">'+(r.st?.wiUn||'—')+' %</span></div>';
-// Results & Severity
+const st2=r.st||{};
+h+='<div class="dl"><span class="dl-l">IR (MΩ) — UV / VW / WU</span><span class="dl-v">'+(st2.irUV||'—')+' / '+(st2.irVW||'—')+' / '+(st2.irWU||'—')+'</span></div>';
+h+='<div class="dl"><span class="dl-l">IR UVW-G</span><span class="dl-v">'+(st2.irG||'—')+'</span></div>';
+h+='<div class="dl"><span class="dl-l">PI Ratio (R10/R1)</span><span class="dl-v">'+(st2.pi||'—')+'</span></div>';
+h+='<div class="dl"><span class="dl-l">WR (Ω) — U / V / W</span><span class="dl-v">'+(st2.wrU||'—')+' / '+(st2.wrV||'—')+' / '+(st2.wrW||'—')+'</span></div>';
+h+='<div class="dl"><span class="dl-l">WR Unbalance</span><span class="dl-v">'+(st2.wrUn||'—')+' %</span></div>';
+h+='<div class="dl"><span class="dl-l">WI (mH) — U / V / W</span><span class="dl-v">'+(st2.wiU||'—')+' / '+(st2.wiV||'—')+' / '+(st2.wiW||'—')+'</span></div>';
+h+='<div class="dl"><span class="dl-l">WI Unbalance</span><span class="dl-v">'+(st2.wiUn||'—')+' %</span></div>';
 h+='<div class="sec-h">📝 Results & Severity</div>';
-h+='<div class="dl"><span class="dl-l">Severity</span><span class="dl-v" style="color:'+(S.sc[r.sev]||'')+'">● '+(S.sl[r.sev]||'—')+'</span></div>';
-h+='<div style="font-size:13px;color:var(--text2);white-space:pre-line;margin-top:8px;padding:10px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border)">'+(r.res||'—')+'</div>';
+h+='<div class="dl"><span class="dl-l">Severity</span><span class="dl-v" style="color:'+(S.sc[sev]||'')+'">● '+(S.sl[sev]||'—')+'</span></div>';
+h+='<div style="font-size:13px;color:var(--text2);white-space:pre-line;margin-top:8px;padding:10px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border)">'+res+'</div>';
 E('mdetb').innerHTML=h;om('mdet');}
 
-// ══════════ EXPORT PDF ══════════
 function exportPDF(){window.print();}
+function printDash(){
+// Temporarily hide sidebar/topbar, print only content area
+const sb=document.querySelector('.sidebar'),tb=document.querySelector('.topbar');
+if(sb)sb.style.display='none';if(tb)tb.style.display='none';
+window.print();
+if(sb)sb.style.display='';if(tb)tb.style.display='';
+}
 
 // ══════════ TRENDS ══════════
 let tc1,tc2,tc3;
 function pgTrend(el){el.innerHTML='<div class="card"><div class="sh"><div class="st">Trend Analysis</div><select class="fs" id="trt" style="width:180px" onchange="drTr()">'+S.eq.map(e=>'<option value="'+e.tag+'">'+e.tag+'</option>').join('')+'</select></div><div class="itab"><div class="it active" onclick="trT(\'v\',this)">Vibration</div><div class="it" onclick="trT(\'e\',this)">Electrical</div></div><div id="trv"><div class="cw" style="height:300px"><canvas id="tcv"></canvas></div></div><div id="tre" style="display:none"><div class="g2" style="gap:16px"><div class="cw" style="height:220px"><canvas id="tcc"></canvas></div><div class="cw" style="height:220px"><canvas id="tcu"></canvas></div></div></div></div>';drTr();}
 function trT(t,el){document.querySelectorAll('.it').forEach(b=>b.classList.remove('active'));el.classList.add('active');E('trv').style.display=t==='v'?'':'none';E('tre').style.display=t==='e'?'':'none';if(t==='e')drTr();}
-function drTr(){const tg=E('trt')?.value||S.eq[0]?.tag,rs=S.rec.filter(r=>r.tag===tg).sort((a,b)=>a.date.localeCompare(b.date)),lb=rs.map(r=>r.date),eq=S.eq.find(e=>e.tag===tg),al=eq?.val||4.5,da2=eq?.vda||7.1;const co=t=>({responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:10}},title:{display:!!t,text:t,color:'#8b949e',font:{size:11}}},scales:{y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}}});
-if(tc1)tc1.destroy();if(E('tcv'))tc1=new Chart(E('tcv'),{type:'line',data:{labels:lb,datasets:[{label:'Pump DE-H',data:rs.map(r=>r.vib?.pDH||0),borderColor:'#d29922',pointRadius:5,tension:.3,borderWidth:2},{label:'Motor DE-H',data:rs.map(r=>r.vib?.mDH||0),borderColor:'#58a6ff',pointRadius:5,tension:.3,borderWidth:2},{label:'Alarm',data:rs.map(()=>al),borderColor:'rgba(210,153,34,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5},{label:'Danger',data:rs.map(()=>da2),borderColor:'rgba(248,81,73,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5}]},options:co('')});
-if(tc2)tc2.destroy();if(E('tcc'))tc2=new Chart(E('tcc'),{type:'line',data:{labels:lb,datasets:[{label:'U',data:rs.map(r=>r.el?.cu||0),borderColor:'#3fb950',pointRadius:4,tension:.3,borderWidth:2},{label:'V',data:rs.map(r=>r.el?.cv||0),borderColor:'rgba(63,185,80,.5)',pointRadius:4,tension:.3,borderWidth:1.5},{label:'W',data:rs.map(r=>r.el?.cw||0),borderColor:'rgba(63,185,80,.3)',pointRadius:4,tension:.3,borderWidth:1.5}]},options:co('Current (A)')});
-if(tc3)tc3.destroy();if(E('tcu'))tc3=new Chart(E('tcu'),{type:'line',data:{labels:lb,datasets:[{label:'U',data:rs.map(r=>r.el?.vu||0),borderColor:'#bc8cff',pointRadius:4,tension:.3,borderWidth:2},{label:'V',data:rs.map(r=>r.el?.vv||0),borderColor:'rgba(188,140,255,.5)',pointRadius:4,tension:.3,borderWidth:1.5},{label:'W',data:rs.map(r=>r.el?.vw||0),borderColor:'rgba(188,140,255,.3)',pointRadius:4,tension:.3,borderWidth:1.5}]},options:{...co('Voltage (V)'),scales:{y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}}}});}
+function drTr(){const tg=E('trt')?.value||S.eq[0]?.tag,rs=S.rec.filter(r=>r.tag===tg).sort((a,b)=>a.date.localeCompare(b.date)),lb=rs.map(r=>r.date),eq=S.eq.find(e=>e.tag===tg),al=eqAl(eq),da2=eqDa(eq);const co=t=>({responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:10}},title:{display:!!t,text:t,color:'#8b949e',font:{size:11}}},scales:{y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}}});
+const gp=r=>{const v=r.vib||{};return v.pDH??v.pDeH??0;};const gm=r=>{const v=r.vib||{};return v.mDH??v.mDeH??0;};
+if(tc1)tc1.destroy();if(E('tcv'))tc1=new Chart(E('tcv'),{type:'line',data:{labels:lb,datasets:[{label:'Pump DE-H',data:rs.map(gp),borderColor:'#d29922',pointRadius:5,tension:.3,borderWidth:2},{label:'Motor DE-H',data:rs.map(gm),borderColor:'#58a6ff',pointRadius:5,tension:.3,borderWidth:2},{label:'Alarm',data:rs.map(()=>al),borderColor:'rgba(210,153,34,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5},{label:'Danger',data:rs.map(()=>da2),borderColor:'rgba(248,81,73,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5}]},options:co('')});
+const gc=(r,k)=>{const e=r.el||r.elec||{};return e[k]||0;};
+if(tc2)tc2.destroy();if(E('tcc'))tc2=new Chart(E('tcc'),{type:'line',data:{labels:lb,datasets:[{label:'U',data:rs.map(r=>gc(r,'cu')),borderColor:'#3fb950',pointRadius:4,tension:.3,borderWidth:2},{label:'V',data:rs.map(r=>gc(r,'cv')),borderColor:'rgba(63,185,80,.5)',pointRadius:4,tension:.3,borderWidth:1.5},{label:'W',data:rs.map(r=>gc(r,'cw')),borderColor:'rgba(63,185,80,.3)',pointRadius:4,tension:.3,borderWidth:1.5}]},options:co('Current (A)')});
+if(tc3)tc3.destroy();if(E('tcu'))tc3=new Chart(E('tcu'),{type:'line',data:{labels:lb,datasets:[{label:'U',data:rs.map(r=>gc(r,'vu')),borderColor:'#bc8cff',pointRadius:4,tension:.3,borderWidth:2},{label:'V',data:rs.map(r=>gc(r,'vv')),borderColor:'rgba(188,140,255,.5)',pointRadius:4,tension:.3,borderWidth:1.5},{label:'W',data:rs.map(r=>gc(r,'vw')),borderColor:'rgba(188,140,255,.3)',pointRadius:4,tension:.3,borderWidth:1.5}]},options:{...co('Voltage (V)'),scales:{y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}}}});}
 
 // ══════════ EQUIPMENT ══════════
 function pgEq(el){el.innerHTML='';const hd=document.createElement('div');hd.className='sh';hd.style.marginBottom='16px';hd.innerHTML='<div class="st">Equipment ('+S.eq.length+')</div><button class="btn btn-p" onclick="addEq()">+ Add</button>';el.appendChild(hd);
-S.eq.forEach(eq=>{const rs=S.rec.filter(r=>r.tag===eq.tag),la=[...rs].sort((a,b)=>b.date.localeCompare(a.date))[0],p=la?.vib?.pDH||0,al=p>=(eq.val||4.5),da=p>=(eq.vda||7.1),dc=!la?'d-x':da?'d-r':al?'d-a':'d-g';
-const d=document.createElement('div');d.className='eq-i';d.innerHTML='<div class="eq-av">'+eq.tag.slice(-3)+'</div><div style="flex:1"><div style="font-size:14px;font-weight:600"><span class="dot '+dc+'" style="margin-right:7px"></span>'+eq.tag+'</div><div style="font-size:11px;color:var(--text3);margin-top:2px">'+eq.mod+' | '+eq.mfg+' | '+eq.pwr+' HP | '+eq.vol+'</div><div style="font-size:11px;color:var(--text3);margin-top:2px">🔩 DE:<b>'+eq.de+'</b> NDE:<b>'+eq.nde+'</b> | Records: '+rs.length+'</div></div><div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="editEq(\''+eq.tag+'\')">Edit</button><button class="btn btn-sm btn-d" onclick="delEq(\''+eq.tag+'\')">Del</button></div>';el.appendChild(d);});}
-function addEq(){E('meqt').textContent='Add Equipment';['eq-tag','eq-mod','eq-mfg','eq-sn','eq-pwr','eq-vol','eq-amp','eq-spd','eq-de','eq-nde'].forEach(id=>{if(E(id))E(id).value='';});E('eq-val').value='4.5';E('eq-vda').value='7.1';om('meq');}
-function editEq(t){const eq=S.eq.find(e=>e.tag===t);if(!eq)return;E('meqt').textContent='Edit — '+t;const m={tag:'eq-tag',mod:'eq-mod',mfg:'eq-mfg',sn:'eq-sn',pwr:'eq-pwr',vol:'eq-vol',amp:'eq-amp',spd:'eq-spd',de:'eq-de',nde:'eq-nde'};Object.entries(m).forEach(([k,id])=>{if(E(id))E(id).value=eq[k]||'';});E('eq-val').value=eq.val||4.5;E('eq-vda').value=eq.vda||7.1;om('meq');}
-async function saveEq(){const t=E('eq-tag').value.trim();if(!t){toast('Tag required','error');return;}const o={tag:t,mod:E('eq-mod').value,mfg:E('eq-mfg').value,sn:E('eq-sn').value,pwr:E('eq-pwr').value,vol:E('eq-vol').value,amp:E('eq-amp').value,spd:E('eq-spd').value,de:E('eq-de').value,nde:E('eq-nde').value,val:parseFloat(E('eq-val').value)||4.5,vda:parseFloat(E('eq-vda').value)||7.1};try{await db.collection('equipment').doc(t).set(o);const i=S.eq.findIndex(e=>e.tag===t);if(i>=0)S.eq[i]=o;else S.eq.push(o);cm('meq');pgEq(E('content'));toast(t+' saved');}catch(e){toast('Error: '+e.message,'error');}}
+S.eq.forEach(eq=>{const rs=S.rec.filter(r=>r.tag===eq.tag),la=[...rs].sort((a,b)=>b.date.localeCompare(a.date))[0],p=la?(la.vib?.pDH??la.vib?.pDeH??0):0,al=p>=eqAl(eq),da=p>=eqDa(eq),dc=!la?'d-x':da?'d-r':al?'d-a':'d-g';
+const d=document.createElement('div');d.className='eq-i';d.innerHTML='<div class="eq-av">'+eq.tag.slice(-3)+'</div><div style="flex:1"><div style="font-size:14px;font-weight:600"><span class="dot '+dc+'" style="margin-right:7px"></span>'+eq.tag+'</div><div style="font-size:11px;color:var(--text3);margin-top:2px">'+(eq.module||eq.mod||'')+' | '+eq.mfg+' | '+(eq.power||eq.pwr||'')+' HP | '+(eq.volts||eq.vol||'')+'</div><div style="font-size:11px;color:var(--text3);margin-top:2px">🔩 DE:<b>'+eq.de+'</b> NDE:<b>'+eq.nde+'</b> | '+(eq.loadtype||'')+' | Records: '+rs.length+'</div></div><div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="editEq(\''+eq.tag+'\')">Edit</button><button class="btn btn-sm btn-d" onclick="delEq(\''+eq.tag+'\')">Del</button></div>';el.appendChild(d);});}
+const eqFields=['eq-tag','eq-module','eq-mfg','eq-sn','eq-power','eq-weight','eq-volts','eq-amps','eq-freq','eq-speed','eq-ins','eq-duty','eq-de','eq-nde','eq-loadtype','eq-location'];
+function addEq(){E('meqt').textContent='Add Equipment';eqFields.forEach(id=>{if(E(id))E(id).value='';});E('eq-val').value='4.5';E('eq-vda').value='7.1';om('meq');}
+function editEq(t){const eq=S.eq.find(e=>e.tag===t);if(!eq)return;E('meqt').textContent='Edit — '+t;
+const m={tag:'eq-tag',module:'eq-module',mfg:'eq-mfg',sn:'eq-sn',power:'eq-power',weight:'eq-weight',volts:'eq-volts',amps:'eq-amps',freq:'eq-freq',speed:'eq-speed',ins:'eq-ins',duty:'eq-duty',de:'eq-de',nde:'eq-nde',loadtype:'eq-loadtype',location:'eq-location'};
+Object.entries(m).forEach(([k,id])=>{if(E(id))E(id).value=eq[k]||'';});E('eq-val').value=eq.vibAlarm||eq.val||4.5;E('eq-vda').value=eq.vibDanger||eq.vda||7.1;om('meq');}
+async function saveEq(){const t=E('eq-tag').value.trim();if(!t){toast('Tag required','error');return;}const o={tag:t,module:E('eq-module').value,mfg:E('eq-mfg').value,sn:E('eq-sn').value,power:E('eq-power').value,weight:E('eq-weight').value,volts:E('eq-volts').value,amps:E('eq-amps').value,freq:E('eq-freq').value,speed:E('eq-speed').value,ins:E('eq-ins').value,duty:E('eq-duty').value,de:E('eq-de').value,nde:E('eq-nde').value,loadtype:E('eq-loadtype').value,location:E('eq-location').value,vibAlarm:parseFloat(E('eq-val').value)||4.5,vibDanger:parseFloat(E('eq-vda').value)||7.1};try{await db.collection('equipment').doc(t).set(o);const i=S.eq.findIndex(e=>e.tag===t);if(i>=0)S.eq[i]=o;else S.eq.push(o);cm('meq');pgEq(E('content'));toast(t+' saved');}catch(e){toast('Error: '+e.message,'error');}}
 async function delEq(t){if(!confirm('Delete '+t+'?'))return;try{await db.collection('equipment').doc(t).delete();S.eq=S.eq.filter(e=>e.tag!==t);pgEq(E('content'));toast('Deleted '+t,'warning');}catch(e){toast('Error: '+e.message,'error');}}
 
-// ══════════ SETTINGS (editable sidebar text) ══════════
+// ══════════ SETTINGS ══════════
 function pgSet(el){el.innerHTML='<div class="card"><div class="st" style="margin-bottom:16px">⚙ Settings</div><div class="g2" style="gap:12px;margin-bottom:16px"><div class="fg"><label class="fl">Company</label><input class="fi" id="sco" value="'+(S.set.co||'')+'"></div><div class="fg"><label class="fl">Plant</label><input class="fi" id="spl" value="'+(S.set.plant||'')+'"></div><div class="fg"><label class="fl">Area</label><input class="fi" id="sar" value="'+(S.set.area||'')+'"></div><div class="fg"><label class="fl">Site</label><input class="fi" id="ssi" value="'+(S.set.site||'')+'"></div><div class="fg"><label class="fl">Default Inspector</label><input class="fi" id="sdi" value="'+(S.set.di||'')+'"></div><div class="fg"><label class="fl">Default Approver</label><input class="fi" id="sda" value="'+(S.set.da||'')+'"></div></div>'+
 '<div style="font-size:12px;font-weight:600;color:var(--text3);margin:8px 0">SIDEBAR BRANDING (มุมบนซ้าย)</div><div class="g3" style="gap:12px;margin-bottom:16px"><div class="fg"><label class="fl">Icon Text</label><input class="fi" id="sli" value="'+(S.set.logoIcon||'PM')+'" maxlength="3" style="width:60px"></div><div class="fg"><label class="fl">Line 1</label><input class="fi" id="sl1" value="'+(S.set.logoLine1||'PM Inspection')+'"></div><div class="fg"><label class="fl">Line 2</label><input class="fi" id="sl2" value="'+(S.set.logoLine2||'TCC Plant GEN')+'"></div></div>'+
 '<button class="btn btn-p" onclick="saveSt()">Save Settings</button></div><div class="card"><div class="st" style="margin-bottom:14px">🗄️ Database</div><div style="font-size:13px;color:var(--text2)">Equipment: <b>'+S.eq.length+'</b> | Records: <b>'+S.rec.length+'</b></div></div>';}
