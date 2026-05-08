@@ -644,10 +644,19 @@ function exportPDF(){window.print();}
 
 // ══════════ ALARM LOG PAGE — Feature 7 ══════════
 function pgAlarmLog(el){
-  el.innerHTML='<div class="card"><div class="sh" style="margin-bottom:14px"><div class="st">🔔 Alarm Log ('+S.alogs.length+')</div><div style="display:flex;gap:6px"><button class="btn btn-sm btn-s" onclick="backfillAlarmLog().then(()=>pgAlarmLog(E('content')))">↺ Re-scan</button><button class="btn btn-sm btn-d" onclick="clearAlarmLog()">Clear All</button></div></div>'+
-  '<div style="overflow-x:auto"><table class="ht"><thead><tr>'+
-  '<th>Date</th><th>Tag</th><th>Location</th><th>Type</th><th>Value</th><th>Limit</th><th>WO</th></tr></thead>'+
-  '<tbody id="alog-tb"></tbody></table></div></div>';
+  // Build header without nested quote conflicts
+  const wrap=document.createElement('div');wrap.className='card';
+  const sh=document.createElement('div');sh.className='sh';sh.style.marginBottom='14px';
+  const title=document.createElement('div');title.className='st';title.textContent='🔔 Alarm Log ('+S.alogs.length+')';
+  const btns=document.createElement('div');btns.style.cssText='display:flex;gap:6px';
+  const bRescan=document.createElement('button');bRescan.className='btn btn-sm btn-s';bRescan.textContent='↺ Re-scan';
+  bRescan.onclick=()=>backfillAlarmLog().then(()=>pgAlarmLog(el));
+  const bClear=document.createElement('button');bClear.className='btn btn-sm btn-d';bClear.textContent='Clear All';
+  bClear.onclick=clearAlarmLog;
+  btns.append(bRescan,bClear);sh.append(title,btns);wrap.appendChild(sh);
+  const tbl=document.createElement('div');tbl.style.overflowX='auto';
+  tbl.innerHTML='<table class="ht"><thead><tr><th>Date</th><th>Tag</th><th>Location</th><th>Type</th><th>Value</th><th>Limit</th><th>WO</th></tr></thead><tbody id="alog-tb"></tbody></table>';
+  wrap.appendChild(tbl);el.innerHTML='';el.appendChild(wrap);
   const tb=E('alog-tb');if(!tb)return;
   if(!S.alogs.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">ยังไม่มี Alarm Log</td></tr>';return;}
   S.alogs.forEach(a=>{const isDa=a.type==='danger';tb.innerHTML+=
