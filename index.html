@@ -3,16 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>PM Inspection System — GPSC</title>
+<title>PM Inspection System</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script>
-const firebaseConfig={apiKey:"AIzaSyAIIFtJVieyqEpLmqqqn6cOqT_VOICuxmw",authDomain:"check-sheet-motor.firebaseapp.com",projectId:"check-sheet-motor",storageBucket:"check-sheet-motor.firebasestorage.app",messagingSenderId:"726291252984",appId:"1:726291252984:web:952912afbe890c4546dd0d"};
-</script>
+<script>const firebaseConfig={apiKey:"AIzaSyAIIFtJVieyqEpLmqqqn6cOqT_VOICuxmw",authDomain:"check-sheet-motor.firebaseapp.com",projectId:"check-sheet-motor",storageBucket:"check-sheet-motor.firebasestorage.app",messagingSenderId:"726291252984",appId:"1:726291252984:web:952912afbe890c4546dd0d"};</script>
 <style>
 :root{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2128;--bg4:#22272e;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);--text:#e6edf3;--text2:#8b949e;--text3:#6e7681;--accent:#58a6ff;--accent2:#1f6feb;--green:#3fb950;--green-bg:rgba(63,185,80,.1);--amber:#d29922;--amber-bg:rgba(210,153,34,.12);--red:#f85149;--red-bg:rgba(248,81,73,.1);--purple:#bc8cff;--font:'IBM Plex Sans Thai',sans-serif;--mono:'IBM Plex Mono',monospace;--r:8px;--rl:12px;--sw:220px}
 *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
@@ -90,12 +87,11 @@ const firebaseConfig={apiKey:"AIzaSyAIIFtJVieyqEpLmqqqn6cOqT_VOICuxmw",authDomai
 .so{padding:10px 14px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:12px;color:var(--text2);transition:all .15s;display:flex;align-items:center;gap:8px}
 .so.s1{border-color:rgba(248,81,73,.5);background:var(--red-bg);color:var(--red)}
 .so.s2{border-color:rgba(210,153,34,.5);background:var(--amber-bg);color:var(--amber)}
-.so.s3{border-color:rgba(88,166,255,.4);background:rgba(88,166,255,.08);color:var(--accent)}
-.so.s4{border-color:rgba(88,166,255,.3);background:rgba(88,166,255,.05);color:var(--accent)}
+.so.s3,.so.s4{border-color:rgba(88,166,255,.4);background:rgba(88,166,255,.08);color:var(--accent)}
 .so.s5{border-color:rgba(63,185,80,.4);background:var(--green-bg);color:var(--green)}
 .mo{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center}
 .mo.open{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rl);width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rl);max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.5)}
 .mh{padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .mb{padding:18px 20px}.mf{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
 .mc-btn{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:2px 6px;border-radius:4px}
@@ -115,12 +111,10 @@ const firebaseConfig={apiKey:"AIzaSyAIIFtJVieyqEpLmqqqn6cOqT_VOICuxmw",authDomai
 .et th{font-size:11px;color:var(--text3);font-weight:500;text-align:center;padding:6px 8px;border-bottom:1px solid var(--border)}
 .et th:first-child{text-align:left}.et td{padding:6px 4px;border-bottom:1px solid var(--border);text-align:center}
 .et td:first-child{text-align:left;font-size:12px;color:var(--text2)}
-.dz{border:2px dashed var(--border2);border-radius:var(--rl);padding:30px;text-align:center;color:var(--text3);cursor:pointer;transition:all .2s}
-.dz:hover,.dz.dg{border-color:var(--accent);background:rgba(88,166,255,.05);color:var(--accent)}
-.ip{max-height:300px;overflow:auto;margin-top:12px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg3)}
-.ip table{width:100%;border-collapse:collapse;font-size:12px}
-.ip th{background:var(--bg4);padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);font-weight:500;color:var(--text3);position:sticky;top:0}
-.ip td{padding:5px 8px;border-bottom:1px solid var(--border);color:var(--text2)}
+.dl{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)}
+.dl-l{color:var(--text3);font-size:12px}.dl-v{font-family:var(--mono);font-size:13px}
+.sec-h{font-size:11px;font-weight:600;color:var(--accent);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.05em}
+@media print{.sidebar,.topbar,.toast-c,.mf,.mh button{display:none!important}.mo{position:static!important;background:none!important}.modal{max-height:none!important;width:100%!important;border:none!important;box-shadow:none!important;border-radius:0!important}.mb{padding:0!important}body{background:#fff!important;color:#000!important}*{color:#000!important;border-color:#ccc!important}.badge{border:1px solid #999!important}.dl{border-color:#ddd!important}.sec-h{color:#1a5fb4!important}}
 @media(max-width:900px){.metric-row{grid-template-columns:1fr 1fr}.g3,.g4{grid-template-columns:1fr 1fr}.sidebar{display:none}}
 </style>
 </head>
@@ -137,7 +131,7 @@ const firebaseConfig={apiKey:"AIzaSyAIIFtJVieyqEpLmqqqn6cOqT_VOICuxmw",authDomai
 </div></div>
 <div class="app" id="main-app" style="display:none">
 <aside class="sidebar">
-  <div class="sidebar-logo"><div class="logo-badge"><div class="logo-i">PM</div><div><div style="font-size:13px;font-weight:600;line-height:1.2">PM Inspection</div><div style="font-size:10px;color:var(--text3)">TCC Plant GEN</div></div></div></div>
+  <div class="sidebar-logo"><div class="logo-badge"><div class="logo-i" id="logo-icon">PM</div><div><div style="font-size:13px;font-weight:600;line-height:1.2" id="logo-line1">PM Inspection</div><div style="font-size:10px;color:var(--text3)" id="logo-line2">TCC Plant GEN</div></div></div></div>
   <nav class="sidebar-nav">
     <div class="nav-s">Overview</div>
     <div class="nav-i active" id="nav-dashboard" onclick="go('dashboard',this)"><span class="nav-ic">◈</span> Dashboard</div>
@@ -146,8 +140,7 @@ const firebaseConfig={apiKey:"AIzaSyAIIFtJVieyqEpLmqqqn6cOqT_VOICuxmw",authDomai
     <div class="nav-i" id="nav-checksheet" onclick="go('checksheet',this)"><span class="nav-ic">✎</span> PM Check Sheet</div>
     <div class="nav-i" id="nav-history" onclick="go('history',this)"><span class="nav-ic">☰</span> PM History</div>
     <div class="nav-i" id="nav-trends" onclick="go('trends',this)"><span class="nav-ic">↗</span> Trends</div>
-    <div class="nav-s">Data</div>
-    <div class="nav-i" id="nav-import" onclick="go('import',this)"><span class="nav-ic">⬆</span> Import Excel</div>
+    <div class="nav-s">Master Data</div>
     <div class="nav-i" id="nav-equipment" onclick="go('equipment',this)"><span class="nav-ic">⊞</span> Equipment</div>
     <div class="nav-i" id="nav-settings" onclick="go('settings',this)"><span class="nav-ic">⚙</span> Settings</div>
   </nav>
@@ -155,9 +148,8 @@ const firebaseConfig={apiKey:"AIzaSyAIIFtJVieyqEpLmqqqn6cOqT_VOICuxmw",authDomai
   <div class="sidebar-clock" id="sclock"></div>
 </aside>
 <div class="main">
-  <div class="topbar"><div><div style="font-size:15px;font-weight:600" id="ptitle">Dashboard</div><div style="font-size:12px;color:var(--text3)">GEN-Phase1-Water › <span id="pbc">Overview</span></div></div>
+  <div class="topbar"><div><div style="font-size:15px;font-weight:600" id="ptitle">Dashboard</div><div style="font-size:12px;color:var(--text3)"><span id="pplant">GEN-Phase1-Water</span> › <span id="pbc">Overview</span></div></div>
     <div class="topbar-right"><div class="topbar-date" id="tdate"></div>
-      <button class="btn btn-sm" onclick="go('import',E('nav-import'))">⬆ Import</button>
       <button class="btn btn-sm btn-p" onclick="go('checksheet',E('nav-checksheet'))">+ New PM</button>
       <button class="btn btn-sm btn-d" onclick="doLogout()">Logout</button>
     </div>
@@ -165,8 +157,8 @@ const firebaseConfig={apiKey:"AIzaSyAIIFtJVieyqEpLmqqqn6cOqT_VOICuxmw",authDomai
   <div class="content" id="content"></div>
 </div>
 </div>
-<!-- MODALS -->
-<div class="mo" id="meq"><div class="modal"><div class="mh"><div style="font-size:15px;font-weight:600" id="meqt">Add Equipment</div><button class="mc-btn" onclick="cm('meq')">✕</button></div>
+<!-- Equipment Modal -->
+<div class="mo" id="meq"><div class="modal" style="width:600px"><div class="mh"><div style="font-size:15px;font-weight:600" id="meqt">Add Equipment</div><button class="mc-btn" onclick="cm('meq')">✕</button></div>
 <div class="mb"><div class="g2" style="gap:12px;margin-bottom:12px">
 <div class="fg"><label class="fl">Tag No.*</label><input class="fi" id="eq-tag"></div>
 <div class="fg"><label class="fl">Module for</label><input class="fi" id="eq-mod"></div>
@@ -179,56 +171,45 @@ const firebaseConfig={apiKey:"AIzaSyAIIFtJVieyqEpLmqqqn6cOqT_VOICuxmw",authDomai
 </div>
 <div style="font-size:12px;font-weight:600;color:var(--text3);margin:6px 0 8px">BEARING INFO</div>
 <div class="g2" style="gap:12px;margin-bottom:12px">
-<div class="fg"><label class="fl">DE Bearing (Drive End)</label><input class="fi" id="eq-de" placeholder="65BC03J3OX"></div>
-<div class="fg"><label class="fl">NDE Bearing (Non-Drive End)</label><input class="fi" id="eq-nde" placeholder="65BC03J3OX"></div>
+<div class="fg"><label class="fl">DE Bearing</label><input class="fi" id="eq-de"></div>
+<div class="fg"><label class="fl">NDE Bearing</label><input class="fi" id="eq-nde"></div>
 </div>
 <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">ALARM LIMITS</div>
 <div class="g2" style="gap:12px">
-<div class="fg"><label class="fl">Vibration Alarm (mm/s)</label><input class="fi" id="eq-val" type="number" step="0.1" value="4.5"></div>
-<div class="fg"><label class="fl">Vibration Danger (mm/s)</label><input class="fi" id="eq-vda" type="number" step="0.1" value="7.1"></div>
+<div class="fg"><label class="fl">Vib Alarm (mm/s)</label><input class="fi" id="eq-val" type="number" step="0.1" value="4.5"></div>
+<div class="fg"><label class="fl">Vib Danger (mm/s)</label><input class="fi" id="eq-vda" type="number" step="0.1" value="7.1"></div>
 </div></div>
 <div class="mf"><button class="btn" onclick="cm('meq')">Cancel</button><button class="btn btn-p" onclick="saveEq()">Save</button></div>
 </div></div>
-<div class="mo" id="mdet"><div class="modal" style="width:680px"><div class="mh"><div style="font-size:15px;font-weight:600" id="mdett">PM Record</div><button class="mc-btn" onclick="cm('mdet')">✕</button></div><div class="mb" id="mdetb"></div><div class="mf"><button class="btn" onclick="cm('mdet')">Close</button></div></div></div>
+<!-- Detail Modal (View full record + PDF export) -->
+<div class="mo" id="mdet"><div class="modal" style="width:750px" id="mdet-inner"><div class="mh"><div style="font-size:15px;font-weight:600" id="mdett">PM Record</div><div style="display:flex;gap:8px;align-items:center"><button class="btn btn-sm" onclick="exportPDF()">🖨 Export PDF</button><button class="mc-btn" onclick="cm('mdet')">✕</button></div></div><div class="mb" id="mdetb"></div></div></div>
 <script>
 firebase.initializeApp(firebaseConfig);const auth=firebase.auth(),db=firebase.firestore();
-let S={eq:[],rec:[],set:{di:'',da:'',plant:'4261 GEN-Phase1-Water(23)',co:'426 GEN',area:'Pump room',site:'TCC Plant GEN'},
+let S={eq:[],rec:[],set:{di:'',da:'',plant:'GEN-Phase1-Water',co:'426 GEN',area:'Pump room',site:'TCC Plant GEN',logoIcon:'PM',logoLine1:'PM Inspection',logoLine2:'TCC Plant GEN'},
 ci:[{k:'module',l:'Module condition',c:'Fairly clean, No damage'},{k:'magnetic',l:'Magnetic',c:'No damage, Normal contact'},{k:'lamp',l:'Lamp Status',c:'Fairly clean, No damage'},{k:'terminal',l:'Connection at terminal',c:'Tight and Clean'},{k:'cables',l:'Cables',c:'No damage on insulation'},{k:'switch',l:'Switch',c:'Fairly clean, No damage'},{k:'earth',l:'Earth connection',c:'Tight, Fairly clean'}],
 sl:{1:'Immediate attention',2:'Correct ASAP',3:'Correct at next opportunity',4:'Monitor more frequently',5:'No action required'},
 sc:{1:'#f85149',2:'#d29922',3:'#58a6ff',4:'#58a6ff',5:'#3fb950'},
-cf:{ck:{},sev:'5'},usr:null,imp:null};
-
+cf:{ck:{},sev:'5'},usr:null};
 const E=id=>document.getElementById(id),fd=d=>{if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'})},now=()=>new Date().toISOString().slice(0,10);
 function toast(m,t){const c=E('toasts'),d=document.createElement('div');d.className='toast '+(t==='error'?'er':t==='warning'?'wa':'ok');d.innerHTML='<span>'+({ok:'✓',er:'✕',wa:'⚠'}[d.className.split(' ')[1]]||'✓')+'</span> '+m;c.appendChild(d);setTimeout(()=>d.remove(),3500);}
 function om(id){E(id).classList.add('open')}function cm(id){E(id).classList.remove('open')}
+function applyLogo(){E('logo-icon').textContent=S.set.logoIcon||'PM';E('logo-line1').textContent=S.set.logoLine1||'PM Inspection';E('logo-line2').textContent=S.set.logoLine2||'TCC Plant GEN';E('pplant').textContent=S.set.plant||'';}
 
-// AUTH
 auth.onAuthStateChanged(async u=>{if(u){S.usr=u;E('login-screen').style.display='none';E('main-app').style.display='flex';const i=u.email.slice(0,2).toUpperCase();E('uav').textContent=i;E('uname').textContent=u.displayName||u.email.split('@')[0];E('uemail').textContent=u.email;await loadAll();go('dashboard',E('nav-dashboard'));}else{E('login-screen').style.display='flex';E('main-app').style.display='none';}});
 async function doLogin(){const e=E('login-email').value.trim(),p=E('login-pass').value,err=E('login-err'),btn=E('login-btn');if(!e||!p){err.textContent='กรุณากรอก Email/Password';err.style.display='block';return;}btn.textContent='...';btn.disabled=true;err.style.display='none';try{await auth.signInWithEmailAndPassword(e,p);}catch(x){const m={'auth/invalid-credential':'Email หรือ Password ไม่ถูกต้อง','auth/too-many-requests':'รอสักครู่'};err.textContent=m[x.code]||x.message;err.style.display='block';btn.textContent='เข้าสู่ระบบ';btn.disabled=false;}}
 function doLogout(){if(confirm('ออกจากระบบ?'))auth.signOut();}
 
-// FIRESTORE
-async function loadAll(){try{const es=await db.collection('equipment').get();S.eq=es.docs.map(d=>({id:d.id,...d.data()}));const rs=await db.collection('records').orderBy('date','desc').get();S.rec=rs.docs.map(d=>({id:d.id,...d.data()}));const ss=await db.collection('settings').doc('global').get();if(ss.exists)S.set={...S.set,...ss.data()};if(!S.eq.length)await seed();ub();}catch(e){toast('Error: '+e.message,'error');}}
+async function loadAll(){try{const es=await db.collection('equipment').get();S.eq=es.docs.map(d=>({id:d.id,...d.data()}));const rs=await db.collection('records').orderBy('date','desc').get();S.rec=rs.docs.map(d=>({id:d.id,...d.data()}));const ss=await db.collection('settings').doc('global').get();if(ss.exists)S.set={...S.set,...ss.data()};if(!S.eq.length)await seed();applyLogo();ub();}catch(e){toast('Error: '+e.message,'error');}}
 async function seed(){const eqs=[{tag:'P-201A',mod:'CF Export P201A',mfg:'Reliance',sn:'1MAZJ9073 G003',pwr:'250',vol:'380YD',amp:'323A',spd:'2970',de:'65BC03J3OX',nde:'65BC03J3OX',val:4.5,vda:7.1},{tag:'P-201B',mod:'CF Export P201B',mfg:'Reliance',sn:'1MAZJ9073 G001',pwr:'250',vol:'380YD',amp:'323A',spd:'2970',de:'65BC03J3OX',nde:'65BC03J3OX',val:4.5,vda:7.1},{tag:'P-201S',mod:'CF Export P201S',mfg:'Reliance',sn:'1MAZJ9073 G002',pwr:'250',vol:'380YD',amp:'323A',spd:'2970',de:'65BC03J3OX',nde:'65BC03J3OX',val:4.5,vda:7.1}];
-const recs=[{date:'2026-04-16',wo:'30000088621',tag:'P-201A',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},vib:{mDV:.78,mDH:.82,mDA:.91,mNV:.67,mNH:1.09,pDV:3.25,pDH:4.8,pNV:1.56,pNH:0},el:{cu:266,cv:270,cw:260,vu:412,vv:412,vw:411},st:{irUV:0,irVW:0,irWU:0,irG:0,pi:0,wrU:0,wrV:0,wrW:0,wrUn:0,wiU:0,wiV:0,wiW:0,wiUn:0},sev:'5',res:'Cleaned/Re-grease\n- Vibration >> Pump DE-H alarm\n- V/I >> Normal\n- Noise >> Normal'},{date:'2026-04-16',wo:'30000088627',tag:'P-201B',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},vib:{mDV:1.5,mDH:1.34,mDA:.6,mNV:.88,mNH:1.39,pDV:2.81,pDH:3.96,pNV:1.6,pNH:0},el:{cu:282,cv:287,cw:285,vu:399,vv:400,vw:399},st:{irUV:0,irVW:0,irWU:0,irG:0,pi:0,wrU:0,wrV:0,wrW:0,wrUn:0,wiU:0,wiV:0,wiW:0,wiUn:0},sev:'5',res:'Cleaned/Re-grease\n- All Normal'},{date:'2026-04-16',wo:'30000088632',tag:'P-201S',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},vib:{mDV:.62,mDH:.81,mDA:.52,mNV:.67,mNH:.78,pDV:3.02,pDH:6.5,pNV:1.6,pNH:0},el:{cu:233,cv:236,cw:232,vu:401,vv:401,vw:401},st:{irUV:0,irVW:0,irWU:0,irG:0,pi:0,wrU:0,wrV:0,wrW:0,wrUn:0,wiU:0,wiV:0,wiW:0,wiUn:0},sev:'5',res:'Cleaned/Re-grease\n- Vibration >> DE-H alarm\n- V/I >> Normal'},{date:'2026-03-01',wo:'30000087100',tag:'P-201A',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},vib:{mDV:.65,mDH:.70,mDA:.80,mNV:.60,mNH:.95,pDV:2.80,pDH:3.50,pNV:1.40,pNH:0},el:{cu:264,cv:268,cw:258,vu:410,vv:411,vw:409},st:{irUV:0,irVW:0,irWU:0,irG:0,pi:0,wrU:0,wrV:0,wrW:0,wrUn:0,wiU:0,wiV:0,wiW:0,wiUn:0},sev:'5',res:'All Normal'}];
+const recs=[{date:'2026-04-16',wo:'30000088621',tag:'P-201A',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},vib:{mDV:.78,mDH:.82,mDA:.91,mNV:.67,mNH:1.09,pDV:3.25,pDH:4.8,pNV:1.56,pNH:0},el:{cu:266,cv:270,cw:260,vu:412,vv:412,vw:411},st:{irUV:0,irVW:0,irWU:0,irG:0,pi:0,wrU:0,wrV:0,wrW:0,wrUn:0,wiU:0,wiV:0,wiW:0,wiUn:0},sev:'5',res:'Cleaned/Re-grease\n- Vibration >> Pump DE-H alarm\n- V/I >> Normal\n- Noise >> Normal'},{date:'2026-04-16',wo:'30000088627',tag:'P-201B',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},vib:{mDV:1.5,mDH:1.34,mDA:.6,mNV:.88,mNH:1.39,pDV:2.81,pDH:3.96,pNV:1.6,pNH:0},el:{cu:282,cv:287,cw:285,vu:399,vv:400,vw:399},st:{irUV:0,irVW:0,irWU:0,irG:0,pi:0,wrU:0,wrV:0,wrW:0,wrUn:0,wiU:0,wiV:0,wiW:0,wiUn:0},sev:'5',res:'Cleaned/Re-grease\n- All Normal'},{date:'2026-04-16',wo:'30000088632',tag:'P-201S',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},vib:{mDV:.62,mDH:.81,mDA:.52,mNV:.67,mNH:.78,pDV:3.02,pDH:6.5,pNV:1.6,pNH:0},el:{cu:233,cv:236,cw:232,vu:401,vv:401,vw:401},st:{irUV:0,irVW:0,irWU:0,irG:0,pi:0,wrU:0,wrV:0,wrW:0,wrUn:0,wiU:0,wiV:0,wiW:0,wiUn:0},sev:'5',res:'Cleaned/Re-grease\n- Vibration >> DE-H alarm\n- V/I >> Normal'}];
 const b=db.batch();eqs.forEach(e=>b.set(db.collection('equipment').doc(e.tag),e));recs.forEach(r=>b.set(db.collection('records').doc(),{...r,ts:firebase.firestore.FieldValue.serverTimestamp()}));await b.commit();await loadAll();toast('ข้อมูลตัวอย่างพร้อมแล้ว');}
 
 function getAl(){const a=[];S.rec.forEach(r=>{const eq=S.eq.find(e=>e.tag===r.tag);if(!eq)return;const al=eq.val||4.5,da=eq.vda||7.1,p=r.vib?.pDH||0,m=r.vib?.mDH||0;if(p>=da)a.push({lv:'danger',tag:r.tag,msg:'Pump DE-H DANGER: '+p,date:r.date,id:r.id});else if(p>=al)a.push({lv:'alarm',tag:r.tag,msg:'Pump DE-H Alarm: '+p,date:r.date,id:r.id});if(m>=da)a.push({lv:'danger',tag:r.tag,msg:'Motor DE-H DANGER: '+m,date:r.date,id:r.id});else if(m>=al)a.push({lv:'alarm',tag:r.tag,msg:'Motor DE-H Alarm: '+m,date:r.date,id:r.id});});return a;}
 function ub(){const a=getAl();E('acnt').textContent=a.length;E('acnt').style.display=a.length?'':'none';}
+function go(p,n){document.querySelectorAll('.nav-i').forEach(x=>x.classList.remove('active'));if(n)n.classList.add('active');const t={dashboard:'Dashboard',alerts:'Alerts',checksheet:'PM Check Sheet',history:'PM History',trends:'Trends',equipment:'Equipment',settings:'Settings'};E('ptitle').textContent=t[p]||p;E('pbc').textContent=t[p]||p;const c=E('content');c.innerHTML='';({dashboard:pgDash,alerts:pgAlert,checksheet:pgCheck,history:pgHist,trends:pgTrend,equipment:pgEq,settings:pgSet})[p]?.(c);ub();}
 
-function go(p,n){document.querySelectorAll('.nav-i').forEach(x=>x.classList.remove('active'));if(n)n.classList.add('active');const t={dashboard:'Dashboard',alerts:'Alerts',checksheet:'PM Check Sheet',history:'PM History',trends:'Trends',import:'Import Excel',equipment:'Equipment',settings:'Settings'};E('ptitle').textContent=t[p]||p;E('pbc').textContent=t[p]||p;const c=E('content');c.innerHTML='';({dashboard:pgDash,alerts:pgAlert,checksheet:pgCheck,history:pgHist,trends:pgTrend,import:pgImport,equipment:pgEq,settings:pgSet})[p]?.(c);ub();}
-
-// DASHBOARD
+// ══════════ DASHBOARD ══════════
 function pgDash(el){const al=getAl(),lp=S.rec.reduce((m,r)=>r.date>m?r.date:m,''),ac=[...new Set(al.map(a=>a.tag))].length;
-// ── LATEST INSPECTION SUMMARY (top-left text cards) ──
-let sumH='<div class="card" style="margin-bottom:16px"><div class="card-t">📋 Latest Inspection Summary — Full Details</div>';
-sumH+='<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">';
-S.eq.forEach(eq=>{sumH+='<button class="btn btn-sm'+(S.eq.indexOf(eq)===0?' btn-p':'')+'" onclick="showEqSum(\''+eq.tag+'\')" id="sb_'+eq.tag+'">'+eq.tag+'</button>';});
-sumH+='</div><div id="eqSumBox"></div></div>';
-el.innerHTML+=sumH;
-// auto-show first
-setTimeout(()=>{if(S.eq.length)showEqSum(S.eq[0].tag);},10);
-// ── ALERTS ──
 al.slice(0,3).forEach(a=>{el.innerHTML+='<div class="ab '+(a.lv==='danger'?'a-re':'a-am')+'"><span>'+(a.lv==='danger'?'⛔':'⚠')+'</span><b>'+a.tag+'</b>: '+a.msg+'<span style="margin-left:auto;font-size:11px;opacity:.7">'+fd(a.date)+'</span></div>';});
 el.innerHTML+='<div class="metric-row"><div class="mc m1"><div class="ml">Equipment</div><div class="mv" style="color:var(--accent)">'+S.eq.length+'</div></div><div class="mc m2"><div class="ml">PM Records</div><div class="mv" style="color:var(--green)">'+S.rec.length+'</div></div><div class="mc m3"><div class="ml">Alerts</div><div class="mv" style="color:var(--amber)">'+ac+'</div></div><div class="mc m4"><div class="ml">Last PM</div><div class="mv" style="font-size:16px;color:var(--text)">'+fd(lp)+'</div></div></div>';
 let sh='';S.eq.forEach(eq=>{const rs=S.rec.filter(r=>r.tag===eq.tag).sort((a,b)=>b.date.localeCompare(a.date)),la=rs[0],p=la?.vib?.pDH||0,al2=p>=(eq.val||4.5),da2=p>=(eq.vda||7.1),dc=!la?'d-x':da2?'d-r':al2?'d-a':'d-g',bc=!la?'b-no':da2?'b-nk':al2?'b-al':'b-ok',bt=!la?'N/A':da2?'Danger':al2?'Alarm':'Normal';
@@ -240,63 +221,10 @@ if(E('dv'))new Chart(E('dv'),{type:'bar',data:{labels:tg,datasets:[{label:'Motor
 if(E('dc'))new Chart(E('dc'),{type:'bar',data:{labels:tg,datasets:[{label:'U',data:tg.map(t=>lt[t]?.el?.cu||0),backgroundColor:'rgba(63,185,80,.7)',borderRadius:4},{label:'V',data:tg.map(t=>lt[t]?.el?.cv||0),backgroundColor:'rgba(63,185,80,.45)',borderRadius:4},{label:'W',data:tg.map(t=>lt[t]?.el?.cw||0),backgroundColor:'rgba(63,185,80,.25)',borderRadius:4}]},options:co('Current (A)')});
 if(E('du'))new Chart(E('du'),{type:'bar',data:{labels:tg,datasets:[{label:'U',data:tg.map(t=>lt[t]?.el?.vu||0),backgroundColor:'rgba(188,140,255,.7)',borderRadius:4},{label:'V',data:tg.map(t=>lt[t]?.el?.vv||0),backgroundColor:'rgba(188,140,255,.45)',borderRadius:4},{label:'W',data:tg.map(t=>lt[t]?.el?.vw||0),backgroundColor:'rgba(188,140,255,.25)',borderRadius:4}]},options:{...co('Voltage (V)'),scales:{y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:10}}}}}});},100);}
 
-// SHOW EQUIPMENT SUMMARY (text detail at top of dashboard)
-function showEqSum(tag){
-S.eq.forEach(eq=>{const b=E('sb_'+eq.tag);if(b){b.className='btn btn-sm'+(eq.tag===tag?' btn-p':'');}});
-const rs=S.rec.filter(r=>r.tag===tag).sort((a,b)=>b.date.localeCompare(a.date));
-const r=rs[0],eq=S.eq.find(e=>e.tag===tag);
-const box=E('eqSumBox');if(!box)return;
-if(!r){box.innerHTML='<div style="color:var(--text3);padding:12px">ยังไม่มีข้อมูล Inspection สำหรับ '+tag+'</div>';return;}
-const p=r.vib?.pDH||0,al=p>=(eq?.val||4.5),da=p>=(eq?.vda||7.1);
-const brgSt=c=>c==='ok'?'<span class="badge b-ok">OK</span>':c==='alarm'?'<span class="badge b-al">Alarm</span>':'<span class="badge b-nk">NOK</span>';
-const vibSt=v=>{const a=eq?.val||4.5,d=eq?.vda||7.1;return v>=d?'<span style="color:var(--red);font-weight:600">'+v+' ⛔</span>':v>=a?'<span style="color:var(--amber);font-weight:600">'+v+' ⚠</span>':'<span style="color:var(--green)">'+v+'</span>';};
-const ln=(lb,val)=>'<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text3);font-size:12px">'+lb+'</span><span style="font-family:var(--mono);font-size:13px">'+val+'</span></div>';
-let h='<div style="background:var(--bg3);border-radius:var(--r);padding:14px;border:1px solid var(--border)">';
-h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span class="dot '+(da?'d-r':al?'d-a':'d-g')+'"></span><span style="font-size:15px;font-weight:600">'+tag+'</span><span class="badge '+(da?'b-nk':al?'b-al':'b-ok')+'">'+(da?'Danger':al?'Alarm':'Normal')+'</span><span style="margin-left:auto;font-size:11px;color:var(--text3)">'+eq.mod+'</span></div>';
-h+='<div class="g2" style="gap:16px">';
-// LEFT column
-h+='<div>';
-h+='<div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">📋 Work Order</div>';
-h+=ln('Date',fd(r.date));
-h+=ln('WO No.',r.wo||'—');
-h+=ln('Purpose','<span class="badge b-in">'+(r.purp||'PM')+'</span>');
-h+=ln('Inspector',r.insp||'—');
-h+=ln('Approved',r.appr||'—');
-h+=ln('Severity','<span style="color:'+(S.sc[r.sev]||'')+'">● '+(S.sl[r.sev]||'—')+'</span>');
-h+='<div style="font-size:11px;font-weight:600;color:var(--accent);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.05em">🔩 Bearing</div>';
-h+=ln('DE — '+( r.brg?.de||'—'),brgSt(r.brg?.deC));
-h+=ln('NDE — '+(r.brg?.nde||'—'),brgSt(r.brg?.ndeC));
-h+='<div style="font-size:11px;font-weight:600;color:var(--accent);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.05em">🔍 General Inspection</div>';
-var ciNames={module:'Module',magnetic:'Magnetic',lamp:'Lamp',terminal:'Terminal',cables:'Cables',switch:'Switch',earth:'Earth'};
-Object.entries(ciNames).forEach(function(kv){var k=kv[0],v=kv[1];var cv=r.ck?.[k];h+=ln(v,cv==='ok'?'<span class="badge b-ok">OK</span>':cv==='nok'?'<span class="badge b-nk">NOK</span>':cv==='na'?'<span class="badge b-no">N/A</span>':'—');});
-h+='</div>';
-// RIGHT column
-h+='<div>';
-h+='<div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">〰 Vibration (mm/s)</div>';
-h+=ln('Motor DE — V / H / A',(r.vib?.mDV||0)+' / '+vibSt(r.vib?.mDH||0)+' / '+(r.vib?.mDA||0));
-h+=ln('Motor NDE — V / H',(r.vib?.mNV||0)+' / '+(r.vib?.mNH||0));
-h+=ln('Pump DE — V / H / A',(r.vib?.pDV||0)+' / '+vibSt(r.vib?.pDH||0)+' / '+(r.vib?.pDA||0));
-h+=ln('Pump NDE — V / H',(r.vib?.pNV||0)+' / '+(r.vib?.pNH||0));
-h+='<div style="font-size:11px;font-weight:600;color:var(--accent);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.05em">⚡ Electrical</div>';
-h+=ln('Current (A) — U / V / W',(r.el?.cu||0)+' / '+(r.el?.cv||0)+' / '+(r.el?.cw||0));
-h+=ln('Voltage (V) — U / V / W',(r.el?.vu||0)+' / '+(r.el?.vv||0)+' / '+(r.el?.vw||0));
-h+='<div style="font-size:11px;font-weight:600;color:var(--accent);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.05em">🧪 Static Test</div>';
-h+=ln('IR (MΩ) UV / VW / WU',(r.st?.irUV||'—')+' / '+(r.st?.irVW||'—')+' / '+(r.st?.irWU||'—'));
-h+=ln('IR UVW-G / PI',( r.st?.irG||'—')+' / '+(r.st?.pi||'—'));
-h+=ln('WR (Ω) U / V / W',(r.st?.wrU||'—')+' / '+(r.st?.wrV||'—')+' / '+(r.st?.wrW||'—'));
-h+=ln('WR Unbalance',(r.st?.wrUn||'—')+'%');
-h+=ln('WI (mH) U / V / W',(r.st?.wiU||'—')+' / '+(r.st?.wiV||'—')+' / '+(r.st?.wiW||'—'));
-h+=ln('WI Unbalance',(r.st?.wiUn||'—')+'%');
-h+='<div style="font-size:11px;font-weight:600;color:var(--accent);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.05em">📝 Results</div>';
-h+='<div style="font-size:12px;color:var(--text2);white-space:pre-line;padding:6px 0">'+(r.res||'—')+'</div>';
-h+='</div></div></div>';
-box.innerHTML=h;
-}
-
-// ALERTS
+// ══════════ ALERTS ══════════
 function pgAlert(el){const a=getAl();if(!a.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px"><div style="font-size:32px;margin-bottom:12px">✓</div><div style="color:var(--green);font-size:16px;font-weight:600">No alerts</div></div>';return;}a.forEach(x=>{el.innerHTML+='<div class="ab '+(x.lv==='danger'?'a-re':'a-am')+'" style="cursor:pointer" onclick="showD(\''+x.id+'\')"><span>'+(x.lv==='danger'?'⛔':'⚠')+'</span><div style="flex:1"><b>'+x.tag+'</b> — '+x.msg+'</div><span style="font-size:11px;opacity:.7">'+fd(x.date)+'</span></div>';});}
 
-// CHECK SHEET
+// ══════════ CHECK SHEET ══════════
 function pgCheck(el){S.cf={ck:{},sev:'5'};
 el.innerHTML='<div class="card"><div class="st" style="margin-bottom:14px">📋 Work Order Info</div><div class="g4" style="margin-bottom:12px"><div class="fg"><label class="fl">WO No.</label><input class="fi" id="f-wo"></div><div class="fg"><label class="fl">Equipment Tag *</label><select class="fs" id="f-tag" onchange="onTg()"><option value="">— Select —</option>'+S.eq.map(e=>'<option value="'+e.tag+'">'+e.tag+' — '+e.mod+'</option>').join('')+'</select></div><div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="f-dt" value="'+now()+'"></div><div class="fg"><label class="fl">Purpose</label><select class="fs" id="f-pu"><option value="PM">PM</option><option value="Routine">Routine</option><option value="Investigation">Investigation</option><option value="CM">CM</option></select></div><div class="fg"><label class="fl">Inspector</label><input class="fi" id="f-ins" value="'+(S.set.di||'')+'"></div><div class="fg"><label class="fl">Approved by</label><input class="fi" id="f-app" value="'+(S.set.da||'')+'"></div></div></div>'+
 '<div class="card"><div class="st" style="margin-bottom:14px">🔩 Bearing Info</div><div class="g4"><div class="fg"><label class="fl">DE Bearing No.</label><input class="fi" id="f-bde"></div><div class="fg"><label class="fl">DE Condition</label><select class="fs" id="f-bdc"><option value="ok">OK</option><option value="alarm">Alarm</option><option value="nok">NOK-Replace</option></select></div><div class="fg"><label class="fl">NDE Bearing No.</label><input class="fi" id="f-bnde"></div><div class="fg"><label class="fl">NDE Condition</label><select class="fs" id="f-bnc"><option value="ok">OK</option><option value="alarm">Alarm</option><option value="nok">NOK-Replace</option></select></div></div></div>'+
@@ -320,35 +248,77 @@ st:{irUV:gv('irUV'),irVW:gv('irVW'),irWU:gv('irWU'),irG:gv('irG'),pi:gv('irPI'),
 sev:E('f-sev').value||'5',res:E('f-res').value,ts:firebase.firestore.FieldValue.serverTimestamp(),by:S.usr?.email||''};
 try{const ref=await db.collection('records').add(rec);S.rec.unshift({id:ref.id,...rec});ub();toast('บันทึก '+tag+' สำเร็จ ✓');pgCheck(E('content'));}catch(e){toast('Error: '+e.message,'error');btn.disabled=false;btn.textContent='✓ Save';}}
 
-// HISTORY
-function pgHist(el){el.innerHTML='<div class="card"><div class="sh"><div class="st">PM Records ('+S.rec.length+')</div><select class="fs" id="htag" style="width:150px" onchange="apH()"><option value="">All</option>'+S.eq.map(e=>'<option value="'+e.tag+'">'+e.tag+'</option>').join('')+'</select></div><div style="overflow-x:auto"><table class="ht"><thead><tr><th>Date</th><th>WO</th><th>Tag</th><th>Brg DE</th><th>Pump DE-H</th><th>IR UV</th><th>WR Un%</th><th>Sev</th><th></th></tr></thead><tbody id="htb"></tbody></table></div></div>';apH();}
-function apH(){const f=E('htag')?.value||'';let rs=[...S.rec].sort((a,b)=>b.date.localeCompare(a.date));if(f)rs=rs.filter(r=>r.tag===f);const tb=E('htb');if(!tb)return;tb.innerHTML='';rs.forEach(r=>{const eq=S.eq.find(e=>e.tag===r.tag),p=r.vib?.pDH||0,al=p>=(eq?.val||4.5),da=p>=(eq?.vda||7.1);tb.innerHTML+='<tr><td class="mono">'+r.date+'</td><td class="mono" style="color:var(--text3)">'+(r.wo||'—')+'</td><td style="font-weight:600">'+r.tag+'</td><td style="font-size:12px;color:var(--text3)">'+(r.brg?.de||'—')+'</td><td><span class="mono">'+p.toFixed(2)+'</span> <span class="badge '+(da?'b-nk':al?'b-al':'b-ok')+'">'+(da?'Danger':al?'Alarm':'OK')+'</span></td><td class="mono">'+(r.st?.irUV||'—')+'</td><td class="mono">'+(r.st?.wrUn||'—')+'</td><td style="font-size:11px;color:'+(S.sc[r.sev]||'')+'">'+(S.sl[r.sev]||'—')+'</td><td><button class="btn btn-sm" onclick="showD(\''+r.id+'\')">View</button></td></tr>';});if(!rs.length)tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text3)">No records</td></tr>';}
+// ══════════ HISTORY ══════════
+function pgHist(el){el.innerHTML='<div class="card"><div class="sh"><div class="st">PM Records ('+S.rec.length+')</div><select class="fs" id="htag" style="width:150px" onchange="apH()"><option value="">All</option>'+S.eq.map(e=>'<option value="'+e.tag+'">'+e.tag+'</option>').join('')+'</select></div><div style="overflow-x:auto"><table class="ht"><thead><tr><th>Date</th><th>WO</th><th>Tag</th><th>Brg DE</th><th>Pump DE-H</th><th>Severity</th><th></th></tr></thead><tbody id="htb"></tbody></table></div></div>';apH();}
+function apH(){const f=E('htag')?.value||'';let rs=[...S.rec].sort((a,b)=>b.date.localeCompare(a.date));if(f)rs=rs.filter(r=>r.tag===f);const tb=E('htb');if(!tb)return;tb.innerHTML='';rs.forEach(r=>{const eq=S.eq.find(e=>e.tag===r.tag),p=r.vib?.pDH||0,al=p>=(eq?.val||4.5),da=p>=(eq?.vda||7.1);tb.innerHTML+='<tr><td class="mono">'+r.date+'</td><td class="mono" style="color:var(--text3)">'+(r.wo||'—')+'</td><td style="font-weight:600">'+r.tag+'</td><td style="font-size:12px;color:var(--text3)">'+(r.brg?.de||'—')+'</td><td><span class="mono">'+p.toFixed(2)+'</span> <span class="badge '+(da?'b-nk':al?'b-al':'b-ok')+'">'+(da?'Danger':al?'Alarm':'OK')+'</span></td><td style="font-size:11px;color:'+(S.sc[r.sev]||'')+'">● '+(S.sl[r.sev]||'—')+'</td><td><button class="btn btn-sm btn-p" onclick="showD(\''+r.id+'\')">View</button></td></tr>';});if(!rs.length)tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text3)">No records</td></tr>';}
 
-// DETAIL
-function showD(id){const r=S.rec.find(x=>x.id===id);if(!r)return;const eq=S.eq.find(e=>e.tag===r.tag),p=r.vib?.pDH||0,al=p>=(eq?.val||4.5);E('mdett').textContent='PM — '+r.tag+' | '+r.date;
-E('mdetb').innerHTML='<div class="g3" style="gap:10px;margin-bottom:14px;font-size:13px"><div><span class="fl">WO</span><div class="mono" style="margin-top:4px">'+(r.wo||'—')+'</div></div><div><span class="fl">Date</span><div style="margin-top:4px">'+fd(r.date)+'</div></div><div><span class="fl">Purpose</span><div style="margin-top:4px"><span class="badge b-in">'+(r.purp||'PM')+'</span></div></div><div><span class="fl">Inspector</span><div style="margin-top:4px">'+(r.insp||'—')+'</div></div><div><span class="fl">Approved</span><div style="margin-top:4px">'+(r.appr||'—')+'</div></div><div><span class="fl">Severity</span><div style="margin-top:4px;color:'+(S.sc[r.sev]||'')+'">● '+(S.sl[r.sev]||'—')+'</div></div></div><hr class="divider"><div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">🔩 BEARING</div><div class="g2" style="gap:8px;font-size:13px;margin-bottom:14px"><div>DE: <b>'+(r.brg?.de||'—')+'</b> '+(r.brg?.deC==='ok'?'<span class="badge b-ok">OK</span>':r.brg?.deC==='alarm'?'<span class="badge b-al">Alarm</span>':'<span class="badge b-nk">NOK</span>')+'</div><div>NDE: <b>'+(r.brg?.nde||'—')+'</b> '+(r.brg?.ndeC==='ok'?'<span class="badge b-ok">OK</span>':r.brg?.ndeC==='alarm'?'<span class="badge b-al">Alarm</span>':'<span class="badge b-nk">NOK</span>')+'</div></div><hr class="divider"><div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">〰 VIBRATION</div><div class="g2" style="gap:6px;font-size:13px;margin-bottom:14px"><div>Motor DE V:<b>'+(r.vib?.mDV||0)+'</b> H:<b>'+(r.vib?.mDH||0)+'</b> A:<b>'+(r.vib?.mDA||0)+'</b></div><div>Motor NDE V:<b>'+(r.vib?.mNV||0)+'</b> H:<b>'+(r.vib?.mNH||0)+'</b></div><div>Pump DE V:<b>'+(r.vib?.pDV||0)+'</b> H:<b style="color:'+(al?'var(--amber)':'inherit')+'">'+p+'</b> '+(al?'<span class="badge b-al">Alarm</span>':'')+'</div><div>Pump NDE V:<b>'+(r.vib?.pNV||0)+'</b></div></div><hr class="divider"><div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">⚡ ELECTRICAL</div><div class="g2" style="gap:6px;font-size:13px;margin-bottom:14px"><div>Cur U:<b>'+(r.el?.cu||0)+'</b> V:<b>'+(r.el?.cv||0)+'</b> W:<b>'+(r.el?.cw||0)+'</b></div><div>Vol U:<b>'+(r.el?.vu||0)+'</b> V:<b>'+(r.el?.vv||0)+'</b> W:<b>'+(r.el?.vw||0)+'</b></div></div><hr class="divider"><div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">🧪 STATIC TEST</div><div class="g2" style="gap:6px;font-size:13px;margin-bottom:14px"><div>IR(MΩ) UV:<b>'+(r.st?.irUV||'—')+'</b> VW:<b>'+(r.st?.irVW||'—')+'</b> WU:<b>'+(r.st?.irWU||'—')+'</b> G:<b>'+(r.st?.irG||'—')+'</b></div><div>PI: <b>'+(r.st?.pi||'—')+'</b></div><div>WR(Ω) U:<b>'+(r.st?.wrU||'—')+'</b> V:<b>'+(r.st?.wrV||'—')+'</b> W:<b>'+(r.st?.wrW||'—')+'</b> Un:<b>'+(r.st?.wrUn||'—')+'%</b></div><div>WI(mH) U:<b>'+(r.st?.wiU||'—')+'</b> V:<b>'+(r.st?.wiV||'—')+'</b> W:<b>'+(r.st?.wiW||'—')+'</b></div></div><hr class="divider"><div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">📝 RESULTS</div><div style="font-size:13px;color:var(--text2);white-space:pre-line">'+(r.res||'—')+'</div>';om('mdet');}
+// ══════════ DETAIL MODAL (FULL) ══════════
+function showD(id){
+const r=S.rec.find(x=>x.id===id);if(!r)return;
+const eq=S.eq.find(e=>e.tag===r.tag),p=r.vib?.pDH||0,al=eq?.val||4.5,da=eq?.vda||7.1;
+const bst=c=>c==='ok'?'<span class="badge b-ok">OK</span>':c==='alarm'?'<span class="badge b-al">Alarm</span>':'<span class="badge b-nk">NOK</span>';
+const vst=v=>v>=da?'<b style="color:var(--red)">'+v+' ⛔</b>':v>=al?'<b style="color:var(--amber)">'+v+' ⚠</b>':'<b>'+v+'</b>';
+const ckst=v=>v==='ok'?'<span class="badge b-ok">OK</span>':v==='nok'?'<span class="badge b-nk">NOK</span>':v==='na'?'<span class="badge b-no">N/A</span>':'—';
+E('mdett').textContent='PM Record — '+r.tag+' | '+fd(r.date);
+let h='<div style="text-align:center;font-size:16px;font-weight:600;margin-bottom:4px">'+(S.set.logoLine1||'PM Inspection')+'</div><div style="text-align:center;font-size:12px;color:var(--text3);margin-bottom:16px">'+(S.set.logoLine2||'TCC Plant GEN')+' | '+(S.set.co||'')+' | '+(S.set.plant||'')+'</div>';
+// Work Order
+h+='<div class="sec-h">📋 Work Order Info</div>';
+h+='<div class="dl"><span class="dl-l">Date</span><span class="dl-v">'+fd(r.date)+'</span></div>';
+h+='<div class="dl"><span class="dl-l">Work Order No.</span><span class="dl-v">'+(r.wo||'—')+'</span></div>';
+h+='<div class="dl"><span class="dl-l">Equipment Tag</span><span class="dl-v" style="font-weight:600">'+r.tag+'</span></div>';
+h+='<div class="dl"><span class="dl-l">Module</span><span class="dl-v">'+(eq?.mod||'—')+'</span></div>';
+h+='<div class="dl"><span class="dl-l">Purpose</span><span class="dl-v"><span class="badge b-in">'+(r.purp||'PM')+'</span></span></div>';
+h+='<div class="dl"><span class="dl-l">Inspector</span><span class="dl-v">'+(r.insp||'—')+'</span></div>';
+h+='<div class="dl"><span class="dl-l">Approved by</span><span class="dl-v">'+(r.appr||'—')+'</span></div>';
+// Machine
+h+='<div class="sec-h">⊞ Machine Data</div>';
+h+='<div class="dl"><span class="dl-l">Manufacturer / S.N.</span><span class="dl-v">'+(eq?.mfg||'—')+' / '+(eq?.sn||'—')+'</span></div>';
+h+='<div class="dl"><span class="dl-l">Power / Volts / Amps / RPM</span><span class="dl-v">'+(eq?.pwr||'—')+' HP | '+(eq?.vol||'—')+' | '+(eq?.amp||'—')+' | '+(eq?.spd||'—')+'</span></div>';
+// Bearing
+h+='<div class="sec-h">🔩 Bearing</div>';
+h+='<div class="dl"><span class="dl-l">DE — '+(r.brg?.de||'—')+'</span><span class="dl-v">'+bst(r.brg?.deC)+'</span></div>';
+h+='<div class="dl"><span class="dl-l">NDE — '+(r.brg?.nde||'—')+'</span><span class="dl-v">'+bst(r.brg?.ndeC)+'</span></div>';
+// General Inspection
+h+='<div class="sec-h">🔍 General Inspection</div>';
+S.ci.forEach(i=>{h+='<div class="dl"><span class="dl-l">'+i.l+'</span><span class="dl-v">'+ckst(r.ck?.[i.k])+'</span></div>';});
+// Vibration
+h+='<div class="sec-h">〰 Vibration (mm/s)</div>';
+h+='<div class="dl"><span class="dl-l">Motor DE — V / H / A</span><span class="dl-v">'+(r.vib?.mDV||0)+' / '+vst(r.vib?.mDH||0)+' / '+(r.vib?.mDA||0)+'</span></div>';
+h+='<div class="dl"><span class="dl-l">Motor NDE — V / H</span><span class="dl-v">'+(r.vib?.mNV||0)+' / '+(r.vib?.mNH||0)+'</span></div>';
+h+='<div class="dl"><span class="dl-l">Pump DE — V / H / A</span><span class="dl-v">'+(r.vib?.pDV||0)+' / '+vst(r.vib?.pDH||0)+' / '+(r.vib?.pDA||0)+'</span></div>';
+h+='<div class="dl"><span class="dl-l">Pump NDE — V / H</span><span class="dl-v">'+(r.vib?.pNV||0)+' / '+(r.vib?.pNH||0)+'</span></div>';
+// Electrical
+h+='<div class="sec-h">⚡ Voltage & Current</div>';
+h+='<div class="dl"><span class="dl-l">Current (A) — U / V / W</span><span class="dl-v">'+(r.el?.cu||0)+' / '+(r.el?.cv||0)+' / '+(r.el?.cw||0)+'</span></div>';
+h+='<div class="dl"><span class="dl-l">Voltage (V) — U / V / W</span><span class="dl-v">'+(r.el?.vu||0)+' / '+(r.el?.vv||0)+' / '+(r.el?.vw||0)+'</span></div>';
+// Static Test
+h+='<div class="sec-h">🧪 Electrical Static Test</div>';
+h+='<div class="dl"><span class="dl-l">IR (MΩ) — UV / VW / WU</span><span class="dl-v">'+(r.st?.irUV||'—')+' / '+(r.st?.irVW||'—')+' / '+(r.st?.irWU||'—')+'</span></div>';
+h+='<div class="dl"><span class="dl-l">IR UVW-G</span><span class="dl-v">'+(r.st?.irG||'—')+'</span></div>';
+h+='<div class="dl"><span class="dl-l">PI Ratio (R10/R1)</span><span class="dl-v">'+(r.st?.pi||'—')+'</span></div>';
+h+='<div class="dl"><span class="dl-l">WR (Ω) — U / V / W</span><span class="dl-v">'+(r.st?.wrU||'—')+' / '+(r.st?.wrV||'—')+' / '+(r.st?.wrW||'—')+'</span></div>';
+h+='<div class="dl"><span class="dl-l">WR Unbalance</span><span class="dl-v">'+(r.st?.wrUn||'—')+' %</span></div>';
+h+='<div class="dl"><span class="dl-l">WI (mH) — U / V / W</span><span class="dl-v">'+(r.st?.wiU||'—')+' / '+(r.st?.wiV||'—')+' / '+(r.st?.wiW||'—')+'</span></div>';
+h+='<div class="dl"><span class="dl-l">WI Unbalance</span><span class="dl-v">'+(r.st?.wiUn||'—')+' %</span></div>';
+// Results & Severity
+h+='<div class="sec-h">📝 Results & Severity</div>';
+h+='<div class="dl"><span class="dl-l">Severity</span><span class="dl-v" style="color:'+(S.sc[r.sev]||'')+'">● '+(S.sl[r.sev]||'—')+'</span></div>';
+h+='<div style="font-size:13px;color:var(--text2);white-space:pre-line;margin-top:8px;padding:10px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border)">'+(r.res||'—')+'</div>';
+E('mdetb').innerHTML=h;om('mdet');}
 
-// TRENDS
+// ══════════ EXPORT PDF ══════════
+function exportPDF(){window.print();}
+
+// ══════════ TRENDS ══════════
 let tc1,tc2,tc3;
 function pgTrend(el){el.innerHTML='<div class="card"><div class="sh"><div class="st">Trend Analysis</div><select class="fs" id="trt" style="width:180px" onchange="drTr()">'+S.eq.map(e=>'<option value="'+e.tag+'">'+e.tag+'</option>').join('')+'</select></div><div class="itab"><div class="it active" onclick="trT(\'v\',this)">Vibration</div><div class="it" onclick="trT(\'e\',this)">Electrical</div></div><div id="trv"><div class="cw" style="height:300px"><canvas id="tcv"></canvas></div></div><div id="tre" style="display:none"><div class="g2" style="gap:16px"><div class="cw" style="height:220px"><canvas id="tcc"></canvas></div><div class="cw" style="height:220px"><canvas id="tcu"></canvas></div></div></div></div>';drTr();}
 function trT(t,el){document.querySelectorAll('.it').forEach(b=>b.classList.remove('active'));el.classList.add('active');E('trv').style.display=t==='v'?'':'none';E('tre').style.display=t==='e'?'':'none';if(t==='e')drTr();}
-function drTr(){const tg=E('trt')?.value||S.eq[0]?.tag,rs=S.rec.filter(r=>r.tag===tg).sort((a,b)=>a.date.localeCompare(b.date)),lb=rs.map(r=>r.date),eq=S.eq.find(e=>e.tag===tg),al=eq?.val||4.5,da=eq?.vda||7.1;const co=t=>({responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:10}},title:{display:!!t,text:t,color:'#8b949e',font:{size:11}}},scales:{y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}}});
-if(tc1)tc1.destroy();if(E('tcv'))tc1=new Chart(E('tcv'),{type:'line',data:{labels:lb,datasets:[{label:'Pump DE-H',data:rs.map(r=>r.vib?.pDH||0),borderColor:'#d29922',pointRadius:5,tension:.3,borderWidth:2},{label:'Motor DE-H',data:rs.map(r=>r.vib?.mDH||0),borderColor:'#58a6ff',pointRadius:5,tension:.3,borderWidth:2},{label:'Alarm',data:rs.map(()=>al),borderColor:'rgba(210,153,34,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5},{label:'Danger',data:rs.map(()=>da),borderColor:'rgba(248,81,73,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5}]},options:co('')});
+function drTr(){const tg=E('trt')?.value||S.eq[0]?.tag,rs=S.rec.filter(r=>r.tag===tg).sort((a,b)=>a.date.localeCompare(b.date)),lb=rs.map(r=>r.date),eq=S.eq.find(e=>e.tag===tg),al=eq?.val||4.5,da2=eq?.vda||7.1;const co=t=>({responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:10}},title:{display:!!t,text:t,color:'#8b949e',font:{size:11}}},scales:{y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}}});
+if(tc1)tc1.destroy();if(E('tcv'))tc1=new Chart(E('tcv'),{type:'line',data:{labels:lb,datasets:[{label:'Pump DE-H',data:rs.map(r=>r.vib?.pDH||0),borderColor:'#d29922',pointRadius:5,tension:.3,borderWidth:2},{label:'Motor DE-H',data:rs.map(r=>r.vib?.mDH||0),borderColor:'#58a6ff',pointRadius:5,tension:.3,borderWidth:2},{label:'Alarm',data:rs.map(()=>al),borderColor:'rgba(210,153,34,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5},{label:'Danger',data:rs.map(()=>da2),borderColor:'rgba(248,81,73,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5}]},options:co('')});
 if(tc2)tc2.destroy();if(E('tcc'))tc2=new Chart(E('tcc'),{type:'line',data:{labels:lb,datasets:[{label:'U',data:rs.map(r=>r.el?.cu||0),borderColor:'#3fb950',pointRadius:4,tension:.3,borderWidth:2},{label:'V',data:rs.map(r=>r.el?.cv||0),borderColor:'rgba(63,185,80,.5)',pointRadius:4,tension:.3,borderWidth:1.5},{label:'W',data:rs.map(r=>r.el?.cw||0),borderColor:'rgba(63,185,80,.3)',pointRadius:4,tension:.3,borderWidth:1.5}]},options:co('Current (A)')});
 if(tc3)tc3.destroy();if(E('tcu'))tc3=new Chart(E('tcu'),{type:'line',data:{labels:lb,datasets:[{label:'U',data:rs.map(r=>r.el?.vu||0),borderColor:'#bc8cff',pointRadius:4,tension:.3,borderWidth:2},{label:'V',data:rs.map(r=>r.el?.vv||0),borderColor:'rgba(188,140,255,.5)',pointRadius:4,tension:.3,borderWidth:1.5},{label:'W',data:rs.map(r=>r.el?.vw||0),borderColor:'rgba(188,140,255,.3)',pointRadius:4,tension:.3,borderWidth:1.5}]},options:{...co('Voltage (V)'),scales:{y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}}}});}
 
-// IMPORT
-function pgImport(el){el.innerHTML='<div class="card"><div class="st" style="margin-bottom:14px">⬆ Import PM Records from Excel</div><p style="font-size:13px;color:var(--text2);margin-bottom:14px">อัปโหลด Excel (.xlsx/.xls/.csv) แล้ว preview ก่อน import เข้า Firestore</p><div class="dz" id="dzone" onclick="E(\'finp\').click()" ondrop="hDrop(event)" ondragover="event.preventDefault();this.classList.add(\'dg\')" ondragleave="this.classList.remove(\'dg\')"><div style="font-size:24px;margin-bottom:8px">📂</div><div>Drag & Drop หรือ <b style="color:var(--accent)">คลิกเลือกไฟล์</b></div><div style="font-size:11px;color:var(--text3);margin-top:6px">.xlsx .xls .csv</div></div><input type="file" id="finp" accept=".xlsx,.xls,.csv" style="display:none" onchange="hFile(this.files[0])"></div><div class="card"><div class="st" style="margin-bottom:14px">📄 Template Columns</div><div style="font-size:12px;color:var(--text2);line-height:2;font-family:var(--mono);background:var(--bg3);padding:12px;border-radius:var(--r)">date | tag | wo | purpose | inspector | approver |<br>brg_de | brg_nde | brg_de_cond | brg_nde_cond |<br>vib_mDV | vib_mDH | vib_mDA | vib_mNV | vib_mNH |<br>vib_pDV | vib_pDH | vib_pNV | vib_pNH |<br>el_cu | el_cv | el_cw | el_vu | el_vv | el_vw |<br>ir_uv | ir_vw | ir_wu | ir_g | pi |<br>wr_u | wr_v | wr_w | wr_un |<br>wi_u | wi_v | wi_w | wi_un |<br>severity | results</div><button class="btn" style="margin-top:12px" onclick="dlTpl()">⬇ Download Template</button></div><div id="iprev"></div>';}
-function hDrop(e){e.preventDefault();e.currentTarget.classList.remove('dg');if(e.dataTransfer.files.length)hFile(e.dataTransfer.files[0]);}
-function hFile(f){if(!f)return;toast('กำลังอ่าน...','warning');const r=new FileReader();r.onload=function(e){try{const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],data=XLSX.utils.sheet_to_json(ws,{defval:''});if(!data.length){toast('ไฟล์ว่าง','error');return;}S.imp=data;iprev(data);toast('อ่านได้ '+data.length+' rows');}catch(x){toast('Error: '+x.message,'error');}};r.readAsArrayBuffer(f);}
-function iprev(data){const a=E('iprev'),cols=Object.keys(data[0]);let h='<div class="card"><div class="sh"><div class="st">Preview ('+data.length+' rows)</div><button class="btn btn-p" id="ibtn" onclick="doImp()">⬆ Import '+data.length+' records</button></div><div class="ip"><table><thead><tr>';cols.forEach(c=>{h+='<th>'+c+'</th>';});h+='</tr></thead><tbody>';data.slice(0,50).forEach(row=>{h+='<tr>';cols.forEach(c=>{h+='<td>'+(row[c]!==undefined?row[c]:'')+'</td>';});h+='</tr>';});h+='</tbody></table></div></div>';a.innerHTML=h;}
-async function doImp(){if(!S.imp?.length){toast('ไม่มีข้อมูล','error');return;}const btn=E('ibtn');btn.disabled=true;btn.textContent='⏳ Importing...';let cnt=0,batch=db.batch();
-for(const row of S.imp){const rec={date:String(row.date||''),wo:String(row.wo||''),tag:String(row.tag||''),purp:String(row.purpose||'PM'),insp:String(row.inspector||''),appr:String(row.approver||''),ck:{module:'ok',magnetic:'ok',lamp:'ok',terminal:'ok',cables:'ok',switch:'ok',earth:'ok'},brg:{de:String(row.brg_de||''),nde:String(row.brg_nde||''),deC:String(row.brg_de_cond||'ok'),ndeC:String(row.brg_nde_cond||'ok')},vib:{mDV:+row.vib_mDV||0,mDH:+row.vib_mDH||0,mDA:+row.vib_mDA||0,mNV:+row.vib_mNV||0,mNH:+row.vib_mNH||0,pDV:+row.vib_pDV||0,pDH:+row.vib_pDH||0,pNV:+row.vib_pNV||0,pNH:+row.vib_pNH||0},el:{cu:+row.el_cu||0,cv:+row.el_cv||0,cw:+row.el_cw||0,vu:+row.el_vu||0,vv:+row.el_vv||0,vw:+row.el_vw||0},st:{irUV:+row.ir_uv||0,irVW:+row.ir_vw||0,irWU:+row.ir_wu||0,irG:+row.ir_g||0,pi:+row.pi||0,wrU:+row.wr_u||0,wrV:+row.wr_v||0,wrW:+row.wr_w||0,wrUn:+row.wr_un||0,wiU:+row.wi_u||0,wiV:+row.wi_v||0,wiW:+row.wi_w||0,wiUn:+row.wi_un||0},sev:String(row.severity||'5'),res:String(row.results||''),ts:firebase.firestore.FieldValue.serverTimestamp(),by:S.usr?.email||'import'};
-batch.set(db.collection('records').doc(),rec);cnt++;if(cnt%400===0){await batch.commit();batch=db.batch();}}
-if(cnt%400!==0)await batch.commit();await loadAll();toast('Import '+cnt+' records สำเร็จ ✓');S.imp=null;pgImport(E('content'));}
-function dlTpl(){const h=['date','tag','wo','purpose','inspector','approver','brg_de','brg_nde','brg_de_cond','brg_nde_cond','vib_mDV','vib_mDH','vib_mDA','vib_mNV','vib_mNH','vib_pDV','vib_pDH','vib_pNV','vib_pNH','el_cu','el_cv','el_cw','el_vu','el_vv','el_vw','ir_uv','ir_vw','ir_wu','ir_g','pi','wr_u','wr_v','wr_w','wr_un','wi_u','wi_v','wi_w','wi_un','severity','results'];const ex=['2026-04-16','P-201A','30000088621','PM','Rittiras','Sanan','65BC03J3OX','65BC03J3OX','ok','ok',.78,.82,.91,.67,1.09,3.25,4.8,1.56,0,266,270,260,412,412,411,0,0,0,0,0,0,0,0,0,0,0,0,0,5,'Normal'];const ws=XLSX.utils.aoa_to_sheet([h,ex]);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Template');XLSX.writeFile(wb,'PM_Template.xlsx');toast('Downloaded');}
-
-// EQUIPMENT
+// ══════════ EQUIPMENT ══════════
 function pgEq(el){el.innerHTML='';const hd=document.createElement('div');hd.className='sh';hd.style.marginBottom='16px';hd.innerHTML='<div class="st">Equipment ('+S.eq.length+')</div><button class="btn btn-p" onclick="addEq()">+ Add</button>';el.appendChild(hd);
 S.eq.forEach(eq=>{const rs=S.rec.filter(r=>r.tag===eq.tag),la=[...rs].sort((a,b)=>b.date.localeCompare(a.date))[0],p=la?.vib?.pDH||0,al=p>=(eq.val||4.5),da=p>=(eq.vda||7.1),dc=!la?'d-x':da?'d-r':al?'d-a':'d-g';
 const d=document.createElement('div');d.className='eq-i';d.innerHTML='<div class="eq-av">'+eq.tag.slice(-3)+'</div><div style="flex:1"><div style="font-size:14px;font-weight:600"><span class="dot '+dc+'" style="margin-right:7px"></span>'+eq.tag+'</div><div style="font-size:11px;color:var(--text3);margin-top:2px">'+eq.mod+' | '+eq.mfg+' | '+eq.pwr+' HP | '+eq.vol+'</div><div style="font-size:11px;color:var(--text3);margin-top:2px">🔩 DE:<b>'+eq.de+'</b> NDE:<b>'+eq.nde+'</b> | Records: '+rs.length+'</div></div><div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="editEq(\''+eq.tag+'\')">Edit</button><button class="btn btn-sm btn-d" onclick="delEq(\''+eq.tag+'\')">Del</button></div>';el.appendChild(d);});}
@@ -357,11 +327,13 @@ function editEq(t){const eq=S.eq.find(e=>e.tag===t);if(!eq)return;E('meqt').text
 async function saveEq(){const t=E('eq-tag').value.trim();if(!t){toast('Tag required','error');return;}const o={tag:t,mod:E('eq-mod').value,mfg:E('eq-mfg').value,sn:E('eq-sn').value,pwr:E('eq-pwr').value,vol:E('eq-vol').value,amp:E('eq-amp').value,spd:E('eq-spd').value,de:E('eq-de').value,nde:E('eq-nde').value,val:parseFloat(E('eq-val').value)||4.5,vda:parseFloat(E('eq-vda').value)||7.1};try{await db.collection('equipment').doc(t).set(o);const i=S.eq.findIndex(e=>e.tag===t);if(i>=0)S.eq[i]=o;else S.eq.push(o);cm('meq');pgEq(E('content'));toast(t+' saved');}catch(e){toast('Error: '+e.message,'error');}}
 async function delEq(t){if(!confirm('Delete '+t+'?'))return;try{await db.collection('equipment').doc(t).delete();S.eq=S.eq.filter(e=>e.tag!==t);pgEq(E('content'));toast('Deleted '+t,'warning');}catch(e){toast('Error: '+e.message,'error');}}
 
-// SETTINGS
-function pgSet(el){el.innerHTML='<div class="card"><div class="st" style="margin-bottom:16px">⚙ Settings</div><div class="g2" style="gap:12px;margin-bottom:16px"><div class="fg"><label class="fl">Company</label><input class="fi" id="sco" value="'+(S.set.co||'')+'"></div><div class="fg"><label class="fl">Plant</label><input class="fi" id="spl" value="'+(S.set.plant||'')+'"></div><div class="fg"><label class="fl">Area</label><input class="fi" id="sar" value="'+(S.set.area||'')+'"></div><div class="fg"><label class="fl">Site</label><input class="fi" id="ssi" value="'+(S.set.site||'')+'"></div><div class="fg"><label class="fl">Default Inspector</label><input class="fi" id="sdi" value="'+(S.set.di||'')+'"></div><div class="fg"><label class="fl">Default Approver</label><input class="fi" id="sda" value="'+(S.set.da||'')+'"></div></div><button class="btn btn-p" onclick="saveSt()">Save</button></div><div class="card"><div class="st" style="margin-bottom:14px">🗄️ Database</div><div style="font-size:13px;color:var(--text2)">Equipment: <b>'+S.eq.length+'</b> | Records: <b>'+S.rec.length+'</b></div></div>';}
-async function saveSt(){const s={co:E('sco').value,plant:E('spl').value,area:E('sar').value,site:E('ssi').value,di:E('sdi').value,da:E('sda').value};try{await db.collection('settings').doc('global').set(s);S.set={...S.set,...s};toast('Saved');}catch(e){toast('Error: '+e.message,'error');}}
+// ══════════ SETTINGS (editable sidebar text) ══════════
+function pgSet(el){el.innerHTML='<div class="card"><div class="st" style="margin-bottom:16px">⚙ Settings</div><div class="g2" style="gap:12px;margin-bottom:16px"><div class="fg"><label class="fl">Company</label><input class="fi" id="sco" value="'+(S.set.co||'')+'"></div><div class="fg"><label class="fl">Plant</label><input class="fi" id="spl" value="'+(S.set.plant||'')+'"></div><div class="fg"><label class="fl">Area</label><input class="fi" id="sar" value="'+(S.set.area||'')+'"></div><div class="fg"><label class="fl">Site</label><input class="fi" id="ssi" value="'+(S.set.site||'')+'"></div><div class="fg"><label class="fl">Default Inspector</label><input class="fi" id="sdi" value="'+(S.set.di||'')+'"></div><div class="fg"><label class="fl">Default Approver</label><input class="fi" id="sda" value="'+(S.set.da||'')+'"></div></div>'+
+'<div style="font-size:12px;font-weight:600;color:var(--text3);margin:8px 0">SIDEBAR BRANDING (มุมบนซ้าย)</div><div class="g3" style="gap:12px;margin-bottom:16px"><div class="fg"><label class="fl">Icon Text</label><input class="fi" id="sli" value="'+(S.set.logoIcon||'PM')+'" maxlength="3" style="width:60px"></div><div class="fg"><label class="fl">Line 1</label><input class="fi" id="sl1" value="'+(S.set.logoLine1||'PM Inspection')+'"></div><div class="fg"><label class="fl">Line 2</label><input class="fi" id="sl2" value="'+(S.set.logoLine2||'TCC Plant GEN')+'"></div></div>'+
+'<button class="btn btn-p" onclick="saveSt()">Save Settings</button></div><div class="card"><div class="st" style="margin-bottom:14px">🗄️ Database</div><div style="font-size:13px;color:var(--text2)">Equipment: <b>'+S.eq.length+'</b> | Records: <b>'+S.rec.length+'</b></div></div>';}
+async function saveSt(){const s={co:E('sco').value,plant:E('spl').value,area:E('sar').value,site:E('ssi').value,di:E('sdi').value,da:E('sda').value,logoIcon:E('sli').value,logoLine1:E('sl1').value,logoLine2:E('sl2').value};try{await db.collection('settings').doc('global').set(s);S.set={...S.set,...s};applyLogo();toast('Saved');}catch(e){toast('Error: '+e.message,'error');}}
 
-// CLOCK
+// ══════════ CLOCK ══════════
 function uClock(){const d=new Date(),s=d.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});const td=E('tdate');if(td)td.textContent=s;const sc=E('sclock');if(sc)sc.textContent=d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
 setInterval(uClock,1000);uClock();
 </script>
