@@ -512,6 +512,49 @@ async function removeUser(email){
 
 function openUserMgmt(){if(!isAdmin()){toast('เฉพาะ Admin','error');return;}loadUList();om('musr');}
 
+
+// ══════ LINE NOTIFICATION ══════
+async function sendLineNotify(rec,alarmEntries){
+  const webhookUrl=S.set.lineWebhook||'';
+  if(!webhookUrl)return;
+  const eq=S.eq.find(e=>e.tag===rec.tag);
+  const sl2={1:'Immediate',2:'Correct ASAP',3:'Next opportunity',4:'Monitor',5:'No action'};
+  const sev=sl2[rec.sev||rec.severity]||'';
+  const sep='──────────────────';
+  const lines=[];
+  lines.push('🔔 PM INSPECTION REPORT');
+  lines.push(sep);
+  lines.push('📍 Equipment: '+rec.tag);
+  if(eq?.module)lines.push('🏭 Module: '+eq.module);
+  lines.push('📅 Date: '+rec.date);
+  if(rec.wo)lines.push('🔧 WO: '+rec.wo);
+  if(rec.insp||rec.inspector)lines.push('👤 Inspector: '+(rec.insp||rec.inspector||''));
+  const mv=maxMotorVib(rec),pv=maxPumpVib(rec);
+  if(mv||pv){
+    lines.push(sep);
+    if(mv){const mAl=eqMAl(eq),mDa=eqMDa(eq);lines.push('〰 Motor max: '+mv.toFixed(2)+' mm/s '+(mv>=mDa?'⛔DANGER':mv>=mAl?'⚠ALARM':'✅OK'));}
+    if(pv){const pAl=eqPAl(eq),pDa=eqPDa(eq);lines.push('〰 Pump max:  '+pv.toFixed(2)+' mm/s '+(pv>=pDa?'⛔DANGER':pv>=pAl?'⚠ALARM':'✅OK'));}
+  }
+  const el2=rec.el||rec.elec||{};
+  if(el2.cu)lines.push('⚡ Current: '+[el2.cu,el2.cv,el2.cw].filter(Boolean).join('/')+'A'+(el2.cuUn?' (Unbal:'+el2.cuUn+'%)':''));
+  if(el2.vu)lines.push('⚡ Voltage: '+[el2.vu,el2.vv,el2.vw].filter(Boolean).join('/')+'V'+(el2.vuUn?' (Unbal:'+el2.vuUn+'%)':''));
+  if(alarmEntries.length){
+    lines.push(sep);
+    lines.push('⚠ ALERTS ('+alarmEntries.length+'):');
+    alarmEntries.forEach(a=>lines.push((a.type==='danger'?'🔴':'🟡')+' '+a.loc.replace(/_/g,' ')+': '+a.msg));
+  }
+  lines.push(sep);
+  if(sev)lines.push('📝 Severity: '+sev);
+  if(rec.res)lines.push('📋 '+rec.res.slice(0,120)+(rec.res.length>120?'...':''));
+  lines.push(sep);
+  lines.push('PM Inspection — '+(S.set.plant||'TCC Plant GEN'));
+  const msg=lines.join('\n');
+  fetch(webhookUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,tag:rec.tag,date:rec.date,wo:rec.wo||'',alarmCount:alarmEntries.length,hasDanger:alarmEntries.some(a=>a.type==='danger')})})
+  .then(r=>{if(r.ok)toast('ส่ง Line แล้ว ✓');else toast('Line webhook error: '+r.status,'warning');})
+  .catch(()=>toast('Line webhook ส่งไม่ได้','warning'));
+}
+
+
 async function loadAll(){try{
   const [es,rs,ss,al]=await Promise.all([
     db.collection('equipment').get(),
@@ -830,6 +873,9 @@ try{
   }
   await persistNewAlarms(full);
   const al2=await db.collection('alarmlog').orderBy('date','desc').limit(200).get();S.alogs=al2.docs.map(d=>({id:d.id,...d.data()}));
+  // Send Line notification (all PM records + alarm details)
+  const alarmEntries=getAllAlarmsFromRec(full,S.eq.find(e=>e.tag===full.tag));
+  sendLineNotify(full,alarmEntries);
   ub();pgCheck(E('content'));
 }catch(e){toast('Error: '+e.message,'error');btn.disabled=false;btn.textContent='✓ Save';}}
 
@@ -1136,9 +1182,9 @@ async function removeUser2(email){
 }
 
 // ══════════ SETTINGS ══════════
-function pgSet(el){el.innerHTML='<div class="card"><div class="st" style="margin-bottom:16px">⚙ Settings</div><div class="g2" style="gap:12px;margin-bottom:16px"><div class="fg"><label class="fl">Company</label><input class="fi" id="sco" value="'+(S.set.co||'')+'"></div><div class="fg"><label class="fl">Plant</label><input class="fi" id="spl" value="'+(S.set.plant||'')+'"></div><div class="fg"><label class="fl">Area</label><input class="fi" id="sar" value="'+(S.set.area||'')+'"></div><div class="fg"><label class="fl">Site</label><input class="fi" id="ssi" value="'+(S.set.site||'')+'"></div><div class="fg"><label class="fl">Default Inspector</label><input class="fi" id="sdi" value="'+(S.set.di||'')+'"></div><div class="fg"><label class="fl">Default Approver</label><input class="fi" id="sda" value="'+(S.set.da||'')+'"></div></div><div style="font-size:12px;font-weight:600;color:var(--text3);margin:8px 0">SIDEBAR BRANDING</div><div class="g3" style="gap:12px;margin-bottom:16px"><div class="fg"><label class="fl">Icon Text</label><input class="fi" id="sli" value="'+(S.set.logoIcon||'PM')+'" maxlength="3" style="width:60px"></div><div class="fg"><label class="fl">Line 1</label><input class="fi" id="sl1" value="'+(S.set.logoLine1||'PM Inspection')+'"></div><div class="fg"><label class="fl">Line 2</label><input class="fi" id="sl2" value="'+(S.set.logoLine2||'TCC Plant GEN')+'"></div></div><button class="btn btn-p" onclick="saveSt()">Save Settings</button></div>'+pgUsrBtn()+'<div<div class="card"><div class="st" style="margin-bottom:14px">🗄️ Database</div><div style="font-size:13px;color:var(--text2)">Equipment: <b>'+S.eq.length+'</b> | Records: <b>'+S.rec.length+'</b> | Alarm Log: <b>'+S.alogs.length+'</b></div></div>';}
+function pgSet(el){el.innerHTML='<div class="card"><div class="st" style="margin-bottom:16px">⚙ Settings</div><div class="g2" style="gap:12px;margin-bottom:16px"><div class="fg"><label class="fl">Company</label><input class="fi" id="sco" value="'+(S.set.co||'')+'"></div><div class="fg"><label class="fl">Plant</label><input class="fi" id="spl" value="'+(S.set.plant||'')+'"></div><div class="fg"><label class="fl">Area</label><input class="fi" id="sar" value="'+(S.set.area||'')+'"></div><div class="fg"><label class="fl">Site</label><input class="fi" id="ssi" value="'+(S.set.site||'')+'"></div><div class="fg"><label class="fl">Default Inspector</label><input class="fi" id="sdi" value="'+(S.set.di||'')+'"></div><div class="fg"><label class="fl">Default Approver</label><input class="fi" id="sda" value="'+(S.set.da||'')+'"></div></div><div style="font-size:12px;font-weight:600;color:var(--text3);margin:8px 0">LINE NOTIFICATION (n8n)</div><div class=\"fg\"><label class=\"fl\">n8n Webhook URL</label><input class=\"fi\" id=\"slw\" value=\"'+(S.set.lineWebhook||'')+'\"></div><div style=\"font-size:11px;color:var(--text3);margin-bottom:12px\">⚡ ทุก PM บันทึกจะส่ง Line ทันที — ถ้าว่างไม่ส่ง</div><div style=\"font-size:12px;font-weight:600;color:var(--text3);margin:8px 0\">SIDEBAR BRANDING</div><div class="g3" style="gap:12px;margin-bottom:16px"><div class="fg"><label class="fl">Icon Text</label><input class="fi" id="sli" value="'+(S.set.logoIcon||'PM')+'" maxlength="3" style="width:60px"></div><div class="fg"><label class="fl">Line 1</label><input class="fi" id="sl1" value="'+(S.set.logoLine1||'PM Inspection')+'"></div><div class="fg"><label class="fl">Line 2</label><input class="fi" id="sl2" value="'+(S.set.logoLine2||'TCC Plant GEN')+'"></div></div><button class="btn btn-p" onclick="saveSt()">Save Settings</button></div>'+pgUsrBtn()+'<div<div class="card"><div class="st" style="margin-bottom:14px">🗄️ Database</div><div style="font-size:13px;color:var(--text2)">Equipment: <b>'+S.eq.length+'</b> | Records: <b>'+S.rec.length+'</b> | Alarm Log: <b>'+S.alogs.length+'</b></div></div>';}
 function pgUsrBtn(){if(isAdmin())return '<button class="btn btn-p" onclick="go(\'users\',E(\'nav-users\'))" style="margin-top:12px">👥 User Management</button>';return '';}
-async function saveSt(){const s={co:E('sco').value,plant:E('spl').value,area:E('sar').value,site:E('ssi').value,di:E('sdi').value,da:E('sda').value,logoIcon:E('sli').value,logoLine1:E('sl1').value,logoLine2:E('sl2').value};try{await db.collection('settings').doc('global').set(s);S.set={...S.set,...s};applyLogo();toast('Saved');}catch(e){toast('Error: '+e.message,'error');}}
+async function saveSt(){const s={co:E('sco').value,plant:E('spl').value,area:E('sar').value,site:E('ssi').value,di:E('sdi').value,da:E('sda').value,logoIcon:E('sli').value,logoLine1:E('sl1').value,logoLine2:E('sl2').value,lineWebhook:(E('slw')?.value||'').trim()};try{await db.collection('settings').doc('global').set(s);S.set={...S.set,...s};applyLogo();toast('Saved');}catch(e){toast('Error: '+e.message,'error');}}
 
 // Clock
 function uClock(){const d=new Date(),s=d.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});const td=E('tdate');if(td)td.textContent=s;const sc=E('sclock');if(sc)sc.textContent=d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
