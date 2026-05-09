@@ -773,13 +773,13 @@ el.innerHTML=
 '<div class="g2" style="gap:16px">'+
 '<div><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px">🔵 MOTOR</div>'+
 '<table class="vt"><thead><tr><th>Pos</th><th>V</th><th>H</th><th>A</th><th>Status</th></tr></thead><tbody>'+
-'<tr><td>DE</td><td><input class="vi" id="vmDV" type="number" step=".01"></td><td><input class="vi" id="vmDH" type="number" step=".01" oninput="chkVm(this,\'smD\')"></td><td><input class="vi" id="vmDA" type="number" step=".01"></td><td id="smD">—</td></tr>'+
-'<tr><td>NDE</td><td><input class="vi" id="vmNV" type="number" step=".01"></td><td><input class="vi" id="vmNH" type="number" step=".01" oninput="chkVm(this,\'smN\')"></td><td><input class="vi" id="vmNA" type="number" step=".01"></td><td id="smN">—</td></tr>'+
+'<tr><td>DE</td><td><input class="vi" id="vmDV" type="number" step=".01" oninput="chkVm(this,\'smD\')"></td><td><input class="vi" id="vmDH" type="number" step=".01" oninput="chkVm(this,\'smD\')"></td><td><input class="vi" id="vmDA" type="number" step=".01" oninput="chkVm(this,\'smD\')"></td><td id="smD">—</td></tr>'+
+'<tr><td>NDE</td><td><input class="vi" id="vmNV" type="number" step=".01" oninput="chkVm(this,\'smN\')"></td><td><input class="vi" id="vmNH" type="number" step=".01" oninput="chkVm(this,\'smN\')"></td><td><input class="vi" id="vmNA" type="number" step=".01" oninput="chkVm(this,\'smN\')"></td><td id="smN">—</td></tr>'+
 '</tbody></table></div>'+
 '<div><div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:8px">🟡 PUMP</div>'+
 '<table class="vt"><thead><tr><th>Pos</th><th>V</th><th>H</th><th>A</th><th>Status</th></tr></thead><tbody>'+
-'<tr><td>DE</td><td><input class="vi" id="vpDV" type="number" step=".01"></td><td><input class="vi" id="vpDH" type="number" step=".01" oninput="chkVp(this,\'spD\')"></td><td><input class="vi" id="vpDA" type="number" step=".01"></td><td id="spD">—</td></tr>'+
-'<tr><td>NDE</td><td><input class="vi" id="vpNV" type="number" step=".01"></td><td><input class="vi" id="vpNH" type="number" step=".01"></td><td><input class="vi" id="vpNA" type="number" step=".01"></td><td>—</td></tr>'+
+'<tr><td>DE</td><td><input class="vi" id="vpDV" type="number" step=".01" oninput="chkVp(this,\'spD\')"></td><td><input class="vi" id="vpDH" type="number" step=".01" oninput="chkVp(this,\'spD\')"></td><td><input class="vi" id="vpDA" type="number" step=".01" oninput="chkVp(this,\'spD\')"></td><td id="spD">—</td></tr>'+
+'<tr><td>NDE</td><td><input class="vi" id="vpNV" type="number" step=".01" oninput="chkVp(this,\'spN\')"</td><td><input class="vi" id="vpNH" type="number" step=".01" oninput="chkVp(this,\'spN\')"</td><td><input class="vi" id="vpNA" type="number" step=".01" oninput="chkVp(this,\'spN\')"</td><td id="spN">—</td></tr>'+
 '</tbody></table></div></div></div>'+
 // ── Electrical ──
 '<div class="card"><div class="st" style="margin-bottom:14px">⚡ Voltage & Current</div>'+
@@ -842,8 +842,23 @@ function setCk(k,v,b){S.cf.ck[k]=v;b.closest('div').querySelectorAll('.cb').forE
 function setCkAct(k,v,b){S.cf.ck[k]=v;b.closest('div').querySelectorAll('.cb').forEach(x=>x.className='cb');b.className='cb ok';}
 function onTg(t){const eq=S.eq.find(e=>e.tag===t);if(!eq)return;E('f-bde').value=eq.de||'';E('f-bnde').value=eq.nde||'';}
 // Feature 3: separate Motor and Pump alarm check
-function chkVm(inp,sid){const t=ssVal('f-tag-wrap');const eq=S.eq.find(e=>e.tag===t),al=eqMAl(eq),da=eqMDa(eq),v=parseFloat(inp.value)||0;inp.className='vi'+(v>=da?' danger':v>=al?' alarm':'');const s=E(sid);if(s)s.innerHTML=v>=da?'<span class="badge b-nk">Danger</span>':v>=al?'<span class="badge b-al">Alarm</span>':'<span class="badge b-ok">Normal</span>';}
-function chkVp(inp,sid){const t=ssVal('f-tag-wrap');const eq=S.eq.find(e=>e.tag===t),al=eqPAl(eq),da=eqPDa(eq),v=parseFloat(inp.value)||0;inp.className='vi'+(v>=da?' danger':v>=al?' alarm':'');const s=E(sid);if(s)s.innerHTML=v>=da?'<span class="badge b-nk">Danger</span>':v>=al?'<span class="badge b-al">Alarm</span>':'<span class="badge b-ok">Normal</span>';}
+function chkVm(inp,sid){
+  const t=ssVal('f-tag-wrap');const eq=S.eq.find(e=>e.tag===t);
+  const al=eqMAl(eq),da=eqMDa(eq),v=parseFloat(inp.value)||0;
+  inp.className='vi'+(v>=da?' danger':v>=al?' alarm':'');
+  // Check max of all 3 fields in this row for status badge
+  const rowIds=sid==='smD'?['vmDV','vmDH','vmDA']:['vmNV','vmNH','vmNA'];
+  const mx=Math.max(...rowIds.map(id=>parseFloat(E(id)?.value)||0));
+  const s=E(sid);if(s)s.innerHTML=mx>=da?'<span class="badge b-nk">Danger</span>':mx>=al?'<span class="badge b-al">Alarm</span>':mx>0?'<span class="badge b-ok">Normal</span>':'—';
+}
+function chkVp(inp,sid){
+  const t=ssVal('f-tag-wrap');const eq=S.eq.find(e=>e.tag===t);
+  const al=eqPAl(eq),da=eqPDa(eq),v=parseFloat(inp.value)||0;
+  inp.className='vi'+(v>=da?' danger':v>=al?' alarm':'');
+  const rowIds=sid==='spD'?['vpDV','vpDH','vpDA']:['vpNV','vpNH','vpNA'];
+  const mx=Math.max(...rowIds.map(id=>parseFloat(E(id)?.value)||0));
+  const s=E(sid);if(s)s.innerHTML=mx>=da?'<span class="badge b-nk">Danger</span>':mx>=al?'<span class="badge b-al">Alarm</span>':mx>0?'<span class="badge b-ok">Normal</span>':'—';
+}
 function selS(n,el){document.querySelectorAll('.so').forEach(b=>b.className='so');el.className='so s'+n;S.cf.sev=String(n);E('f-sev').value=n;}
 function ssVal(wid,def=''){const inp=E(wid)?.querySelector('input.ss-input');return(inp?.dataset?.val&&inp.dataset.val.trim())||def;}
 async function saveR(){if(!canEdit()){toast('ไม่มีสิทธิ์บันทึก (Viewer)','error');return;}const tag=ssVal('f-tag-wrap');if(!tag){toast('เลือก Equipment Tag','error');return;}const btn=E('svb');btn.disabled=true;btn.textContent='⏳ Saving...';
