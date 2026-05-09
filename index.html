@@ -2,1267 +2,161 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>PM Inspection System</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script>const firebaseConfig={apiKey:"AIzaSyAIIFtJVieyqEpLmqqqn6cOqT_VOICuxmw",authDomain:"check-sheet-motor.firebaseapp.com",projectId:"check-sheet-motor",storageBucket:"check-sheet-motor.firebasestorage.app",messagingSenderId:"726291252984",appId:"1:726291252984:web:952912afbe890c4546dd0d"};</script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PM Inspection System — GPSC TCC Plant GEN</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2128;--bg4:#22272e;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);--text:#e6edf3;--text2:#8b949e;--text3:#6e7681;--accent:#58a6ff;--accent2:#1f6feb;--green:#3fb950;--green-bg:rgba(63,185,80,.1);--amber:#d29922;--amber-bg:rgba(210,153,34,.12);--red:#f85149;--red-bg:rgba(248,81,73,.1);--purple:#bc8cff;--font:'IBM Plex Sans Thai',sans-serif;--mono:'IBM Plex Mono',monospace;--r:8px;--rl:12px;--sw:220px}
-*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
-::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
-#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
-.login-box{width:380px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rl);padding:36px;box-shadow:0 24px 64px rgba(0,0,0,.5)}
-.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px}
-.login-logo i{width:44px;height:44px;background:var(--accent2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;font-style:normal}
-.login-err{background:var(--red-bg);border:1px solid rgba(248,81,73,.3);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:14px;display:none}
-.app{display:flex;height:100vh;overflow:hidden}.sidebar{width:var(--sw);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.topbar{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;flex-shrink:0}
-.content{flex:1;overflow-y:auto;padding:24px}
-.sidebar-logo{padding:16px;border-bottom:1px solid var(--border)}.logo-badge{display:flex;align-items:center;gap:10px}
-.logo-i{width:34px;height:34px;background:var(--accent2);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0}
-.sidebar-nav{flex:1;padding:8px;overflow-y:auto}
-.nav-s{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;padding:12px 8px 5px}
-.nav-i{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r);cursor:pointer;color:var(--text2);font-size:13px;margin-bottom:1px;transition:all .15s}
-.nav-i:hover{background:var(--bg3);color:var(--text)}.nav-i.active{background:rgba(88,166,255,.12);color:var(--accent)}
-.nav-ic{font-size:15px;width:18px;text-align:center;flex-shrink:0}
-.nav-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;font-family:var(--mono)}
-.sidebar-user{padding:12px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.u-av{width:30px;height:30px;border-radius:50%;background:rgba(88,166,255,.15);border:1px solid rgba(88,166,255,.25);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--accent);flex-shrink:0}
-.sidebar-clock{padding:8px 16px 14px;font-size:11px;color:var(--text3);font-family:var(--mono)}
-.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}.topbar-date{font-size:12px;color:var(--text3);font-family:var(--mono)}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:12px;cursor:pointer;font-family:var(--font);transition:all .15s;white-space:nowrap}
-.btn:hover{background:var(--bg4)}.btn:disabled{opacity:.5;cursor:default}
-.btn-p{background:var(--accent2);border-color:var(--accent2);color:#fff}.btn-p:hover{background:var(--accent)}
-.btn-s{background:var(--green-bg);border-color:rgba(63,185,80,.3);color:var(--green)}
-.btn-d{background:var(--red-bg);border-color:rgba(248,81,73,.3);color:var(--red)}
-.btn-sm{padding:4px 10px;font-size:11px}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:16px 18px;margin-bottom:16px}
-.card-t{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
-.metric-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-.mc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:16px;position:relative;overflow:hidden}
-.mc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-.mc.m1::after{background:var(--accent)}.mc.m2::after{background:var(--green)}.mc.m3::after{background:var(--amber)}.mc.m4::after{background:var(--red)}
-.ml{font-size:11px;color:var(--text3);margin-bottom:6px}.mv{font-size:26px;font-weight:600;font-family:var(--mono);line-height:1}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.fg{display:flex;flex-direction:column;gap:5px}.fl{font-size:11px;color:var(--text3);font-weight:500}
-.fi,.fs,.ft{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:7px 10px;font-size:13px;color:var(--text);font-family:var(--font);width:100%;transition:border-color .15s}
-.fi:focus,.fs:focus,.ft:focus{outline:none;border-color:var(--accent2);box-shadow:0 0 0 3px rgba(31,111,235,.15)}
-.fs option{background:var(--bg3)}.ft{resize:vertical;min-height:70px;line-height:1.5}
-/* Searchable Select */
-.ss-wrap{position:relative}.ss-input{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:7px 28px 7px 10px;font-size:13px;color:var(--text);font-family:var(--font);width:100%;cursor:pointer}
-.ss-input:focus{outline:none;border-color:var(--accent2)}.ss-arrow{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text3);pointer-events:none}
-.ss-drop{position:absolute;top:100%;left:0;right:0;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);max-height:180px;overflow-y:auto;z-index:50;display:none;margin-top:2px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
-.ss-drop.open{display:block}.ss-opt{padding:7px 10px;font-size:12px;cursor:pointer;color:var(--text2)}.ss-opt:hover,.ss-opt.hl{background:rgba(88,166,255,.12);color:var(--accent)}
-.ss-none{padding:7px 10px;font-size:11px;color:var(--text3);font-style:italic}
-/* Unit toggle */
-.unit-grp{display:flex;gap:0;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;height:30px}
-.unit-btn{padding:2px 8px;font-size:10px;border:none;background:var(--bg3);color:var(--text3);cursor:pointer;font-family:var(--font);transition:all .15s}
-.unit-btn.active{background:var(--accent2);color:#fff}
-.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
-.b-ok{background:var(--green-bg);color:var(--green);border:1px solid rgba(63,185,80,.2)}
-.b-al{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(210,153,34,.2)}
-.b-nk{background:var(--red-bg);color:var(--red);border:1px solid rgba(248,81,73,.2)}
-.b-in{background:rgba(88,166,255,.1);color:var(--accent);border:1px solid rgba(88,166,255,.2)}
-.b-no{background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
-.cht{width:100%;border-collapse:collapse}
-.cht th{font-size:11px;color:var(--text3);font-weight:500;text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)}
-.cht td{padding:8px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
-.cht tr:last-child td{border-bottom:none}
-.cb{padding:3px 10px;border-radius:12px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text3);transition:all .15s}
-.cb.ok{background:var(--green-bg);color:var(--green);border-color:rgba(63,185,80,.3)}
-.cb.nok{background:var(--red-bg);color:var(--red);border-color:rgba(248,81,73,.3)}
-.cb.na{background:rgba(139,148,158,.1);color:var(--text3)}
-.vt{width:100%;border-collapse:collapse}
-.vt th{font-size:11px;color:var(--text3);text-align:center;padding:6px 4px;border-bottom:1px solid var(--border);font-weight:500}
-.vt th:first-child{text-align:left}.vt td{padding:6px 4px;border-bottom:1px solid var(--border)}
-.vt tr:last-child td{border-bottom:none}.vt td:first-child{font-size:12px;color:var(--text2);white-space:nowrap}
-.vi{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:5px 6px;font-size:13px;color:var(--text);font-family:var(--mono);text-align:center;width:72px;transition:all .15s}
-.vi:focus{outline:none;border-color:var(--accent2)}.vi.alarm{border-color:rgba(210,153,34,.5);background:rgba(210,153,34,.05)}.vi.danger{border-color:rgba(248,81,73,.5);background:rgba(248,81,73,.05)}
-.vi-ro{background:var(--bg4);border:1px solid var(--border);border-radius:5px;padding:5px 6px;font-size:12px;color:var(--amber);font-family:var(--mono);text-align:center;width:72px}
-.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
-.d-g{background:var(--green);box-shadow:0 0 6px rgba(63,185,80,.5)}.d-a{background:var(--amber);box-shadow:0 0 6px rgba(210,153,34,.5)}.d-r{background:var(--red);box-shadow:0 0 6px rgba(248,81,73,.5)}.d-x{background:var(--text3)}
-.eq-i{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--rl);margin-bottom:8px;background:var(--bg3)}
-.eq-av{width:38px;height:38px;border-radius:8px;background:rgba(88,166,255,.12);border:1px solid rgba(88,166,255,.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--accent);font-family:var(--mono);flex-shrink:0}
-.ht{width:100%;border-collapse:collapse}.ht th{font-size:11px;color:var(--text3);font-weight:500;text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);background:var(--bg3);white-space:nowrap}
-.ht td{padding:10px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}.ht tr:hover td{background:var(--bg3)}
-.mono{font-family:var(--mono);font-size:12px}
-.ab{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:var(--r);margin-bottom:10px;font-size:13px}
-.a-am{background:var(--amber-bg);border:1px solid rgba(210,153,34,.25);color:var(--amber)}
-.a-re{background:var(--red-bg);border:1px solid rgba(248,81,73,.25);color:var(--red)}
-.sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.so{padding:10px 14px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:12px;color:var(--text2);transition:all .15s;display:flex;align-items:center;gap:8px}
-.so.s1{border-color:rgba(248,81,73,.5);background:var(--red-bg);color:var(--red)}
-.so.s2{border-color:rgba(210,153,34,.5);background:var(--amber-bg);color:var(--amber)}
-.so.s3,.so.s4{border-color:rgba(88,166,255,.4);background:rgba(88,166,255,.08);color:var(--accent)}
-.so.s5{border-color:rgba(63,185,80,.4);background:var(--green-bg);color:var(--green)}
-.mo{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center}
-.mo.open{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rl);max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.5)}
-.mh{padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.mb{padding:18px 20px}.mf{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
-.mc-btn{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:2px 6px;border-radius:4px}
-.mc-btn:hover{color:var(--text);background:var(--bg3)}
-.toast-c{position:fixed;bottom:24px;right:24px;z-index:200;display:flex;flex-direction:column;gap:8px}
-.toast{background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);padding:10px 16px;font-size:13px;max-width:320px;display:flex;align-items:center;gap:8px;animation:si .2s ease;box-shadow:0 8px 24px rgba(0,0,0,.3)}
-.toast.ok{border-left:3px solid var(--green)}.toast.er{border-left:3px solid var(--red)}.toast.wa{border-left:3px solid var(--amber)}
-@keyframes si{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.st{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
-.itab{display:flex;border-bottom:1px solid var(--border);margin-bottom:16px}
-.it{padding:8px 16px;cursor:pointer;font-size:13px;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
-.it.active{color:var(--accent);border-bottom-color:var(--accent)}
-.cw{position:relative;width:100%}
-.et{width:100%;border-collapse:collapse}
-.et th{font-size:11px;color:var(--text3);font-weight:500;text-align:center;padding:6px 8px;border-bottom:1px solid var(--border)}
-.et th:first-child{text-align:left}.et td{padding:6px 4px;border-bottom:1px solid var(--border);text-align:center}
-.et td:first-child{text-align:left;font-size:12px;color:var(--text2)}
-.dl{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)}
-.dl-l{color:var(--text3);font-size:12px}.dl-v{font-family:var(--mono);font-size:13px;text-align:right}
-.sec-h{font-size:11px;font-weight:600;color:var(--accent);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.05em}
-@media print{.sidebar,.topbar,.toast-c,.mf,.mh button,.mh .mc-btn,.btn,.ss-drop{display:none!important}.mo{position:static!important;background:none!important}.modal{max-height:none!important;width:100%!important;border:none!important;box-shadow:none!important;border-radius:0!important}.mb{padding:0!important}body{background:#fff!important;color:#000!important}*{color:#000!important;border-color:#ccc!important}.badge{border:1px solid #999!important}.dl{border-color:#ddd!important}.sec-h{color:#1a5fb4!important}.content{overflow:visible!important;height:auto!important}.main{overflow:visible!important}.app{display:block!important;height:auto!important;overflow:visible!important}.card{break-inside:avoid;border:1px solid #ddd!important}.mc{border:1px solid #ddd!important}.metric-row{grid-template-columns:repeat(4,1fr)!important}.g2{grid-template-columns:1fr 1fr!important}canvas{max-height:200px!important}}
+:root{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2128;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);--text:#e6edf3;--text2:#8b949e;--text3:#6e7681;--accent:#58a6ff;--accent2:#1f6feb;--green:#3fb950;--green-bg:rgba(63,185,80,.1);--amber:#d29922;--amber-bg:rgba(210,153,34,.12);--red:#f85149;--red-bg:rgba(248,81,73,.1);--font:'IBM Plex Sans Thai',sans-serif;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;font-family:var(--font);background:var(--bg);color:var(--text);font-size:15px;line-height:1.6}
+body{display:flex;flex-direction:column;align-items:center;padding:48px 20px 64px}
 
-/* Role-based UI */
-.viewer-hide{display:none!important}
-.role-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:600}
-.role-admin{background:rgba(248,81,73,.15);color:var(--red);border:1px solid rgba(248,81,73,.25)}
-.role-editor{background:rgba(63,185,80,.12);color:var(--green);border:1px solid rgba(63,185,80,.25)}
-.role-viewer{background:rgba(139,148,158,.12);color:var(--text3);border:1px solid var(--border)}
+/* Header */
+.header{text-align:center;margin-bottom:48px}
+.logo{width:72px;height:72px;background:var(--accent2);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#fff;margin:0 auto 20px;box-shadow:0 8px 32px rgba(31,111,235,.35)}
+.title{font-size:28px;font-weight:600;margin-bottom:6px}
+.subtitle{font-size:14px;color:var(--text2)}
+.badge-row{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid}
+.b-blue{background:rgba(88,166,255,.1);color:var(--accent);border-color:rgba(88,166,255,.25)}
+.b-green{background:var(--green-bg);color:var(--green);border-color:rgba(63,185,80,.25)}
 
-@media(max-width:900px){.metric-row{grid-template-columns:1fr 1fr}.g3,.g4{grid-template-columns:1fr 1fr}.sidebar{display:none}}
+/* Grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;width:100%;max-width:900px;margin-bottom:48px}
+
+/* Cards */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;text-decoration:none;color:var(--text);transition:all .2s;display:flex;flex-direction:column;gap:0;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.card-motor::before{background:linear-gradient(90deg,#58a6ff,#1f6feb)}
+.card-transformer::before{background:linear-gradient(90deg,#d29922,#f0883e)}
+.card-swg::before{background:linear-gradient(90deg,#bc8cff,#8957e5)}
+.card-protection::before{background:linear-gradient(90deg,#f85149,#da3633)}
+.card-ups::before{background:linear-gradient(90deg,#3fb950,#238636)}
+.card-coming::before{background:var(--border2)}
+.card:hover:not(.card-coming){border-color:var(--border2);transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.3)}
+.card-coming{opacity:.55;cursor:default}
+.card-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px;flex-shrink:0}
+.icon-motor{background:rgba(88,166,255,.12)}
+.icon-transformer{background:rgba(210,153,34,.12)}
+.icon-swg{background:rgba(188,140,255,.12)}
+.icon-protection{background:var(--red-bg)}
+.icon-ups{background:var(--green-bg)}
+.icon-coming{background:var(--bg3)}
+.card-name{font-size:17px;font-weight:600;margin-bottom:4px}
+.card-desc{font-size:13px;color:var(--text2);margin-bottom:16px;flex:1}
+.card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
+.tag-row{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500}
+.tag-active{background:var(--green-bg);color:var(--green);border:1px solid rgba(63,185,80,.25)}
+.tag-soon{background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
+.tag-alert{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(210,153,34,.25)}
+.arrow{font-size:18px;color:var(--accent);opacity:0;transition:opacity .2s}
+.card:hover:not(.card-coming) .arrow{opacity:1}
+
+/* Section divider */
+.section-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;width:100%;max-width:900px;margin-bottom:12px;padding:0 4px}
+
+/* Footer */
+.footer{text-align:center;font-size:12px;color:var(--text3);border-top:1px solid var(--border);padding-top:24px;width:100%;max-width:900px}
+.footer a{color:var(--accent);text-decoration:none}
+
+/* Stat bar */
+.stat-bar{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px 24px;width:100%;max-width:900px;display:flex;gap:32px;margin-bottom:32px;flex-wrap:wrap}
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat-val{font-size:22px;font-weight:600;font-family:'IBM Plex Mono',monospace}
+.stat-lbl{font-size:12px;color:var(--text3)}
+
+@media(max-width:600px){.title{font-size:22px}.grid{grid-template-columns:1fr}.stat-bar{gap:20px}}
 </style>
 </head>
 <body>
-<div class="toast-c" id="toasts"></div>
-<div id="login-screen"><div class="login-box">
-  <div class="login-logo"><i>PM</i><div><div style="font-size:16px;font-weight:600">PM Inspection System</div><div style="font-size:12px;color:var(--text3)">GPSC — TCC Plant GEN</div></div></div>
-  <div style="font-size:22px;font-weight:600;margin-bottom:6px">เข้าสู่ระบบ</div>
-  <div style="font-size:13px;color:var(--text3);margin-bottom:24px">ใช้ Email/Password ที่ Admin กำหนด</div>
-  <div class="login-err" id="login-err"></div>
-  <div class="fg" style="margin-bottom:12px"><label class="fl">Email</label><input class="fi" type="email" id="login-email" placeholder="your@email.com"></div>
-  <div class="fg" style="margin-bottom:20px"><label class="fl">Password</label><input class="fi" type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
-  <button class="btn btn-p" style="width:100%;justify-content:center;padding:10px" onclick="doLogin()" id="login-btn">เข้าสู่ระบบ</button>
-</div></div>
-<div class="app" id="main-app" style="display:none">
-<aside class="sidebar">
-  <div class="sidebar-logo"><div class="logo-badge"><div class="logo-i" id="logo-icon">PM</div><div><div style="font-size:13px;font-weight:600;line-height:1.2" id="logo-line1">PM Inspection</div><div style="font-size:10px;color:var(--text3)" id="logo-line2">TCC Plant GEN</div></div></div></div>
-  <nav class="sidebar-nav">
-    <div class="nav-s">Overview</div>
-    <div class="nav-i active" id="nav-dashboard" onclick="go('dashboard',this)"><span class="nav-ic">◈</span> Dashboard</div>
-    <div class="nav-i" id="nav-alerts" onclick="go('alerts',this)"><span class="nav-ic">⚠</span> Alerts <span class="nav-badge" id="acnt" style="display:none">0</span></div>
-    <div class="nav-s">PM Operations</div>
-    <div class="nav-i" id="nav-checksheet" onclick="go('checksheet',this)"><span class="nav-ic">✎</span> PM Check Sheet</div>
-    <div class="nav-i" id="nav-history" onclick="go('history',this)"><span class="nav-ic">☰</span> PM History</div>
-    <div class="nav-i" id="nav-trends" onclick="go('trends',this)"><span class="nav-ic">↗</span> Trends</div>
-    <div class="nav-i" id="nav-alarmlog" onclick="go('alarmlog',this)"><span class="nav-ic">🔔</span> Alarm Log</div>
-    <div class="nav-s">Master Data</div>
-    <div class="nav-i" id="nav-equipment" onclick="go('equipment',this)"><span class="nav-ic">⊞</span> Equipment</div>
-    <div class="nav-i" id="nav-settings" onclick="go('settings',this)"><span class="nav-ic">⚙</span> Settings</div>
-    <div class="nav-i" id="nav-users" onclick="go('users',this)" style="display:none"><span class="nav-ic">👥</span> Users</div>
-  </nav>
-  <div class="sidebar-user"><div class="u-av" id="uav">?</div><div style="flex:1;overflow:hidden"><div style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="uname">—</div><div style="font-size:10px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="uemail">—</div></div><span id="role-badge" style="font-size:9px;padding:2px 6px;border-radius:10px;background:rgba(88,166,255,.15);color:var(--accent);border:1px solid rgba(88,166,255,.25);flex-shrink:0">—</span></div>
-  <div class="sidebar-clock" id="sclock"></div>
-</aside>
-<div class="main">
-  <div class="topbar"><div><div style="font-size:15px;font-weight:600" id="ptitle">Dashboard</div><div style="font-size:12px;color:var(--text3)"><span id="pplant">GEN-Phase1-Water</span> › <span id="pbc">Overview</span></div></div>
-    <div class="topbar-right"><div class="topbar-date" id="tdate"></div>
-      <button class="btn btn-sm btn-p" id="btn-newpm" onclick="go('checksheet',E('nav-checksheet'))">+ New PM</button>
-      <button class="btn btn-sm btn-d" onclick="doLogout()">Logout</button>
+
+<div class="header">
+  <div class="logo">PM</div>
+  <div class="title">PM Inspection System</div>
+  <div class="subtitle">GPSC — Glow Energy Phase 2 | Preventive Maintenance Platform</div>
+  <div class="badge-row">
+    <span class="badge b-blue">🔒 Firebase Auth</span>
+    <span class="badge b-green">☁️ Firestore Cloud</span>
+    <span class="badge b-blue">📱 PWA Ready</span>
+  </div>
+</div>
+
+<div class="stat-bar">
+  <div class="stat"><div class="stat-val" style="color:var(--accent)">1</div><div class="stat-lbl">Active Systems</div></div>
+  <div class="stat"><div class="stat-val" style="color:var(--text2)">4</div><div class="stat-lbl">Coming Soon</div></div>
+  <div class="stat"><div class="stat-val" style="color:var(--green)">Line</div><div class="stat-lbl">Notification</div></div>
+  <div class="stat"><div class="stat-val" style="color:var(--amber)">3</div><div class="stat-lbl">Role Levels</div></div>
+</div>
+
+<div class="section-label">⚡ Available Now</div>
+<div class="grid" style="margin-bottom:16px">
+
+  <!-- PM Motor — Active -->
+  <a href="https://kongsang-rrk.github.io/pm-inspection/" class="card card-motor">
+    <div class="card-icon icon-motor">⚙️</div>
+    <div class="card-name">PM Motor</div>
+    <div class="card-desc">Vibration Analysis, Electrical Test, Bearing Inspection, Operating Data</div>
+    <div class="card-footer">
+      <div class="tag-row">
+        <span class="tag tag-active">✓ Active</span>
+        <span class="tag tag-alert">⚠ 1 Alert</span>
+      </div>
+      <span class="arrow">→</span>
+    </div>
+  </a>
+
+</div>
+
+<div class="section-label">🔧 Coming Soon</div>
+<div class="grid">
+
+  <!-- PM Transformer -->
+  <div class="card card-transformer card-coming">
+    <div class="card-icon icon-transformer">🔌</div>
+    <div class="card-name">PM Transformer</div>
+    <div class="card-desc">Oil Level, Temperature, Insulation Resistance, Breather</div>
+    <div class="card-footer">
+      <span class="tag tag-soon">Coming soon</span>
     </div>
   </div>
-  <div class="content" id="content"></div>
-</div>
-</div>
-<!-- Equipment Modal -->
-<div class="mo" id="meq"><div class="modal" style="width:650px"><div class="mh"><div style="font-size:15px;font-weight:600" id="meqt">Add Equipment</div><button class="mc-btn" onclick="cm('meq')">✕</button></div>
-<div class="mb"><div class="g2" style="gap:12px;margin-bottom:12px">
-<div class="fg"><label class="fl">Tag No.*</label><input class="fi" id="eq-tag" placeholder="P-201X"></div>
-<div class="fg"><label class="fl">Module for</label><input class="fi" id="eq-module" placeholder="CF Export P201X"></div>
-<div class="fg"><label class="fl">Manufacturer</label><input class="fi" id="eq-mfg" placeholder="Reliance"></div>
-<div class="fg"><label class="fl">Serial No.</label><input class="fi" id="eq-sn" placeholder="1MAZJ9073 G00X"></div>
-<div class="fg"><label class="fl">Type</label><input class="fi" id="eq-type" placeholder="เช่น Induction, Synchronous"></div>
-<div class="fg"><label class="fl">Power</label><div style="display:flex;gap:6px;align-items:center"><input class="fi" id="eq-power" type="number" placeholder="250" style="flex:1"><div class="unit-grp"><button class="unit-btn active" onclick="togU(this,'eq-pwrU','kW')">kW</button><button class="unit-btn" onclick="togU(this,'eq-pwrU','HP')">HP</button></div><input type="hidden" id="eq-pwrU" value="kW"></div></div>
-<div class="fg"><label class="fl">Weight</label><div style="display:flex;gap:6px;align-items:center"><input class="fi" id="eq-weight" type="number" placeholder="2268" style="flex:1"><div class="unit-grp"><button class="unit-btn" onclick="togU(this,'eq-wtU','kg')">kg</button><button class="unit-btn active" onclick="togU(this,'eq-wtU','lbs')">lbs</button></div><input type="hidden" id="eq-wtU" value="lbs"></div></div>
-<div class="fg"><label class="fl">Stat. Volts</label><input class="fi" id="eq-volts" placeholder="380YD"></div>
-<div class="fg"><label class="fl">Stat. Amps</label><input class="fi" id="eq-amps" placeholder="323A"></div>
-<div class="fg"><label class="fl">Power Factor (P.F)</label><input class="fi" id="eq-pf" type="number" step="0.01" placeholder="0.85"></div>
-<div class="fg"><label class="fl">Frequency (Hz)</label><input class="fi" id="eq-freq" type="number" placeholder="50"></div>
-<div class="fg"><label class="fl">Speed (RPM)</label><input class="fi" id="eq-speed" type="number" placeholder="2970"></div>
-<div class="fg"><label class="fl">Insulation Class</label><input class="fi" id="eq-ins" placeholder="F"></div>
-<div class="fg"><label class="fl">Duty</label><input class="fi" id="eq-duty" placeholder="CONT"></div>
-</div>
-<div style="font-size:12px;font-weight:600;color:var(--text3);margin:6px 0 8px">BEARING INFO</div>
-<div class="g2" style="gap:12px;margin-bottom:12px">
-<div class="fg"><label class="fl">DE Bearing</label><input class="fi" id="eq-de" placeholder="65BC03J3OX"></div>
-<div class="fg"><label class="fl">NDE Bearing</label><input class="fi" id="eq-nde" placeholder="65BC03J3OX"></div>
-</div>
-<div style="font-size:12px;font-weight:600;color:var(--text3);margin:6px 0 8px">INSTALLATION</div>
-<div class="g2" style="gap:12px;margin-bottom:12px">
-<div class="fg"><label class="fl">Load Type</label><input class="fi" id="eq-loadtype" placeholder="Pump"></div>
-<div class="fg"><label class="fl">Location</label><input class="fi" id="eq-location" placeholder="Pump room"></div>
-</div>
-<div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">ALARM LIMITS — MOTOR</div>
-<div class="g2" style="gap:12px;margin-bottom:10px">
-<div class="fg"><label class="fl">Motor Vib Alarm (mm/s)</label><input class="fi" id="eq-mval" type="number" step="0.1" value="4.5"></div>
-<div class="fg"><label class="fl">Motor Vib Danger (mm/s)</label><input class="fi" id="eq-mvda" type="number" step="0.1" value="7.1"></div>
-</div>
-<div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">ALARM LIMITS — PUMP</div>
-<div class="g2" style="gap:12px">
-<div class="fg"><label class="fl">Pump Vib Alarm (mm/s)</label><input class="fi" id="eq-pval" type="number" step="0.1" value="4.5"></div>
-<div class="fg"><label class="fl">Pump Vib Danger (mm/s)</label><input class="fi" id="eq-pvda" type="number" step="0.1" value="7.1"></div>
-</div></div>
-<div class="mf"><button class="btn" onclick="cm('meq')">Cancel</button><button class="btn btn-p" onclick="saveEq()">Save</button></div>
-</div></div>
-<!-- Detail Modal -->
-<div class="mo" id="mdet"><div class="modal" style="width:800px" id="mdet-inner"><div class="mh"><div style="font-size:15px;font-weight:600" id="mdett">PM Record</div><div style="display:flex;gap:8px;align-items:center"><button class="btn btn-sm" onclick="exportPDF()">🖨 Export PDF</button><button class="mc-btn" onclick="cm('mdet')">✕</button></div></div><div class="mb" id="mdetb"></div></div></div>
 
-<!-- User Management Modal -->
-<div class="mo" id="musr"><div class="modal" style="width:520px">
-<div class="mh"><div style="font-size:15px;font-weight:600">User Management</div><button class="mc-btn" onclick="cm('musr')">✕</button></div>
-<div class="mb">
-  <div style="font-size:12px;color:var(--text3);margin-bottom:16px;padding:10px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border)">
-    ⚠ สร้าง user ใหม่ได้ที่ Firebase Console → Authentication<br>ที่นี่ใช้กำหนด <b>Role</b> ให้แต่ละ user
-  </div>
-  <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:10px">ASSIGN ROLE</div>
-  <div class="g2" style="gap:12px;margin-bottom:14px">
-    <div class="fg"><label class="fl">User Email *</label><input class="fi" id="ur-email" placeholder="user@email.com" type="email"></div>
-    <div class="fg"><label class="fl">Role</label>
-      <select class="fi" id="ur-role">
-        <option value="viewer">👁 Viewer — ดูได้อย่างเดียว</option>
-        <option value="editor">✎ Editor — บันทึก PM ได้</option>
-        <option value="admin">⚡ Admin — สิทธิ์เต็ม</option>
-      </select>
+  <!-- PM SWG -->
+  <div class="card card-swg card-coming">
+    <div class="card-icon icon-swg">⚡</div>
+    <div class="card-name">PM Switchgear</div>
+    <div class="card-desc">Contact Resistance, Insulation Test, Arc Flash Inspection</div>
+    <div class="card-footer">
+      <span class="tag tag-soon">Coming soon</span>
     </div>
   </div>
-  <button class="btn btn-p" onclick="assignRole()" style="margin-bottom:20px">✓ Assign Role</button>
-  <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:10px">USER LIST</div>
-  <div id="ulist"></div>
-</div></div></div>
-<script>
-firebase.initializeApp(firebaseConfig);const auth=firebase.auth(),db=firebase.firestore();
-let S={eq:[],rec:[],alogs:[],set:{di:'',da:'',plant:'GEN-Phase1-Water',co:'426 GEN',area:'Pump room',site:'TCC Plant GEN',logoIcon:'PM',logoLine1:'PM Inspection',logoLine2:'TCC Plant GEN'},
-// ── MCC Module Inspection rows ──
-mcc:[
-  {k:'mcc_module',  l:'Module condition',       c:'Fairly clean, No damage',     act:['Cleaning','N/A']},
-  {k:'mcc_magnetic',l:'Magnetic',               c:'No damage, Normal contact',   act:['Re-Tight','N/A']},
-  {k:'mcc_lamp',    l:'Lamp Status',            c:'Fairly clean, No damage',     act:['Cleaning','N/A']},
-  {k:'mcc_terminal',l:'Connection at terminal', c:'Tight and Clean',             act:['Re-Tight','N/A']},
-  {k:'mcc_cables',  l:'Cables',                 c:'No damage on insulation',     act:['Cleaning','N/A']},
-  {k:'mcc_switch',  l:'Switch',                 c:'Fairly clean, No damage',     act:['Cleaning','N/A']},
-  {k:'mcc_earth',   l:'Earth connection',       c:'Tight, Fairly clean',         act:['Re-Tight','N/A']}
-],
-// ── Motor Inspection rows ──
-mot:[
-  {k:'mot_shaft',   l:'Shaft and Coupling',     c:'Fairly clean/No damage',      act:['Cleaning','N/A']},
-  {k:'mot_fan',     l:'Fan/Cover',              c:'Fairly clean/No damage',      act:['Cleaning','N/A']},
-  {k:'mot_frame',   l:'Frame',                  c:'Fairly clean/No damage',      act:['Cleaning','N/A']},
-  {k:'mot_bolts',   l:'Bolts at Foundation',    c:'Tight/No damage',             act:['Re-Tight','N/A']},
-  {k:'mot_tbox',    l:'Terminal box',           c:'Fairly clean/No damage',      act:['Cleaning','N/A']},
-  {k:'mot_cable',   l:'Cable',                  c:'Fairly clean/No damage',      act:['Cleaning','N/A']},
-  {k:'mot_earth',   l:'Earth cable',            c:'Tight/No damage',             act:['Re-Tight','N/A']}
-],
-sl:{1:'Immediate attention',2:'Correct ASAP',3:'Correct at next opportunity',4:'Monitor more frequently',5:'No action required'},
-sc:{1:'#f85149',2:'#d29922',3:'#58a6ff',4:'#58a6ff',5:'#3fb950'},
-cf:{ck:{},sev:'5'},usr:null,role:'viewer',userProfile:null};
 
-const E=id=>document.getElementById(id);
-const fd=d=>{if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'});};
-const now=()=>new Date().toISOString().slice(0,10);
-const gv=id=>parseFloat(E(id)?.value)||0;
+  <!-- PM Protection -->
+  <div class="card card-protection card-coming">
+    <div class="card-icon icon-protection">🛡️</div>
+    <div class="card-name">PM Protection</div>
+    <div class="card-desc">Relay Test, Trip Time, Setting Verification, CT/PT Test</div>
+    <div class="card-footer">
+      <span class="tag tag-soon">Coming soon</span>
+    </div>
+  </div>
 
-function toast(m,t){const c=E('toasts'),d=document.createElement('div');d.className='toast '+(t==='error'?'er':t==='warning'?'wa':'ok');d.innerHTML='<span>'+({ok:'✓',er:'✕',wa:'⚠'}[d.className.split(' ')[1]]||'✓')+'</span> '+m;c.appendChild(d);setTimeout(()=>d.remove(),3500);}
-function om(id){E(id).classList.add('open')}function cm(id){E(id).classList.remove('open')}
-function applyLogo(){E('logo-icon').textContent=S.set.logoIcon||'PM';E('logo-line1').textContent=S.set.logoLine1||'PM Inspection';E('logo-line2').textContent=S.set.logoLine2||'TCC Plant GEN';E('pplant').textContent=S.set.plant||'';}
-function togU(btn,hidId,val){btn.parentElement.querySelectorAll('.unit-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');E(hidId).value=val;}
+  <!-- PM UPS -->
+  <div class="card card-ups card-coming">
+    <div class="card-icon icon-ups">🔋</div>
+    <div class="card-name">PM UPS</div>
+    <div class="card-desc">Battery Test, Load Test, Autonomy Time, Charger Check</div>
+    <div class="card-footer">
+      <span class="tag tag-soon">Coming soon</span>
+    </div>
+  </div>
 
-// ══════ Searchable Select ══════
-function mkSS(id,opts,ph,onChange){
-const w=document.createElement('div');w.className='ss-wrap';
-const inp=document.createElement('input');inp.className='ss-input';inp.placeholder=ph||'— Select —';inp.id=id;inp.setAttribute('autocomplete','off');
-const arrow=document.createElement('span');arrow.className='ss-arrow';arrow.textContent='▾';
-const drop=document.createElement('div');drop.className='ss-drop';
-w.appendChild(inp);w.appendChild(arrow);w.appendChild(drop);
-let val='';
-function render(filter){drop.innerHTML='';const f=filter?filter.toLowerCase():'';const fl=opts.filter(o=>!f||o.label.toLowerCase().includes(f)||o.value.toLowerCase().includes(f));
-if(!fl.length){drop.innerHTML='<div class="ss-none">ไม่พบ</div>';return;}
-fl.forEach(o=>{const d=document.createElement('div');d.className='ss-opt';d.textContent=o.label;
-d.onmousedown=e=>{e.preventDefault();val=o.value;inp.value=o.label;inp.dataset.val=o.value;drop.classList.remove('open');if(onChange)onChange(o.value);};drop.appendChild(d);});}
-function show(){drop.classList.add('open');const cur=opts.find(o=>o.value===val);render((!cur||inp.value===cur.label)?'':inp.value);}
-function close(){drop.classList.remove('open');if(val){const o=opts.find(x=>x.value===val);if(o)inp.value=o.label;else{inp.value='';inp.dataset.val='';val='';}}else{inp.value='';inp.dataset.val='';}}
-inp.addEventListener('focus',show);inp.addEventListener('input',e=>render(e.target.value));
-inp.addEventListener('blur',()=>setTimeout(close,150));
-inp.addEventListener('keydown',e=>{if(e.key==='Escape')close();else if(e.key==='Enter'){const f=drop.querySelector('.ss-opt');if(f)f.onmousedown&&f.onmousedown(e);}});
-w.setVal=v=>{val=v;const o=opts.find(x=>x.value===v);inp.value=o?o.label:'';inp.dataset.val=v;};
-w.getVal=()=>val;
-return w;}
-function ssVal(wid,def=''){const inp=E(wid)?.querySelector('input.ss-input');return(inp?.dataset?.val&&inp.dataset.val.trim())||def;}
+</div>
 
-// ══════ Unbalance ══════
-function calcUnbal(a,b,c){const arr=[a,b,c].map(Number).filter(v=>!isNaN(v)&&v!==0);if(arr.length<3)return'';const avg=(arr[0]+arr[1]+arr[2])/3;if(avg===0)return'0.00';const mx=Math.max(Math.abs(arr[0]-avg),Math.abs(arr[1]-avg),Math.abs(arr[2]-avg));return((mx/avg)*100).toFixed(2);}
-function autoUnbal(a,b,c,out){const r=calcUnbal(E(a)?.value,E(b)?.value,E(c)?.value);const o=E(out);if(o)o.textContent=r?r+'%':'—';}
+<div class="footer">
+  <div style="margin-bottom:6px">PM Inspection System © 2026 — GPSC TCC Plant GEN</div>
+  <div>Built with Firebase + GitHub Pages | <a href="https://kongsang-rrk.github.io/pm-inspection/">PM Motor →</a></div>
+</div>
 
-// ══════ Equipment helpers — SEPARATE Motor/Pump alarm limits ══════
-function eqMAl(eq){return parseFloat(eq?.motorVibAlarm||eq?.vibAlarm||eq?.val||4.5);}
-function eqMDa(eq){return parseFloat(eq?.motorVibDanger||eq?.vibDanger||eq?.vda||7.1);}
-function eqPAl(eq){return parseFloat(eq?.pumpVibAlarm||eq?.vibAlarm||eq?.val||4.5);}
-function eqPDa(eq){return parseFloat(eq?.pumpVibDanger||eq?.vibDanger||eq?.vda||7.1);}
-
-function V(r,k){const v=r.vib||{};const m={mDV:'mDeV',mDH:'mDeH',mDA:'mDeA',mNV:'mNdeV',mNH:'mNdeH',pDV:'pDeV',pDH:'pDeH',pDA:'pDeA',pNV:'pNdeV',pNH:'pNdeH'};return+(v[k]??v[m[k]]??0);}
-
-// Max vibration helper for history display
-function maxMotorVib(r){return Math.max(V(r,'mDV'),V(r,'mDH'),V(r,'mDA')||0,V(r,'mNV'),V(r,'mNH'),r.vib?.mNA||0);}
-function maxPumpVib(r){return Math.max(V(r,'pDV'),V(r,'pDH'),V(r,'pDA')||0,V(r,'pNV'),V(r,'pNH'),r.vib?.pNA||0);}
-
-// ══════ ALARM LOGIC — check ALL vib positions + bearing + electrical ══════
-// Returns alarm entries from latest record per equipment (suppressed if latest is normal)
-function checkVibAlarms(rec,eq,entries){
-  const mAl=eqMAl(eq),mDa=eqMDa(eq),pAl=eqPAl(eq),pDa=eqPDa(eq);
-  const mPts={'Motor_DE-V':V(rec,'mDV'),'Motor_DE-H':V(rec,'mDH'),'Motor_DE-A':V(rec,'mDA'),'Motor_NDE-V':V(rec,'mNV'),'Motor_NDE-H':V(rec,'mNH'),'Motor_NDE-A':rec.vib?.mNA||0};
-  const pPts={'Pump_DE-V':V(rec,'pDV'),'Pump_DE-H':V(rec,'pDH'),'Pump_DE-A':V(rec,'pDA')||0,'Pump_NDE-V':V(rec,'pNV'),'Pump_NDE-H':V(rec,'pNH'),'Pump_NDE-A':rec.vib?.pNA||0};
-  Object.entries(mPts).forEach(([loc,val])=>{if(!val)return;
-    if(val>=mDa)entries.push({type:'danger',tag:rec.tag,loc,val,limit:mDa,wo:rec.wo||'',date:rec.date,msg:loc+' DANGER: '+val.toFixed(2)+' mm/s'});
-    else if(val>=mAl)entries.push({type:'alarm',tag:rec.tag,loc,val,limit:mAl,wo:rec.wo||'',date:rec.date,msg:loc+' Alarm: '+val.toFixed(2)+' mm/s'});
-  });
-  Object.entries(pPts).forEach(([loc,val])=>{if(!val)return;
-    if(val>=pDa)entries.push({type:'danger',tag:rec.tag,loc,val,limit:pDa,wo:rec.wo||'',date:rec.date,msg:loc+' DANGER: '+val.toFixed(2)+' mm/s'});
-    else if(val>=pAl)entries.push({type:'alarm',tag:rec.tag,loc,val,limit:pAl,wo:rec.wo||'',date:rec.date,msg:loc+' Alarm: '+val.toFixed(2)+' mm/s'});
-  });
-}
-function checkBearingAlarms(rec,eq,entries){
-  const b=rec.brg||{};
-  if(b.deC&&b.deC!=='ok')entries.push({type:'alarm',tag:rec.tag,loc:'Bearing_DE',val:b.deC,limit:'ok',wo:rec.wo||'',date:rec.date,msg:'Bearing DE: '+b.deC+' ('+(b.de||eq?.de||'')+')'});
-  if(b.ndeC&&b.ndeC!=='ok')entries.push({type:'alarm',tag:rec.tag,loc:'Bearing_NDE',val:b.ndeC,limit:'ok',wo:rec.wo||'',date:rec.date,msg:'Bearing NDE: '+b.ndeC+' ('+(b.nde||eq?.nde||'')+')'});
-}
-function checkElecAlarms(rec,entries){
-  const el=rec.el||rec.elec||{};const st=rec.st||{};
-  const cuUn=parseFloat(el.cuUn||calcUnbal(el.cu,el.cv,el.cw)||0);
-  const vuUn=parseFloat(el.vuUn||calcUnbal(el.vu,el.vv,el.vw)||0);
-  const wrUn=parseFloat(st.wrUn||calcUnbal(st.wrU,st.wrV,st.wrW)||0);
-  const wiUn=parseFloat(st.wiUn||calcUnbal(st.wiU,st.wiV,st.wiW)||0);
-  if(cuUn>5)entries.push({type:'alarm',tag:rec.tag,loc:'Current_Unbal',val:cuUn,limit:5,wo:rec.wo||'',date:rec.date,msg:'Current Unbal '+cuUn.toFixed(2)+'% (limit 5%)'});
-  if(vuUn>3)entries.push({type:'alarm',tag:rec.tag,loc:'Voltage_Unbal',val:vuUn,limit:3,wo:rec.wo||'',date:rec.date,msg:'Voltage Unbal '+vuUn.toFixed(2)+'% (limit 3%)'});
-  if(wrUn>3)entries.push({type:'alarm',tag:rec.tag,loc:'WR_Unbal',val:wrUn,limit:3,wo:rec.wo||'',date:rec.date,msg:'Winding Resistance Unbal '+wrUn.toFixed(2)+'% (limit 3%)'});
-  if(wiUn>10)entries.push({type:'alarm',tag:rec.tag,loc:'WI_Unbal',val:wiUn,limit:10,wo:rec.wo||'',date:rec.date,msg:'Winding Inductance Unbal '+wiUn.toFixed(2)+'% (limit 10%)'});
-  // Insulation Resistance — alarm if any value < 10 MΩ (and value was actually recorded)
-  [{k:'irUV',loc:'IR_UV'},{k:'irVW',loc:'IR_VW'},{k:'irWU',loc:'IR_WU'},{k:'irG',loc:'IR_UVW-G'}].forEach(({k,loc})=>{
-    const v=parseFloat(st[k]||0);
-    if(v>0&&v<10)entries.push({type:'alarm',tag:rec.tag,loc,val:v,limit:10,wo:rec.wo||'',date:rec.date,msg:'IR '+loc.replace('IR_','')+' = '+v+' MΩ (ต่ำกว่า 10 MΩ)'});
-  });
-}
-function getAllAlarmsFromRec(rec,eq){
-  const entries=[];
-  if(eq)checkVibAlarms(rec,eq,entries);
-  checkBearingAlarms(rec,eq,entries);
-  checkElecAlarms(rec,entries);
-  return entries;
-}
-function getAl(){
-  const a=[];
-  S.eq.forEach(eq=>{
-    const rs=[...S.rec.filter(r=>r.tag===eq.tag)].sort((a,b)=>b.date.localeCompare(a.date));
-    if(!rs.length)return;
-    const latest=rs[0];
-    // Check all positions + bearing + electrical of latest record
-    getAllAlarmsFromRec(latest,eq).forEach(e=>{
-      a.push({lv:e.type,tag:e.tag,msg:e.msg,date:e.date,id:latest.id,loc:e.loc});
-    });
-  });
-  return a;
-}
-
-// ══════ ALARM LOG — save & load from Firestore ══════
-// Use deterministic doc ID = tag_date_loc to prevent duplicates
-function alarmDocId(tag,date,loc){return (tag+'_'+date+'_'+loc+'_'+Date.now()).replace(/[^a-zA-Z0-9_\-]/g,'_');}
-
-async function saveAlarmLog(entries){
-  if(!entries.length)return;
-  const b=db.batch();
-  entries.forEach(e=>{
-    // Each event gets unique ID (tag+date+loc+timestamp) so nothing ever overwrites
-    const docId=alarmDocId(e.tag,e.date,e.loc);
-    b.set(db.collection('alarmlog').doc(docId),{...e,savedAt:firebase.firestore.FieldValue.serverTimestamp()});
-  });
-  await b.commit();
-  // Reload alarm log
-  const snap=await db.collection('alarmlog').orderBy('date','desc').limit(500).get();
-  S.alogs=snap.docs.map(d=>({id:d.id,...d.data()}));
-}
-
-// After saving/editing a PM record — full check all positions + bearing + electrical
-async function persistNewAlarms(rec){
-  const eq=S.eq.find(e=>e.tag===rec.tag);
-  const entries=getAllAlarmsFromRec(rec,eq);
-  if(entries.length)await saveAlarmLog(entries);
-}
-
-// Backfill: scan ALL existing records (uses deterministic IDs — safe to re-run)
-async function backfillAlarmLog(){
-  const entries=[];
-  S.rec.forEach(rec=>{
-    const eq=S.eq.find(e=>e.tag===rec.tag);
-    getAllAlarmsFromRec(rec,eq).forEach(e=>entries.push(e));
-  });
-  if(!entries.length){toast('ไม่มี Alarm ในข้อมูล');return;}
-  await saveAlarmLog(entries); // saveAlarmLog already reloads S.alogs
-  toast('สร้าง Alarm Log จาก '+entries.length+' entries แล้ว');
-}
-
-function ub(){const a=getAl();E('acnt').textContent=a.length;E('acnt').style.display=a.length?'':'none';}
-
-// ══════ AUTH ══════
-auth.onAuthStateChanged(async u=>{
-  if(u){
-    S.usr=u;
-    E('login-screen').style.display='none';
-    E('main-app').style.display='flex';
-    const i=u.email.slice(0,2).toUpperCase();
-    E('uav').textContent=i;
-    E('uname').textContent=u.displayName||u.email.split('@')[0];
-    E('uemail').textContent=u.email;
-    // Load user role from Firestore
-    await loadUserRole(u);
-    await loadAll();
-    applyRoleUI();
-    go('dashboard',E('nav-dashboard'));
-  }else{
-    E('login-screen').style.display='flex';
-    E('main-app').style.display='none';
-  }
-});
-async function doLogin(){const e=E('login-email').value.trim(),p=E('login-pass').value,err=E('login-err'),btn=E('login-btn');if(!e||!p){err.textContent='กรุณากรอก Email/Password';err.style.display='block';return;}btn.textContent='...';btn.disabled=true;err.style.display='none';try{await auth.signInWithEmailAndPassword(e,p);}catch(x){const m={'auth/invalid-credential':'Email หรือ Password ไม่ถูกต้อง','auth/too-many-requests':'รอสักครู่'};err.textContent=m[x.code]||x.message;err.style.display='block';btn.textContent='เข้าสู่ระบบ';btn.disabled=false;}}
-function doLogout(){if(confirm('ออกจากระบบ?'))auth.signOut();}
-
-
-// ══════ ROLE SYSTEM ══════
-// Roles: admin > editor > viewer
-// Stored in Firestore: users/{email}/role
-// First user ever to login auto-gets admin
-
-async function loadUserRole(u){
-  try{
-    const doc=await db.collection('users').doc(u.email).get();
-    if(doc.exists){
-      S.role=doc.data().role||'viewer';
-      S.userProfile=doc.data();
-    }else{
-      // Check if ANY user exists — if not, first user = admin
-      const all=await db.collection('users').limit(1).get();
-      const role=all.empty?'admin':'viewer';
-      await db.collection('users').doc(u.email).set({email:u.email,role,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-      S.role=role;
-      S.userProfile={email:u.email,role};
-      if(role==='admin')toast('ยินดีต้อนรับ Admin คนแรก!');
-    }
-  }catch(e){S.role='viewer';}
-}
-
-function isAdmin(){return S.role==='admin';}
-function canEdit(){return S.role==='admin'||S.role==='editor';}
-
-function applyRoleUI(){
-  const r=S.role;
-  // Role badge in sidebar
-  const rb=E('role-badge');
-  if(rb){rb.textContent=r==='admin'?'Admin':r==='editor'?'Editor':'Viewer';rb.className='role-chip '+(r==='admin'?'role-admin':r==='editor'?'role-editor':'role-viewer');}
-  // Show/hide nav items
-  if(E('nav-checksheet'))E('nav-checksheet').style.display=canEdit()?'':'none';
-  if(E('nav-users'))E('nav-users').style.display=isAdmin()?'':'none';
-  if(E('btn-newpm'))E('btn-newpm').style.display=canEdit()?'':'none';
-}
-
-// Assign role to any user by email (admin only)
-async function assignRole(){
-  if(!isAdmin()){toast('เฉพาะ Admin เท่านั้น','error');return;}
-  const email=E('ur-email').value.trim().toLowerCase();
-  const role=E('ur-role').value;
-  if(!email){toast('กรอก Email','error');return;}
-  try{
-    await db.collection('users').doc(email).set({email,role,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
-    toast(email+' → '+role+' ✓');
-    E('ur-email').value='';
-    loadUList();
-  }catch(e){toast('Error: '+e.message,'error');}
-}
-
-async function loadUList(){
-  try{
-    const snap=await db.collection('users').orderBy('email').get();
-    const ul=E('ulist');if(!ul)return;
-    ul.innerHTML='';
-    snap.docs.forEach(d=>{
-      const u=d.data();
-      const row=document.createElement('div');
-      row.style.cssText='display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)';
-      row.innerHTML=
-        '<div style="flex:1;font-size:13px">'+u.email+'</div>'+
-        '<span class="role-chip '+(u.role==='admin'?'role-admin':u.role==='editor'?'role-editor':'role-viewer')+'">'+u.role+'</span>';
-      if(isAdmin()&&u.email!==S.usr?.email){const b=document.createElement('button');b.className='btn btn-sm btn-d';b.textContent='Del';b.onclick=()=>removeUser(u.email);row.appendChild(b);}
-      ul.appendChild(row);
-    });
-    if(!snap.docs.length)ul.innerHTML='<div style="color:var(--text3);font-size:13px;padding:8px">ยังไม่มี user</div>';
-  }catch(e){toast('Error: '+e.message,'error');}
-}
-
-async function removeUser(email){
-  if(!isAdmin())return;
-  if(!confirm('ลบสิทธิ์ '+email+'?'))return;
-  try{await db.collection('users').doc(email).delete();toast('ลบ '+email+' แล้ว','warning');loadUList();}
-  catch(e){toast('Error: '+e.message,'error');}
-}
-
-function openUserMgmt(){if(!isAdmin()){toast('เฉพาะ Admin','error');return;}loadUList();om('musr');}
-
-
-// ══════ LINE NOTIFICATION ══════
-async function sendLineNotify(rec,alarmEntries){
-  const webhookUrl=S.set.lineWebhook||'';
-  if(!webhookUrl)return;
-  const eq=S.eq.find(e=>e.tag===rec.tag);
-  const sl2={1:'Immediate',2:'Correct ASAP',3:'Next opportunity',4:'Monitor',5:'No action'};
-  const sev=sl2[rec.sev||rec.severity]||'';
-  const sep='──────────────────';
-  const lines=[];
-  lines.push('🔔 PM INSPECTION REPORT');
-  lines.push(sep);
-  lines.push('📍 Equipment: '+rec.tag);
-  if(eq?.module)lines.push('🏭 Module: '+eq.module);
-  lines.push('📅 Date: '+rec.date);
-  if(rec.wo)lines.push('🔧 WO: '+rec.wo);
-  if(rec.insp||rec.inspector)lines.push('👤 Inspector: '+(rec.insp||rec.inspector||''));
-  const mv=maxMotorVib(rec),pv=maxPumpVib(rec);
-  if(mv||pv){
-    lines.push(sep);
-    if(mv){const mAl=eqMAl(eq),mDa=eqMDa(eq);lines.push('〰 Motor max: '+mv.toFixed(2)+' mm/s '+(mv>=mDa?'⛔DANGER':mv>=mAl?'⚠ALARM':'✅OK'));}
-    if(pv){const pAl=eqPAl(eq),pDa=eqPDa(eq);lines.push('〰 Pump max:  '+pv.toFixed(2)+' mm/s '+(pv>=pDa?'⛔DANGER':pv>=pAl?'⚠ALARM':'✅OK'));}
-  }
-  const el2=rec.el||rec.elec||{};
-  if(el2.cu)lines.push('⚡ Current: '+[el2.cu,el2.cv,el2.cw].filter(Boolean).join('/')+'A'+(el2.cuUn?' (Unbal:'+el2.cuUn+'%)':''));
-  if(el2.vu)lines.push('⚡ Voltage: '+[el2.vu,el2.vv,el2.vw].filter(Boolean).join('/')+'V'+(el2.vuUn?' (Unbal:'+el2.vuUn+'%)':''));
-  if(alarmEntries.length){
-    lines.push(sep);
-    lines.push('⚠ ALERTS ('+alarmEntries.length+'):');
-    alarmEntries.forEach(a=>lines.push((a.type==='danger'?'🔴':'🟡')+' '+a.loc.replace(/_/g,' ')+': '+a.msg));
-  }
-  lines.push(sep);
-  if(sev)lines.push('📝 Severity: '+sev);
-  if(rec.res)lines.push('📋 '+rec.res.slice(0,120)+(rec.res.length>120?'...':''));
-  lines.push(sep);
-  lines.push('PM Inspection — '+(S.set.plant||'TCC Plant GEN'));
-  lines.push('🔗 '+window.location.origin+window.location.pathname);
-  const msg=lines.join('\n');
-  // Use no-cors for Google Apps Script (avoids CORS preflight block)
-  fetch(webhookUrl,{
-    method:'POST',
-    mode:'no-cors',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({message:msg,tag:rec.tag,date:rec.date,wo:rec.wo||'',alarmCount:alarmEntries.length,hasDanger:alarmEntries.some(a=>a.type==='danger')})
-  })
-  .then(()=>toast('ส่ง Line แล้ว ✓'))
-  .catch(()=>toast('Line webhook ส่งไม่ได้ ตรวจสอบ URL','warning'));
-}
-
-
-async function loadAll(){try{
-  const [es,rs,ss,al]=await Promise.all([
-    db.collection('equipment').get(),
-    db.collection('records').orderBy('date','desc').get(),
-    db.collection('settings').doc('global').get(),
-    db.collection('alarmlog').orderBy('date','desc').limit(200).get()
-  ]);
-  S.eq=es.docs.map(d=>({id:d.id,...d.data()}));
-  S.rec=rs.docs.map(d=>({id:d.id,...d.data()}));
-  S.alogs=al.docs.map(d=>({id:d.id,...d.data()}));
-  if(ss.exists)S.set={...S.set,...ss.data()};
-  const sf=await db.collection('settings').doc('_seeded').get();if(!sf.exists)await seed();
-  // Auto-backfill: write alarm log for any existing records that exceed limits
-  // Safe to run every time — deterministic doc IDs prevent duplicates
-  await backfillAlarmLog();
-  applyLogo();ub();
-}catch(e){toast('Error: '+e.message,'error');}}
-
-async function seed(){
-const eqs=[
-  {tag:'P-201A',module:'CF Export P201A',mfg:'Reliance',sn:'1MAZJ9073 G003',power:'250',powerUnit:'HP',weight:'2268',weightUnit:'lbs',volts:'380YD',amps:'323A',freq:'50',speed:'2970',ins:'F',duty:'CONT',de:'65BC03J3OX',nde:'65BC03J3OX',loadtype:'Pump',location:'Pump room',motorVibAlarm:4.5,motorVibDanger:7.1,pumpVibAlarm:4.5,pumpVibDanger:7.1},
-  {tag:'P-201B',module:'CF Export P201B',mfg:'Reliance',sn:'1MAZJ9073 G001',power:'250',powerUnit:'HP',weight:'2268',weightUnit:'lbs',volts:'380YD',amps:'323A',freq:'50',speed:'2970',ins:'F',duty:'CONT',de:'65BC03J3OX',nde:'65BC03J3OX',loadtype:'Pump',location:'Pump room',motorVibAlarm:4.5,motorVibDanger:7.1,pumpVibAlarm:4.5,pumpVibDanger:7.1},
-  {tag:'P-201S',module:'CF Export P201S',mfg:'Reliance',sn:'1MAZJ9073 G002',power:'250',powerUnit:'HP',weight:'2268',weightUnit:'lbs',volts:'380YD',amps:'323A',freq:'50',speed:'2970',ins:'F',duty:'CONT',de:'65BC03J3OX',nde:'65BC03J3OX',loadtype:'Pump',location:'Pump room',motorVibAlarm:4.5,motorVibDanger:7.1,pumpVibAlarm:4.5,pumpVibDanger:7.1}
-];
-const recs=[
-  {date:'2026-04-16',wo:'30000088621',tag:'P-201A',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{},vib:{mDV:0.78,mDH:0.82,mDA:0.91,mNV:0.67,mNH:1.09,mNA:0,pDV:3.25,pDH:4.8,pDA:0,pNV:1.56,pNH:0,pNA:0},el:{cu:266,cv:270,cw:260,vu:412,vv:412,vw:411},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},sev:'5',res:'Cleaned/Re-grease. Pump DE-H alarm.'},
-  {date:'2026-04-16',wo:'30000088627',tag:'P-201B',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{},vib:{mDV:1.5,mDH:1.34,mDA:0.6,mNV:0.88,mNH:1.39,mNA:0,pDV:2.81,pDH:3.96,pDA:0,pNV:1.6,pNH:0,pNA:0},el:{cu:282,cv:287,cw:285,vu:399,vv:400,vw:399},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},sev:'5',res:'Cleaned/Re-grease. Normal.'},
-  {date:'2026-04-16',wo:'30000088632',tag:'P-201S',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{},vib:{mDV:0.62,mDH:0.81,mDA:0.52,mNV:0.67,mNH:0.78,mNA:0,pDV:3.02,pDH:6.5,pDA:0,pNV:1.6,pNH:0,pNA:0},el:{cu:233,cv:236,cw:232,vu:401,vv:401,vw:401},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},sev:'5',res:'Pump DE-H alarm.'},
-  {date:'2026-03-01',wo:'30000087100',tag:'P-201A',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{},vib:{mDV:0.65,mDH:0.70,mDA:0.80,mNV:0.60,mNH:0.95,mNA:0,pDV:2.80,pDH:3.50,pDA:0,pNV:1.40,pNH:0,pNA:0},el:{cu:264,cv:268,cw:258,vu:410,vv:411,vw:409},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},sev:'5',res:'Normal.'},
-  {date:'2026-02-01',wo:'30000086200',tag:'P-201A',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{},vib:{mDV:0.60,mDH:0.65,mDA:0.75,mNV:0.55,mNH:0.88,mNA:0,pDV:2.60,pDH:3.10,pDA:0,pNV:1.30,pNH:0,pNA:0},el:{cu:263,cv:267,cw:257,vu:411,vv:411,vw:410},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},sev:'5',res:'Normal.'}
-];
-const b=db.batch();
-eqs.forEach(e=>b.set(db.collection('equipment').doc(e.tag),e));
-recs.forEach(r=>b.set(db.collection('records').doc(),{...r,ts:firebase.firestore.FieldValue.serverTimestamp(),by:'seed'}));
-b.set(db.collection('settings').doc('_seeded'),{done:true,at:firebase.firestore.FieldValue.serverTimestamp()});
-await b.commit();
-const [es2,rs2,al2]=await Promise.all([db.collection('equipment').get(),db.collection('records').orderBy('date','desc').get(),db.collection('alarmlog').orderBy('date','desc').limit(200).get()]);
-S.eq=es2.docs.map(d=>({id:d.id,...d.data()}));
-S.rec=rs2.docs.map(d=>({id:d.id,...d.data()}));
-S.alogs=al2.docs.map(d=>({id:d.id,...d.data()}));
-toast('โหลดข้อมูลตัวอย่างเรียบร้อย');}
-
-// Navigation
-function go(p,n){document.querySelectorAll('.nav-i').forEach(x=>x.classList.remove('active'));if(n)n.classList.add('active');
-const t={dashboard:'Dashboard',alerts:'Alerts',checksheet:'PM Check Sheet',history:'PM History',trends:'Trends',alarmlog:'Alarm Log',equipment:'Equipment',settings:'Settings',users:'User Management'};
-E('ptitle').textContent=t[p]||p;E('pbc').textContent=t[p]||p;
-const c=E('content');c.innerHTML='';
-({dashboard:pgDash,alerts:pgAlert,checksheet:pgCheck,history:pgHist,trends:pgTrend,alarmlog:pgAlarmLog,equipment:pgEq,settings:pgSet,users:pgUsers})[p]?.(c);ub();}
-
-// ══════════ DASHBOARD ══════════
-function pgDash(el){
-  el.innerHTML='';
-  const al=getAl(),lp=S.rec.reduce((m,r)=>r.date>m?r.date:m,''),ac=[...new Set(al.map(a=>a.tag))].length;
-
-  // Export button
-  const expRow=document.createElement('div');expRow.style.cssText='display:flex;justify-content:flex-end;margin-bottom:12px';
-  const expBtn=document.createElement('button');expBtn.className='btn btn-sm';expBtn.textContent='🖨 Export Dashboard PDF';expBtn.onclick=printDash;
-  expRow.appendChild(expBtn);el.appendChild(expRow);
-
-  // Alert banners (top 3)
-  al.slice(0,3).forEach(a=>{
-    const d=document.createElement('div');d.className='ab '+(a.lv==='danger'?'a-re':'a-am');
-    d.style.cursor='pointer';d.onclick=()=>go('alerts',E('nav-alerts'));
-    d.innerHTML='<span>'+(a.lv==='danger'?'⛔':'⚠')+'</span><b>'+a.tag+'</b>: '+a.msg+
-      '<span style="margin-left:auto;font-size:11px;opacity:.7">'+fd(a.date)+'</span>';
-    el.appendChild(d);
-  });
-
-  // Metric cards — fully DOM, no innerHTML+= after
-  const mr=document.createElement('div');mr.className='metric-row';
-  [{cls:'m1',lbl:'Equipment',val:S.eq.length,col:'var(--accent)',nav:'equipment',navEl:'nav-equipment'},
-   {cls:'m2',lbl:'PM Records',val:S.rec.length,col:'var(--green)',nav:'history',navEl:'nav-history'},
-   {cls:'m3',lbl:'Alerts',val:ac,col:'var(--amber)',nav:'alerts',navEl:'nav-alerts'},
-   {cls:'m4',lbl:'Last PM',val:lp?fd(lp):'—',col:'var(--text)',nav:null}
-  ].forEach(m=>{
-    const mc=document.createElement('div');mc.className='mc '+m.cls;
-    mc.innerHTML='<div class="ml">'+m.lbl+'</div><div class="mv" style="color:'+m.col+';font-size:'+(m.cls==='m4'?'16':'26')+'px">'+m.val+'</div>';
-    if(m.nav){
-      mc.style.cursor='pointer';
-      mc.onmouseenter=()=>{mc.style.transform='translateY(-2px)';mc.style.borderColor=m.col;};
-      mc.onmouseleave=()=>{mc.style.transform='';mc.style.borderColor='';};
-      mc.onclick=()=>go(m.nav,E(m.navEl));
-    }
-    mr.appendChild(mc);
-  });
-  el.appendChild(mr);
-
-  // Equipment Status + Vib Chart row
-  const g2a=document.createElement('div');g2a.className='g2';g2a.style.marginBottom='16px';
-  // Equipment status card
-  const eqCard=document.createElement('div');eqCard.className='card';
-  // Get 6 most recently PM'd equipment tags
-  const recentTags=[];
-  [...S.rec].sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{
-    if(!recentTags.includes(r.tag))recentTags.push(r.tag);
-  });
-  const showTags=recentTags.slice(0,6);
-  if(!showTags.length)S.eq.slice(0,6).forEach(e=>showTags.push(e.tag));
-  eqCard.innerHTML='<div class="card-t">Equipment Status <span style="font-size:10px;color:var(--text3);font-weight:400">(6 ล่าสุด)</span></div>';
-  showTags.forEach(tag=>{
-    const eq=S.eq.find(e=>e.tag===tag);if(!eq)return;
-    const rs=S.rec.filter(r=>r.tag===tag).sort((a,b)=>b.date.localeCompare(a.date)),la=rs[0];
-    const pv=la?maxPumpVib(la):0;
-    const pDa=pv>=eqPDa(eq),pAl=pv>=eqPAl(eq);
-    const dc=!la?'d-x':pDa?'d-r':pAl?'d-a':'d-g';
-    const bc=!la?'b-no':pDa?'b-nk':pAl?'b-al':'b-ok';
-    const bt=!la?'N/A':pDa?'Danger':pAl?'Alarm':'Normal';
-    const row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer';
-    row.innerHTML='<span class="dot '+dc+'"></span><div style="flex:1"><div style="font-weight:600">'+tag+'</div>'+
-      '<div style="font-size:11px;color:var(--text3)">'+(eq.module||eq.mod||'')+(la?' | '+la.date:'')+'</div></div>'+
-      '<span class="badge '+bc+'">'+bt+'</span>'+(la?'<span class="mono" style="color:var(--text3);font-size:11px"> P:'+pv.toFixed(2)+'</span>':'');
-    row.onclick=()=>{if(la)showD(la.id);};
-    eqCard.appendChild(row);
-  });
-  g2a.appendChild(eqCard);
-  // Vib chart card
-  const vibCard=document.createElement('div');vibCard.className='card';
-  vibCard.innerHTML='<div class="card-t">Vibration — 6 Latest PM</div><div class="cw" style="height:240px"><canvas id="dv"></canvas></div>';
-  g2a.appendChild(vibCard);
-  el.appendChild(g2a);
-
-  // Current & Voltage chart
-  const elCard=document.createElement('div');elCard.className='card';
-  elCard.innerHTML='<div class="card-t">Current & Voltage</div><div class="g2" style="gap:16px"><div class="cw" style="height:200px"><canvas id="dc"></canvas></div><div class="cw" style="height:200px"><canvas id="du"></canvas></div></div>';
-  el.appendChild(elCard);
-
-  // Draw charts
-  setTimeout(()=>{
-    const sorted=[...S.rec].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6).reverse();
-    const lb=sorted.map(r=>r.tag+' '+r.date.slice(5));
-    const co=()=>({responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:10}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:9},maxRotation:40}}}});
-    if(E('dv'))new Chart(E('dv'),{type:'bar',data:{labels:lb,datasets:[{label:'Motor DE-H',data:sorted.map(r=>V(r,'mDH')),backgroundColor:'rgba(88,166,255,.7)',borderRadius:4},{label:'Pump DE-H',data:sorted.map(r=>V(r,'pDH')),backgroundColor:'rgba(210,153,34,.7)',borderRadius:4}]},options:co()});
-    if(E('dc'))new Chart(E('dc'),{type:'bar',data:{labels:sorted.map(r=>r.tag),datasets:[{label:'U',data:sorted.map(r=>(r.el||r.elec||{}).cu||0),backgroundColor:'rgba(63,185,80,.7)',borderRadius:4},{label:'V',data:sorted.map(r=>(r.el||r.elec||{}).cv||0),backgroundColor:'rgba(63,185,80,.45)',borderRadius:4},{label:'W',data:sorted.map(r=>(r.el||r.elec||{}).cw||0),backgroundColor:'rgba(63,185,80,.25)',borderRadius:4}]},options:{...co(),plugins:{...co().plugins,title:{display:true,text:'Current (A)',color:'#8b949e',font:{size:11}}}}});
-    if(E('du'))new Chart(E('du'),{type:'bar',data:{labels:sorted.map(r=>r.tag),datasets:[{label:'U',data:sorted.map(r=>(r.el||r.elec||{}).vu||0),backgroundColor:'rgba(188,140,255,.7)',borderRadius:4},{label:'V',data:sorted.map(r=>(r.el||r.elec||{}).vv||0),backgroundColor:'rgba(188,140,255,.45)',borderRadius:4},{label:'W',data:sorted.map(r=>(r.el||r.elec||{}).vw||0),backgroundColor:'rgba(188,140,255,.25)',borderRadius:4}]},options:{...co(),scales:{y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:9},maxRotation:40}}},plugins:{...co().plugins,title:{display:true,text:'Voltage (V)',color:'#8b949e',font:{size:11}}}}});
-  },100);
-}
-
-function printDash(){window.print();}
-
-// ══════════ ALERTS ══════════
-// ══════════ ALERTS ══════════
-function pgAlert(el){
-  const a=getAl();
-  if(!a.length){
-    el.innerHTML='<div class="card" style="text-align:center;padding:40px"><div style="font-size:40px;margin-bottom:12px">✅</div><div style="color:var(--green);font-size:16px;font-weight:600">No active alerts</div><div style="color:var(--text3);font-size:13px;margin-top:6px">ค่า PM ล่าสุดทุกตัวอยู่ในเกณฑ์ปกติ</div></div>';
-    return;
-  }
-  const byTag={};a.forEach(x=>{if(!byTag[x.tag])byTag[x.tag]=[];byTag[x.tag].push(x);});
-  el.innerHTML='<div style="font-size:13px;color:var(--text3);margin-bottom:12px">พบ '+a.length+' รายการ ใน '+Object.keys(byTag).length+' เครื่อง</div>';
-  Object.entries(byTag).forEach(([tag,items])=>{
-    const eq=S.eq.find(e=>e.tag===tag);
-    const latestRec=[...S.rec.filter(r=>r.tag===tag)].sort((a,b)=>b.date.localeCompare(a.date))[0];
-    const hasDanger=items.some(x=>x.lv==='danger');
-    const card=document.createElement('div');card.className='card';card.style.marginBottom='14px';
-    // Header
-    const hd=document.createElement('div');hd.style.cssText='display:flex;align-items:center;gap:12px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)';
-    hd.innerHTML='<span style="font-size:22px">'+(hasDanger?'⛔':'⚠')+'</span>'+
-      '<div style="flex:1"><div style="font-size:15px;font-weight:700">'+tag+'</div>'+
-      '<div style="font-size:12px;color:var(--text3)">'+(eq?.module||eq?.mod||'')+' | '+(eq?.location||'')+'</div></div>'+
-      '<span class="badge '+(hasDanger?'b-nk':'b-al')+'">'+(hasDanger?'DANGER':'ALARM')+'</span>';
-    card.appendChild(hd);
-    // Alarm rows
-    items.forEach(x=>{
-      const row=document.createElement('div');
-      row.style.cssText='display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)';
-      row.innerHTML='<span>'+(x.lv==='danger'?'🔴':'🟡')+'</span>'+
-        '<div style="flex:1;font-size:13px"><b>'+x.loc.replace(/_/g,' ')+'</b> — '+x.msg+'</div>'+
-        '<span style="font-size:11px;color:var(--text3)">'+x.date+'</span>';
-      card.appendChild(row);
-    });
-    // Action buttons
-    const btns=document.createElement('div');btns.style.cssText='display:flex;gap:8px;margin-top:14px;flex-wrap:wrap';
-    if(latestRec){
-      const bv=document.createElement('button');bv.className='btn btn-sm btn-p';
-      bv.textContent='📋 PM ล่าสุด ('+latestRec.date+')';
-      bv.onclick=()=>showD(latestRec.id);btns.appendChild(bv);
-    }
-    const bh=document.createElement('button');bh.className='btn btn-sm';bh.textContent='☰ History';
-    bh.onclick=()=>{go('history',E('nav-history'));setTimeout(()=>{const hw=E('htag-wrap');const ss=hw?.querySelector('.ss-wrap');if(ss?.setVal)ss.setVal(tag);apH();},300);};
-    btns.appendChild(bh);
-    if(canEdit()){
-      const bn=document.createElement('button');bn.className='btn btn-sm btn-s';bn.textContent='+ New PM';
-      bn.onclick=()=>{go('checksheet',E('nav-checksheet'));setTimeout(()=>{const tw=E('f-tag-wrap');const ss=tw?.querySelector('.ss-wrap');if(ss?.setVal)ss.setVal(tag);onTg(tag);},300);};
-      btns.appendChild(bn);
-    }
-    card.appendChild(btns);el.appendChild(card);
-  });
-}
-
-// ══════════ CHECK SHEET ══════════
-function pgCheck(el){S.cf={ck:{},sev:'5'};
-const eqOpts=S.eq.map(e=>({value:e.tag,label:e.tag+(e.module?' — '+e.module:'')}));
-const purpOpts=[{value:'PM',label:'PM'},{value:'Routine',label:'Routine'},{value:'Investigation',label:'Investigation'},{value:'CM',label:'CM'}];
-const brgOpts=[{value:'ok',label:'OK'},{value:'alarm',label:'Alarm'},{value:'nok',label:'NOK-Replace'}];
-el.innerHTML=
-'<div class="card"><div class="st" style="margin-bottom:14px">📋 Work Order Info</div>'+
-'<div class="g4" style="margin-bottom:12px">'+
-'<div class="fg"><label class="fl">WO No.</label><input class="fi" id="f-wo"></div>'+
-'<div class="fg"><label class="fl">Equipment Tag *</label><div id="f-tag-wrap"></div></div>'+
-'<div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="f-dt" value="'+now()+'"></div>'+
-'<div class="fg"><label class="fl">Purpose</label><div id="f-pu-wrap"></div></div>'+
-'<div class="fg"><label class="fl">Inspector</label><input class="fi" id="f-ins" value="'+(S.set.di||'')+'"></div>'+
-'<div class="fg"><label class="fl">Approved by</label><input class="fi" id="f-app" value="'+(S.set.da||'')+'"></div>'+
-'</div></div>'+
-'<div class="card"><div class="st" style="margin-bottom:14px">🔩 Bearing Info</div><div class="g4">'+
-'<div class="fg"><label class="fl">DE Bearing No.</label><input class="fi" id="f-bde"></div>'+
-'<div class="fg"><label class="fl">DE Condition</label><div id="f-bdc-wrap"></div></div>'+
-'<div class="fg"><label class="fl">NDE Bearing No.</label><input class="fi" id="f-bnde"></div>'+
-'<div class="fg"><label class="fl">NDE Condition</label><div id="f-bnc-wrap"></div></div>'+
-'</div></div>'+
-// ── Feature 1: MCC Module Inspection ──
-'<div class="card"><div class="st" style="margin-bottom:14px">🔌 MCC Module Inspection</div>'+
-'<div style="overflow-x:auto"><table class="cht"><thead><tr>'+
-'<th style="min-width:160px">Item</th><th>Criteria</th><th>As Found</th><th>Action</th><th>As Left</th></tr></thead>'+
-'<tbody id="mcc-body"></tbody></table></div></div>'+
-// ── Feature 2: Motor Inspection ──
-'<div class="card"><div class="st" style="margin-bottom:14px">🔧 Motor Inspection</div>'+
-'<div style="overflow-x:auto"><table class="cht"><thead><tr>'+
-'<th style="min-width:160px">Item</th><th>Criteria</th><th>As Found</th><th>Action</th><th>As Left</th></tr></thead>'+
-'<tbody id="mot-body"></tbody></table></div></div>'+
-// ── Vibration ──
-'<div class="card"><div class="st" style="margin-bottom:14px">〰 Vibration (mm/s)</div>'+
-'<div class="g2" style="gap:16px">'+
-'<div><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px">🔵 MOTOR</div>'+
-'<table class="vt"><thead><tr><th>Pos</th><th>V</th><th>H</th><th>A</th><th>Status</th></tr></thead><tbody>'+
-'<tr><td>DE</td><td><input class="vi" id="vmDV" type="number" step=".01" oninput="chkVm(this,\'smD\')"></td><td><input class="vi" id="vmDH" type="number" step=".01" oninput="chkVm(this,\'smD\')"></td><td><input class="vi" id="vmDA" type="number" step=".01" oninput="chkVm(this,\'smD\')"></td><td id="smD">—</td></tr>'+
-'<tr><td>NDE</td><td><input class="vi" id="vmNV" type="number" step=".01" oninput="chkVm(this,\'smN\')"></td><td><input class="vi" id="vmNH" type="number" step=".01" oninput="chkVm(this,\'smN\')"></td><td><input class="vi" id="vmNA" type="number" step=".01" oninput="chkVm(this,\'smN\')"></td><td id="smN">—</td></tr>'+
-'</tbody></table></div>'+
-'<div><div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:8px">🟡 PUMP</div>'+
-'<table class="vt"><thead><tr><th>Pos</th><th>V</th><th>H</th><th>A</th><th>Status</th></tr></thead><tbody>'+
-'<tr><td>DE</td><td><input class="vi" id="vpDV" type="number" step=".01" oninput="chkVp(this,\'spD\')"></td><td><input class="vi" id="vpDH" type="number" step=".01" oninput="chkVp(this,\'spD\')"></td><td><input class="vi" id="vpDA" type="number" step=".01" oninput="chkVp(this,\'spD\')"></td><td id="spD">—</td></tr>'+
-'<tr><td>NDE</td><td><input class="vi" id="vpNV" type="number" step=".01" oninput="chkVp(this,\'spN\')"</td><td><input class="vi" id="vpNH" type="number" step=".01" oninput="chkVp(this,\'spN\')"</td><td><input class="vi" id="vpNA" type="number" step=".01" oninput="chkVp(this,\'spN\')"</td><td id="spN">—</td></tr>'+
-'</tbody></table></div></div></div>'+
-// ── Electrical ──
-'<div class="card"><div class="st" style="margin-bottom:14px">⚡ Voltage & Current</div>'+
-'<table class="et"><thead><tr><th>Phase</th><th>U</th><th>V</th><th>W</th><th>Unbal%</th></tr></thead><tbody>'+
-'<tr><td>Current (A)</td><td><input class="vi" id="ecu" type="number" oninput="autoUnbal(\'ecu\',\'ecv\',\'ecw\',\'ecUn\')"></td><td><input class="vi" id="ecv" type="number" oninput="autoUnbal(\'ecu\',\'ecv\',\'ecw\',\'ecUn\')"></td><td><input class="vi" id="ecw" type="number" oninput="autoUnbal(\'ecu\',\'ecv\',\'ecw\',\'ecUn\')"></td><td><span class="vi-ro" id="ecUn">—</span></td></tr>'+
-'<tr><td>Voltage (V)</td><td><input class="vi" id="evu" type="number" oninput="autoUnbal(\'evu\',\'evv\',\'evw\',\'evUn\')"></td><td><input class="vi" id="evv" type="number" oninput="autoUnbal(\'evu\',\'evv\',\'evw\',\'evUn\')"></td><td><input class="vi" id="evw" type="number" oninput="autoUnbal(\'evu\',\'evv\',\'evw\',\'evUn\')"></td><td><span class="vi-ro" id="evUn">—</span></td></tr>'+
-'</tbody></table></div>'+
-// ── Static Test ──
-'<div class="card"><div class="st" style="margin-bottom:14px">🧪 Electrical Static Test</div>'+
-'<div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:10px">INSULATION RESISTANCE (MΩ)</div>'+
-'<table class="et"><thead><tr><th>Test</th><th>U-V</th><th>V-W</th><th>W-U</th><th>UVW-G</th></tr></thead><tbody>'+
-'<tr><td>IR @ <input class="vi" id="irVdc" type="number" placeholder="Vdc" style="width:52px"> Vdc</td><td><input class="vi" id="irUV" type="number" step=".01"></td><td><input class="vi" id="irVW" type="number" step=".01"></td><td><input class="vi" id="irWU" type="number" step=".01"></td><td><input class="vi" id="irG" type="number" step=".01"></td></tr>'+
-'</tbody></table><div style="margin-top:8px;font-size:12px;color:var(--text3)">PI (R10/R1): <input class="vi" id="irPI" type="number" step=".01" style="width:80px"></div>'+
-'<div style="font-size:12px;font-weight:600;color:var(--text3);margin-top:16px;margin-bottom:10px">WINDING RESISTANCE (Ω)</div>'+
-'<table class="et"><thead><tr><th>Phase</th><th>U</th><th>V</th><th>W</th><th>Unbal%</th></tr></thead><tbody>'+
-'<tr><td>WR @ <input class="vi" id="wrTemp" type="number" placeholder="°C" style="width:52px"> °C</td><td><input class="vi" id="wrU" type="number" step=".001" oninput="autoUnbal(\'wrU\',\'wrV\',\'wrW\',\'wrUn\')"></td><td><input class="vi" id="wrV" type="number" step=".001" oninput="autoUnbal(\'wrU\',\'wrV\',\'wrW\',\'wrUn\')"></td><td><input class="vi" id="wrW" type="number" step=".001" oninput="autoUnbal(\'wrU\',\'wrV\',\'wrW\',\'wrUn\')"></td><td><span class="vi-ro" id="wrUn">—</span></td></tr>'+
-'</tbody></table>'+
-'<div style="font-size:12px;font-weight:600;color:var(--text3);margin-top:16px;margin-bottom:10px">WINDING INDUCTANCE (mH)</div>'+
-'<table class="et"><thead><tr><th>Phase</th><th>U</th><th>V</th><th>W</th><th>Unbal%</th></tr></thead><tbody>'+
-'<tr><td>WI @ <input class="vi" id="wiTemp" type="number" placeholder="°C" style="width:52px"> °C</td><td><input class="vi" id="wiU" type="number" step=".01" oninput="autoUnbal(\'wiU\',\'wiV\',\'wiW\',\'wiUn\')"></td><td><input class="vi" id="wiV" type="number" step=".01" oninput="autoUnbal(\'wiU\',\'wiV\',\'wiW\',\'wiUn\')"></td><td><input class="vi" id="wiW" type="number" step=".01" oninput="autoUnbal(\'wiU\',\'wiV\',\'wiW\',\'wiUn\')"></td><td><span class="vi-ro" id="wiUn">—</span></td></tr>'+
-'</tbody></table></div>'+
-// ── Results ──
-'<div class="card"><div class="st" style="margin-bottom:14px">📊 Operating Data</div><div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:10px">BEARING TEMPERATURE (°C)</div><div class="g4" style="margin-bottom:14px"><div class="fg"><label class="fl">Motor DE (°C)</label><input class="vi" id="od-mde-t" type="number" step="0.1" placeholder="—" style="width:100%"></div><div class="fg"><label class="fl">Motor NDE (°C)</label><input class="vi" id="od-mnde-t" type="number" step="0.1" placeholder="—" style="width:100%"></div><div class="fg"><label class="fl">Pump DE (°C)</label><input class="vi" id="od-pde-t" type="number" step="0.1" placeholder="—" style="width:100%"></div><div class="fg"><label class="fl">Pump NDE (°C)</label><input class="vi" id="od-pnde-t" type="number" step="0.1" placeholder="—" style="width:100%"></div></div><div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:10px">PROCESS DATA</div><div class="g3"><div class="fg"><label class="fl">Suction Pressure (Bar)</label><input class="vi" id="od-suc" type="number" step="0.01" placeholder="—" style="width:100%"></div><div class="fg"><label class="fl">Discharge Pressure (Bar)</label><input class="vi" id="od-dis" type="number" step="0.01" placeholder="—" style="width:100%"></div><div class="fg"><label class="fl">Flow (m³/hr)</label><input class="vi" id="od-flow" type="number" step="0.1" placeholder="—" style="width:100%"></div></div></div>'+'<div class="card"><div class="st" style="margin-bottom:14px">📝 Results & Severity</div>'+
-'<div class="fg" style="margin-bottom:14px"><label class="fl">Results</label><textarea class="ft" id="f-res" rows="4"></textarea></div>'+
-'<div class="fl" style="margin-bottom:8px">Severity:</div>'+
-'<div class="sg"><div class="so" onclick="selS(1,this)">⛔ Immediate</div><div class="so" onclick="selS(2,this)">⚠ Correct ASAP</div><div class="so" onclick="selS(3,this)">🔧 Next opportunity</div><div class="so" onclick="selS(4,this)">👁 Monitor</div><div class="so s5" onclick="selS(5,this)">✓ No action</div></div>'+
-'<input type="hidden" id="f-sev" value="5"></div>'+
-'<div style="display:flex;gap:10px;justify-content:flex-end;margin-bottom:24px">'+
-'<button class="btn" onclick="pgCheck(E(\'content\'))">Clear</button>'+
-'<button class="btn btn-s" id="svb" onclick="saveR()"'+(canEdit()?'':' disabled title="ไม่มีสิทธิ์ (Viewer)"')+'>✓ Save to Firestore</button></div>';
-
-// Append searchable selects
-const sTag=mkSS('f-tag',eqOpts,eqOpts.length?'Search equipment...':'(No equipment)',onTg);E('f-tag-wrap').appendChild(sTag);
-const sPu=mkSS('f-pu',purpOpts,'Purpose...');sPu.setVal('PM');E('f-pu-wrap').appendChild(sPu);
-const sBdc=mkSS('f-bdc',brgOpts,'Condition...');sBdc.setVal('ok');E('f-bdc-wrap').appendChild(sBdc);
-const sBnc=mkSS('f-bnc',brgOpts,'Condition...');sBnc.setVal('ok');E('f-bnc-wrap').appendChild(sBnc);
-
-// Build inspection tables (5-column: Item, Criteria, As Found, Action, As Left)
-function buildInspTable(tbodyId,rows,prefix){
-  const tb=E(tbodyId);if(!tb)return;
-  rows.forEach(i=>{
-    const tr=document.createElement('tr');
-    const afBtns=`<div style="display:flex;gap:3px">
-      <button class="cb" onclick="setCk('${prefix}${i.k}','ok',this)">OK</button>
-      <button class="cb" onclick="setCk('${prefix}${i.k}','nok',this)">NOK</button>
-      <button class="cb" onclick="setCk('${prefix}${i.k}','na',this)">N/A</button></div>`;
-    const actBtns=i.act.map(a=>`<button class="cb" onclick="setCkAct('${prefix}${i.k}_act','${a}',this)">${a}</button>`).join(' ');
-    const alBtns=`<div style="display:flex;gap:3px">
-      <button class="cb" onclick="setCk('${prefix}${i.k}_al','ok',this)">OK</button>
-      <button class="cb" onclick="setCk('${prefix}${i.k}_al','nok',this)">NOK</button>
-      <button class="cb" onclick="setCk('${prefix}${i.k}_al','na',this)">N/A</button></div>`;
-    tr.innerHTML=`<td style="font-weight:500;font-size:12px">${i.l}</td><td style="color:var(--text3);font-size:11px">${i.c}</td><td>${afBtns}</td><td><div style="display:flex;gap:3px">${actBtns}</div></td><td>${alBtns}</td>`;
-    tb.appendChild(tr);
-  });
-}
-buildInspTable('mcc-body',S.mcc,'');
-buildInspTable('mot-body',S.mot,'');}
-
-function setCk(k,v,b){S.cf.ck[k]=v;b.closest('div').querySelectorAll('.cb').forEach(x=>x.className='cb');b.className='cb '+v;}
-function setCkAct(k,v,b){S.cf.ck[k]=v;b.closest('div').querySelectorAll('.cb').forEach(x=>x.className='cb');b.className='cb ok';}
-function onTg(t){const eq=S.eq.find(e=>e.tag===t);if(!eq)return;E('f-bde').value=eq.de||'';E('f-bnde').value=eq.nde||'';}
-// Feature 3: separate Motor and Pump alarm check
-function chkVm(inp,sid){
-  const t=ssVal('f-tag-wrap');const eq=S.eq.find(e=>e.tag===t);
-  const al=eqMAl(eq),da=eqMDa(eq),v=parseFloat(inp.value)||0;
-  inp.className='vi'+(v>=da?' danger':v>=al?' alarm':'');
-  // Check max of all 3 fields in this row for status badge
-  const rowIds=sid==='smD'?['vmDV','vmDH','vmDA']:['vmNV','vmNH','vmNA'];
-  const mx=Math.max(...rowIds.map(id=>parseFloat(E(id)?.value)||0));
-  const s=E(sid);if(s)s.innerHTML=mx>=da?'<span class="badge b-nk">Danger</span>':mx>=al?'<span class="badge b-al">Alarm</span>':mx>0?'<span class="badge b-ok">Normal</span>':'—';
-}
-function chkVp(inp,sid){
-  const t=ssVal('f-tag-wrap');const eq=S.eq.find(e=>e.tag===t);
-  const al=eqPAl(eq),da=eqPDa(eq),v=parseFloat(inp.value)||0;
-  inp.className='vi'+(v>=da?' danger':v>=al?' alarm':'');
-  const rowIds=sid==='spD'?['vpDV','vpDH','vpDA']:['vpNV','vpNH','vpNA'];
-  const mx=Math.max(...rowIds.map(id=>parseFloat(E(id)?.value)||0));
-  const s=E(sid);if(s)s.innerHTML=mx>=da?'<span class="badge b-nk">Danger</span>':mx>=al?'<span class="badge b-al">Alarm</span>':mx>0?'<span class="badge b-ok">Normal</span>':'—';
-}
-function selS(n,el){document.querySelectorAll('.so').forEach(b=>b.className='so');el.className='so s'+n;S.cf.sev=String(n);E('f-sev').value=n;}
-function ssVal(wid,def=''){const inp=E(wid)?.querySelector('input.ss-input');return(inp?.dataset?.val&&inp.dataset.val.trim())||def;}
-async function saveR(){if(!canEdit()){toast('ไม่มีสิทธิ์บันทึก (Viewer)','error');return;}const tag=ssVal('f-tag-wrap');if(!tag){toast('เลือก Equipment Tag','error');return;}const btn=E('svb');btn.disabled=true;btn.textContent='⏳ Saving...';
-const cuU=calcUnbal(E('ecu')?.value,E('ecv')?.value,E('ecw')?.value);
-const vuU=calcUnbal(E('evu')?.value,E('evv')?.value,E('evw')?.value);
-const rec={date:E('f-dt').value,wo:E('f-wo').value,tag,purp:ssVal('f-pu-wrap','PM'),insp:E('f-ins').value,appr:E('f-app').value,ck:{...S.cf.ck},
-brg:{de:E('f-bde')?.value||'',nde:E('f-bnde')?.value||'',deC:ssVal('f-bdc-wrap','ok'),ndeC:ssVal('f-bnc-wrap','ok')},
-vib:{mDV:gv('vmDV'),mDH:gv('vmDH'),mDA:gv('vmDA'),mNV:gv('vmNV'),mNH:gv('vmNH'),mNA:gv('vmNA'),pDV:gv('vpDV'),pDH:gv('vpDH'),pDA:gv('vpDA'),pNV:gv('vpNV'),pNH:gv('vpNH'),pNA:gv('vpNA')},
-el:{cu:gv('ecu'),cv:gv('ecv'),cw:gv('ecw'),cuUn:cuU,vu:gv('evu'),vv:gv('evv'),vw:gv('evw'),vuUn:vuU},
-st:{irVdc:gv('irVdc'),irUV:gv('irUV'),irVW:gv('irVW'),irWU:gv('irWU'),irG:gv('irG'),pi:gv('irPI'),wrTemp:gv('wrTemp'),wiTemp:gv('wiTemp'),wrU:gv('wrU'),wrV:gv('wrV'),wrW:gv('wrW'),wrUn:calcUnbal(E('wrU')?.value,E('wrV')?.value,E('wrW')?.value),wiU:gv('wiU'),wiV:gv('wiV'),wiW:gv('wiW'),wiUn:calcUnbal(E('wiU')?.value,E('wiV')?.value,E('wiW')?.value)},
-sev:E('f-sev').value||'5',res:E('f-res').value,od:{mDeT:gv('od-mde-t'),mNdeT:gv('od-mnde-t'),pDeT:gv('od-pde-t'),pNdeT:gv('od-pnde-t'),suc:gv('od-suc'),dis:gv('od-dis'),flow:gv('od-flow')},ts:firebase.firestore.FieldValue.serverTimestamp(),by:S.usr?.email||''};
-// Check if editing existing record
-const editId=E('f-edit-id')?.value;
-try{
-  let full;
-  if(editId){
-    await db.collection('records').doc(editId).update({...rec,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:S.usr?.email||''});
-    const idx=S.rec.findIndex(x=>x.id===editId);
-    full={id:editId,...rec};
-    if(idx>=0)S.rec[idx]=full;else S.rec.unshift(full);
-    if(E('f-edit-id'))E('f-edit-id').value='';
-    toast('อัพเดต '+tag+' สำเร็จ ✓');
-  }else{
-    const ref=await db.collection('records').add(rec);
-    full={id:ref.id,...rec};S.rec.unshift(full);
-    toast('บันทึก '+tag+' สำเร็จ ✓');
-  }
-  await persistNewAlarms(full); // saveAlarmLog inside already reloads S.alogs
-  // Send Line notification (all PM records + alarm details)
-  const alarmEntries=getAllAlarmsFromRec(full,S.eq.find(e=>e.tag===full.tag));
-  sendLineNotify(full,alarmEntries);
-  ub();pgCheck(E('content'));
-}catch(e){toast('Error: '+e.message,'error');btn.disabled=false;btn.textContent='✓ Save';}}
-
-// ══════════ HISTORY ══════════
-// Feature 4: show max motor vib + max pump vib
-function pgHist(el){
-  const opts=[{value:'',label:'All Equipment'},...S.eq.map(e=>({value:e.tag,label:e.tag}))];
-  el.innerHTML='<div class="card"><div class="sh"><div class="st">PM Records ('+S.rec.length+')</div><div id="htag-wrap" style="width:180px"></div></div>'+
-  '<div style="overflow-x:auto"><table class="ht"><thead><tr>'+
-  '<th>Date</th><th>WO</th><th>Tag</th><th>Brg DE</th>'+
-  '<th title="Max vibration all positions">Motor Vib↑</th>'+
-  '<th title="Max vibration all positions">Pump Vib↑</th>'+
-  '<th>Severity</th><th></th></tr></thead><tbody id="htb"></tbody></table></div></div>';
-  const hw=E('htag-wrap');if(hw){const ss=mkSS('htag',opts,'Filter...',()=>apH());hw.appendChild(ss);}
-  apH();
-}
-function apH(){const hw=E('htag-wrap');const f=hw?.querySelector('input')?.dataset?.val||'';let rs=[...S.rec].sort((a,b)=>b.date.localeCompare(a.date));if(f)rs=rs.filter(r=>r.tag===f);
-const tb=E('htb');if(!tb)return;tb.innerHTML='';
-rs.forEach(r=>{const eq=S.eq.find(e=>e.tag===r.tag);
-  const mv=maxMotorVib(r),pv=maxPumpVib(r);
-  const mAl=mv>=eqMAl(eq),mDa=mv>=eqMDa(eq);
-  const pAl=pv>=eqPAl(eq),pDa=pv>=eqPDa(eq);
-  tb.innerHTML+='<tr>'+
-    '<td class="mono">'+r.date+'</td>'+
-    '<td class="mono" style="color:var(--text3)">'+(r.wo||'—')+'</td>'+
-    '<td style="font-weight:600">'+r.tag+'</td>'+
-    '<td style="font-size:12px;color:var(--text3)">'+(r.brg?.de||eq?.de||'—')+'</td>'+
-    '<td><span class="mono">'+mv.toFixed(2)+'</span> <span class="badge '+(mDa?'b-nk':mAl?'b-al':'b-ok')+'">'+(mDa?'Danger':mAl?'Alarm':'OK')+'</span></td>'+
-    '<td><span class="mono">'+pv.toFixed(2)+'</span> <span class="badge '+(pDa?'b-nk':pAl?'b-al':'b-ok')+'">'+(pDa?'Danger':pAl?'Alarm':'OK')+'</span></td>'+
-    '<td style="font-size:11px;color:'+(S.sc[r.sev||r.severity]||'')+'">● '+(S.sl[r.sev||r.severity]||'—')+'</td>'+
-    '<td><div style="display:flex;gap:4px"><button class="btn btn-sm btn-p" onclick="showD(\''+r.id+'\')">View</button>'+(canEdit()?'<button class="btn btn-sm" onclick="editRec(\''+r.id+'\')">✎ Edit</button>':'')+'<button class="btn btn-sm btn-d" onclick="delRec(\''+r.id+'\')">Del</button></div></td></tr>';});
-if(!rs.length)tb.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text3)">No records</td></tr>';}
-
-// ── Feature 3: Edit existing PM record ──
-function editRec(id){
-  const r=S.rec.find(x=>x.id===id);if(!r){toast('ไม่พบ record','error');return;}
-  go('checksheet',E('nav-checksheet'));
-  // Wait for DOM to render then populate
-  setTimeout(()=>populateCheck(r,id),200);
-}
-function populateCheck(r,id){
-  // Set header fields
-  if(E('f-wo'))E('f-wo').value=r.wo||'';
-  if(E('f-dt'))E('f-dt').value=r.date||'';
-  if(E('f-ins'))E('f-ins').value=r.insp||r.inspector||'';
-  if(E('f-app'))E('f-app').value=r.appr||r.approver||'';
-  if(E('f-res'))E('f-res').value=r.res||r.results||'';
-  // Equipment tag
-  const tw=E('f-tag-wrap');const tss=tw?.querySelector('.ss-wrap');
-  if(tss?.setVal)tss.setVal(r.tag);else if(tss){const inp=tss.querySelector('input');if(inp){inp.value=r.tag;inp.dataset.val=r.tag;}}
-  // Purpose
-  const pw=E('f-pu-wrap');const pss=pw?.querySelector('.ss-wrap');
-  if(pss?.setVal)pss.setVal(r.purp||r.purpose||'PM');
-  // Bearing
-  if(E('f-bde'))E('f-bde').value=r.brg?.de||'';
-  if(E('f-bnde'))E('f-bnde').value=r.brg?.nde||'';
-  const bdcW=E('f-bdc-wrap');const bdcSS=bdcW?.querySelector('.ss-wrap');if(bdcSS?.setVal)bdcSS.setVal(r.brg?.deC||'ok');
-  const bncW=E('f-bnc-wrap');const bncSS=bncW?.querySelector('.ss-wrap');if(bncSS?.setVal)bncSS.setVal(r.brg?.ndeC||'ok');
-  // Vibration
-  const vf={vmDV:'mDV',vmDH:'mDH',vmDA:'mDA',vmNV:'mNV',vmNH:'mNH',vmNA:'mNA',vpDV:'pDV',vpDH:'pDH',vpDA:'pDA',vpNV:'pNV',vpNH:'pNH',vpNA:'pNA'};
-  Object.entries(vf).forEach(([eid,vk])=>{if(E(eid))E(eid).value=V(r,vk)||r.vib?.[vk]||'';});
-  // Electrical
-  const el=r.el||r.elec||{};
-  ['ecu','ecv','ecw','evu','evv','evw'].forEach((eid,i)=>{const k=['cu','cv','cw','vu','vv','vw'][i];if(E(eid))E(eid).value=el[k]||'';});
-  autoUnbal('ecu','ecv','ecw','ecUn');autoUnbal('evu','evv','evw','evUn');
-  // Static test
-  const st=r.st||{};
-  ['irVdc','irUV','irVW','irWU','irG','irPI','wrTemp','wrU','wrV','wrW','wiTemp','wiU','wiV','wiW'].forEach(eid=>{const k=eid==='irPI'?'pi':eid;if(E(eid))E(eid).value=st[k]||'';});
-  autoUnbal('wrU','wrV','wrW','wrUn');autoUnbal('wiU','wiV','wiW','wiUn');
-  // Operating data
-  const od=r.od||{};
-  ['od-mde-t','od-mnde-t','od-pde-t','od-pnde-t','od-suc','od-dis','od-flow'].forEach((eid,i)=>{
-    const k=['mDeT','mNdeT','pDeT','pNdeT','suc','dis','flow'][i];
-    if(E(eid))E(eid).value=od[k]||'';
-  });
-  // Severity
-  const sn=parseInt(r.sev||r.severity||5);
-  document.querySelectorAll('.so').forEach(b=>b.className='so');
-  const sevBtns=document.querySelectorAll('.so');if(sevBtns[sn-1])sevBtns[sn-1].className='so s'+sn;
-  if(E('f-sev'))E('f-sev').value=sn;S.cf.sev=String(sn);
-  // Inspections (ck) — click matching buttons
-  const ck=r.ck||{};
-  document.querySelectorAll('.cb[onclick]').forEach(btn=>{
-    const oc=btn.getAttribute('onclick')||'';
-    const m=oc.match(/setCk(?:Act)?\s*\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]/);
-    if(!m)return;
-    const[,key,val]=m;
-    if(ck[key]===val){btn.className='cb '+val;}
-  });
-  // Store edit ID in hidden field for saveR to use
-  if(!E('f-edit-id')){const h=document.createElement('input');h.type='hidden';h.id='f-edit-id';document.body.appendChild(h);}
-  E('f-edit-id').value=id;
-  // Update save button text
-  const btn=E('svb');if(btn)btn.textContent='✓ Update Record';
-  toast('โหลดข้อมูล '+r.tag+' พร้อมแก้ไขแล้ว');
-}
-async function delRec(id){if(!canEdit()){toast('ไม่มีสิทธิ์ลบ (Viewer)','error');return;}const r=S.rec.find(x=>x.id===id);if(!r)return;if(!confirm('ลบ record '+r.tag+' ('+r.date+') ?\nจะไม่สามารถกู้คืนได้'))return;try{await db.collection('records').doc(id).delete();S.rec=S.rec.filter(x=>x.id!==id);ub();apH();toast('ลบเรียบร้อย','warning');}catch(e){toast('Error: '+e.message,'error');}}
-
-// ══════════ DETAIL MODAL ══════════
-function showD(id){
-const r=S.rec.find(x=>x.id===id);if(!r)return;
-const eq=S.eq.find(e=>e.tag===r.tag);
-const vst=(v,al,da)=>v>=da?`<b style="color:var(--red)">${v}⛔</b>`:v>=al?`<b style="color:var(--amber)">${v}⚠</b>`:`${v}`;
-const bst=c=>c==='ok'?'<span class="badge b-ok">OK</span>':c==='alarm'?'<span class="badge b-al">Alarm</span>':'<span class="badge b-nk">NOK</span>';
-const ckst=v=>v==='ok'?'<span class="badge b-ok">OK</span>':v==='nok'?'<span class="badge b-nk">NOK</span>':v==='na'?'<span class="badge b-no">N/A</span>':'—';
-const ck=r.ck||{};const el2=r.el||r.elec||{};const st2=r.st||{};
-E('mdett').textContent='PM Record — '+r.tag+' | '+fd(r.date);
-let h='<div style="text-align:center;font-size:16px;font-weight:600;margin-bottom:4px">'+(S.set.logoLine1||'PM Inspection')+'</div><div style="text-align:center;font-size:12px;color:var(--text3);margin-bottom:16px">'+(S.set.logoLine2||'TCC Plant GEN')+'</div>';
-h+='<div class="sec-h">📊 Quick Dashboard</div>';
-h+='<div class="g2" style="gap:12px;margin-bottom:4px"><div class="cw" style="height:180px"><canvas id="dv-mini"></canvas></div><div class="cw" style="height:180px"><canvas id="de-mini"></canvas></div></div>';
-h+='<div class="sec-h">📋 Work Order</div>';
-h+=`<div class="dl"><span class="dl-l">Date</span><span class="dl-v">${fd(r.date)}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">WO No.</span><span class="dl-v">${r.wo||'—'}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Tag</span><span class="dl-v" style="font-weight:600">${r.tag}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Module</span><span class="dl-v">${eq?.module||eq?.mod||'—'}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Purpose</span><span class="dl-v"><span class="badge b-in">${r.purp||r.purpose||'PM'}</span></span></div>`;
-h+=`<div class="dl"><span class="dl-l">Inspector</span><span class="dl-v">${r.insp||r.inspector||'—'}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Approved by</span><span class="dl-v">${r.appr||r.approver||'—'}</span></div>`;
-h+='<div class="sec-h">⊞ Machine Data</div>';
-h+=`<div class="dl"><span class="dl-l">Manufacturer / S.N.</span><span class="dl-v">${eq?.mfg||'—'} / ${eq?.sn||'—'}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Power / Weight</span><span class="dl-v">${eq?.power||'—'} ${eq?.powerUnit||'HP'} / ${eq?.weight||'—'} ${eq?.weightUnit||'lbs'}</span></div>`;
-if(eq?.type)h+=`<div class="dl"><span class="dl-l">Type</span><span class="dl-v">${eq.type}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Volts / Amps / RPM</span><span class="dl-v">${eq?.volts||'—'} / ${eq?.amps||'—'} / ${eq?.speed||'—'}</span></div>`;
-if(eq?.pf)h+=`<div class="dl"><span class="dl-l">Power Factor (P.F)</span><span class="dl-v">${eq.pf}</span></div>`;
-h+='<div class="sec-h">🔩 Bearing</div>';
-h+=`<div class="dl"><span class="dl-l">DE — ${r.brg?.de||eq?.de||'—'}</span><span class="dl-v">${bst(r.brg?.deC)}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">NDE — ${r.brg?.nde||eq?.nde||'—'}</span><span class="dl-v">${bst(r.brg?.ndeC)}</span></div>`;
-// MCC Module Inspection display
-h+='<div class="sec-h">🔌 MCC Module Inspection</div>';
-S.mcc.forEach(i=>{const af=ck[i.k],act=ck[i.k+'_act'],al2=ck[i.k+'_al'];h+=`<div class="dl"><span class="dl-l">${i.l}</span><span class="dl-v" style="display:flex;gap:6px;flex-wrap:wrap">AF:${ckst(af)} Act:<span class="badge b-no">${act||'—'}</span> AL:${ckst(al2)}</span></div>`;});
-// Motor Inspection display
-h+='<div class="sec-h">🔧 Motor Inspection</div>';
-S.mot.forEach(i=>{const af=ck[i.k],act=ck[i.k+'_act'],al2=ck[i.k+'_al'];h+=`<div class="dl"><span class="dl-l">${i.l}</span><span class="dl-v" style="display:flex;gap:6px;flex-wrap:wrap">AF:${ckst(af)} Act:<span class="badge b-no">${act||'—'}</span> AL:${ckst(al2)}</span></div>`;});
-h+='<div class="sec-h">〰 Vibration (mm/s)</div>';
-const mAl=eqMAl(eq),mDa=eqMDa(eq),pAl=eqPAl(eq),pDa=eqPDa(eq);
-h+=`<div class="dl"><span class="dl-l">Motor DE — V/H/A</span><span class="dl-v">${V(r,'mDV')} / ${vst(V(r,'mDH'),mAl,mDa)} / ${V(r,'mDA')}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Motor NDE — V/H/A</span><span class="dl-v">${V(r,'mNV')} / ${V(r,'mNH')} / ${r.vib?.mNA||0}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Pump DE — V/H/A</span><span class="dl-v">${V(r,'pDV')} / ${vst(V(r,'pDH'),pAl,pDa)} / ${V(r,'pDA')||0}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Pump NDE — V/H/A</span><span class="dl-v">${V(r,'pNV')} / ${V(r,'pNH')} / ${r.vib?.pNA||0}</span></div>`;
-h+='<div class="sec-h">⚡ Electrical</div>';
-h+=`<div class="dl"><span class="dl-l">Current U/V/W</span><span class="dl-v">${el2.cu||0} / ${el2.cv||0} / ${el2.cw||0} A <span style="color:var(--amber)">(Unbal: ${el2.cuUn||calcUnbal(el2.cu,el2.cv,el2.cw)||'—'}%)</span></span></div>`;
-h+=`<div class="dl"><span class="dl-l">Voltage U/V/W</span><span class="dl-v">${el2.vu||0} / ${el2.vv||0} / ${el2.vw||0} V <span style="color:var(--amber)">(Unbal: ${el2.vuUn||calcUnbal(el2.vu,el2.vv,el2.vw)||'—'}%)</span></span></div>`;
-h+='<div class="sec-h">🧪 Static Test</div>';
-h+=`<div class="dl"><span class="dl-l">IR @ ${st2.irVdc||'—'} Vdc — UV/VW/WU/G</span><span class="dl-v">${st2.irUV||'—'} / ${st2.irVW||'—'} / ${st2.irWU||'—'} / ${st2.irG||'—'} MΩ</span></div>`;
-h+=`<div class="dl"><span class="dl-l">WR @ ${st2.wrTemp||'—'} °C — U/V/W</span><span class="dl-v">${st2.wrU||'—'} / ${st2.wrV||'—'} / ${st2.wrW||'—'} Ω <span style="color:var(--amber)">(Unbal: ${st2.wrUn||'—'}%)</span></span></div>`;
-h+=`<div class="dl"><span class="dl-l">WI @ ${st2.wiTemp||'—'} °C — U/V/W</span><span class="dl-v">${st2.wiU||'—'} / ${st2.wiV||'—'} / ${st2.wiW||'—'} mH <span style="color:var(--amber)">(Unbal: ${st2.wiUn||'—'}%)</span></span></div>`;
-h+='<div class="sec-h">📊 Operating Data</div>';
-const od2=r.od||{};
-if(od2.mDeT||od2.mNdeT||od2.pDeT||od2.pNdeT){
-  h+=`<div class="dl"><span class="dl-l">Bearing Temp Motor DE / NDE</span><span class="dl-v">${od2.mDeT||'—'} / ${od2.mNdeT||'—'} °C</span></div>`;
-  h+=`<div class="dl"><span class="dl-l">Bearing Temp Pump DE / NDE</span><span class="dl-v">${od2.pDeT||'—'} / ${od2.pNdeT||'—'} °C</span></div>`;
-}
-if(od2.suc||od2.dis||od2.flow){
-  h+=`<div class="dl"><span class="dl-l">Suction / Discharge</span><span class="dl-v">${od2.suc||'—'} / ${od2.dis||'—'} Bar</span></div>`;
-  h+=`<div class="dl"><span class="dl-l">Flow</span><span class="dl-v">${od2.flow||'—'} m³/hr</span></div>`;
-}
-h+='<div class="sec-h">📝 Results</div>';
-h+=`<div class="dl"><span class="dl-l">Severity</span><span class="dl-v" style="color:${S.sc[r.sev||r.severity]||''}">● ${S.sl[r.sev||r.severity]||'—'}</span></div>`;
-h+=`<div style="font-size:13px;color:var(--text2);white-space:pre-line;margin-top:8px;padding:10px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border)">${r.res||r.results||'—'}</div>`;
-E('mdetb').innerHTML=h;om('mdet');
-setTimeout(()=>{
-  const vLabels=['M-DE-V','M-DE-H','M-DE-A','M-NDE-V','M-NDE-H','M-NDE-A','P-DE-V','P-DE-H','P-DE-A','P-NDE-V','P-NDE-H','P-NDE-A'];
-  const vData=[V(r,'mDV'),V(r,'mDH'),V(r,'mDA'),V(r,'mNV'),V(r,'mNH'),r.vib?.mNA||0,V(r,'pDV'),V(r,'pDH'),V(r,'pDA')||0,V(r,'pNV'),V(r,'pNH'),r.vib?.pNA||0];
-  const vColors=vData.map((v,i)=>{const isM=i<6,al=isM?mAl:pAl,da=isM?mDa:pDa;return v>=da?'rgba(248,81,73,.8)':v>=al?'rgba(210,153,34,.8)':'rgba(88,166,255,.7)';});
-  if(E('dv-mini'))new Chart(E('dv-mini'),{type:'bar',data:{labels:vLabels,datasets:[{data:vData,backgroundColor:vColors,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},title:{display:true,text:'Vibration (mm/s)',color:'#8b949e',font:{size:10}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:9}}},x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:8},maxRotation:45}}}}});
-  if(E('de-mini'))new Chart(E('de-mini'),{type:'bar',data:{labels:['Cu','Cv','Cw','Vu','Vv','Vw'],datasets:[{data:[el2.cu||0,el2.cv||0,el2.cw||0,el2.vu||0,el2.vv||0,el2.vw||0],backgroundColor:['rgba(63,185,80,.7)','rgba(63,185,80,.5)','rgba(63,185,80,.3)','rgba(188,140,255,.7)','rgba(188,140,255,.5)','rgba(188,140,255,.3)'],borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},title:{display:true,text:'Current & Voltage',color:'#8b949e',font:{size:10}}},scales:{y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:9}}},x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:9}}}}}});
-},100);}
-function exportPDF(){window.print();}
-
-// ══════════ ALARM LOG PAGE — Feature 7 ══════════
-async function pgAlarmLog(el){
-  // Always reload fresh from Firestore
-  try{
-    const snap=await db.collection('alarmlog').orderBy('date','desc').limit(500).get();
-    S.alogs=snap.docs.map(d=>({id:d.id,...d.data()}));
-  }catch(e){console.error(e);}
-  // Build header without nested quote conflicts
-  const wrap=document.createElement('div');wrap.className='card';
-  const sh=document.createElement('div');sh.className='sh';sh.style.marginBottom='14px';
-  const title=document.createElement('div');title.className='st';title.textContent='🔔 Alarm Log ('+S.alogs.length+')';
-  const btns=document.createElement('div');btns.style.cssText='display:flex;gap:6px';
-  const bRescan=document.createElement('button');bRescan.className='btn btn-sm btn-s';bRescan.textContent='↺ Re-scan';
-  bRescan.onclick=()=>backfillAlarmLog().then(()=>pgAlarmLog(el));
-  const bClear=document.createElement('button');bClear.className='btn btn-sm btn-d';bClear.textContent='Clear All';
-  bClear.onclick=clearAlarmLog;
-  btns.append(bRescan,bClear);sh.append(title,btns);wrap.appendChild(sh);
-  const tbl=document.createElement('div');
-  tbl.style.cssText='overflow-x:auto;overflow-y:auto;max-height:520px;border:1px solid var(--border);border-radius:var(--r)';
-  tbl.innerHTML='<table class="ht" style="min-width:700px">'
-    +'<thead style="position:sticky;top:0;z-index:2;background:var(--bg3)">'
-    +'<tr><th>Date</th><th>Tag</th><th>Location</th><th>Type</th><th>Value</th><th>Limit</th><th>WO</th></tr></thead>'
-    +'<tbody id="alog-tb"></tbody></table>';
-  wrap.appendChild(tbl);el.innerHTML='';el.appendChild(wrap);
-  const tb=E('alog-tb');if(!tb)return;
-  if(!S.alogs.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">ยังไม่มี Alarm Log</td></tr>';return;}
-  // Summary bar
-  const total=S.alogs.length,dangers=S.alogs.filter(a=>a.type==='danger').length,alarms=S.alogs.filter(a=>a.type==='alarm').length;
-  const summary=document.createElement('div');
-  summary.style.cssText='display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap';
-  summary.innerHTML='<span class="badge b-no">ทั้งหมด: '+total+'</span>'
-    +'<span class="badge b-nk">⛔ Danger: '+dangers+'</span>'
-    +'<span class="badge b-al">⚠ Alarm: '+alarms+'</span>';
-  wrap.insertBefore(summary,tbl);
-  S.alogs.forEach(a=>{
-    const isDa=a.type==='danger';
-    const val=typeof a.val==='number'?a.val.toFixed(2):a.val;
-    const limit=typeof a.limit==='number'?a.limit:a.limit;
-    tb.innerHTML+=
-      '<tr>'
-      +'<td class="mono" style="white-space:nowrap">'+a.date+'</td>'
-      +'<td style="font-weight:600">'+a.tag+'</td>'
-      +'<td style="font-size:12px">'+a.loc.replace(/_/g,' ')+'</td>'
-      +'<td><span class="badge '+(isDa?'b-nk':'b-al')+'">'+(isDa?'⛔ Danger':'⚠ Alarm')+'</span></td>'
-      +'<td class="mono" style="color:'+(isDa?'var(--red)':'var(--amber)')+'">'+val+'</td>'
-      +'<td class="mono" style="color:var(--text3)">'+limit+'</td>'
-      +'<td style="font-size:12px;color:var(--text3)">'+(a.wo||'—')+'</td>'
-      +'</tr>';
-  });
-}
-async function clearAlarmLog(){if(!isAdmin()){toast('เฉพาะ Admin เท่านั้น','error');return;}if(!confirm('ลบ Alarm Log ทั้งหมด?'))return;
-  try{const snp=await db.collection('alarmlog').get();const b=db.batch();snp.docs.forEach(d=>b.delete(d.ref));await b.commit();S.alogs=[];pgAlarmLog(E('content'));toast('ล้าง Alarm Log แล้ว','warning');}catch(e){toast('Error: '+e.message,'error');}}
-
-// ══════════ TRENDS ══════════
-let tc=[];
-function pgTrend(el){
-  const opts=S.eq.map(e=>({value:e.tag,label:e.tag+' — '+(e.module||e.mod||'')}));
-  el.innerHTML='<div class="card"><div class="sh"><div class="st">Trend Analysis</div><div id="trt-wrap" style="width:250px"></div></div>'+
-  '<div class="itab"><div class="it active" onclick="trT(0,this)">Motor Vib</div><div class="it" onclick="trT(1,this)">Pump Vib</div><div class="it" onclick="trT(2,this)">Electrical</div></div>'+
-  '<div id="trp0"><div class="g2" style="gap:16px"><div class="cw" style="height:250px"><canvas id="tc-mde"></canvas></div><div class="cw" style="height:250px"><canvas id="tc-mnde"></canvas></div></div></div>'+
-  '<div id="trp1" style="display:none"><div class="g2" style="gap:16px"><div class="cw" style="height:250px"><canvas id="tc-pde"></canvas></div><div class="cw" style="height:250px"><canvas id="tc-pnde"></canvas></div></div></div>'+
-  '<div id="trp2" style="display:none"><div class="g2" style="gap:16px"><div class="cw" style="height:220px"><canvas id="tc-cur"></canvas></div><div class="cw" style="height:220px"><canvas id="tc-vol"></canvas></div></div></div></div>';
-  const tw=E('trt-wrap');if(tw){const ss=mkSS('trt',opts,'Equipment...',()=>drTr());ss.setVal(S.eq[0]?.tag||'');tw.appendChild(ss);}
-  drTr();}
-function trT(n,el){document.querySelectorAll('.it').forEach(b=>b.classList.remove('active'));el.classList.add('active');[0,1,2].forEach(i=>E('trp'+i).style.display=i===n?'':'none');drTr();}
-function drTr(){const tw=E('trt-wrap');const tg=tw?.querySelector('input')?.dataset?.val||S.eq[0]?.tag;const rs=S.rec.filter(r=>r.tag===tg).sort((a,b)=>a.date.localeCompare(b.date)),lb=rs.map(r=>r.date),eq=S.eq.find(e=>e.tag===tg),mAl=eqMAl(eq),mDa=eqMDa(eq),pAl=eqPAl(eq),pDa=eqPDa(eq);
-const co=()=>({responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:10}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}}});
-tc.forEach(c=>c.destroy());tc=[];
-const mk=(id,title,ds,alv,dav)=>{if(!E(id))return;const extra=[];if(alv)extra.push({label:'Alarm',data:rs.map(()=>alv),borderColor:'rgba(210,153,34,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5});if(dav)extra.push({label:'Danger',data:rs.map(()=>dav),borderColor:'rgba(248,81,73,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5});const c=new Chart(E(id),{type:'line',data:{labels:lb,datasets:[...ds,...extra]},options:{...co(),plugins:{...co().plugins,title:{display:true,text:title,color:'#8b949e',font:{size:11}}}}});tc.push(c);};
-mk('tc-mde','Motor DE (V/H/A)',[{label:'V',data:rs.map(r=>V(r,'mDV')),borderColor:'#58a6ff',pointRadius:4,tension:.3,borderWidth:2},{label:'H',data:rs.map(r=>V(r,'mDH')),borderColor:'#d29922',pointRadius:4,tension:.3,borderWidth:2},{label:'A',data:rs.map(r=>V(r,'mDA')),borderColor:'#3fb950',pointRadius:4,tension:.3,borderWidth:2}],mAl,mDa);
-mk('tc-mnde','Motor NDE (V/H/A)',[{label:'V',data:rs.map(r=>V(r,'mNV')),borderColor:'#58a6ff',pointRadius:4,tension:.3,borderWidth:2},{label:'H',data:rs.map(r=>V(r,'mNH')),borderColor:'#d29922',pointRadius:4,tension:.3,borderWidth:2},{label:'A',data:rs.map(r=>r.vib?.mNA||0),borderColor:'#3fb950',pointRadius:4,tension:.3,borderWidth:2}],mAl,mDa);
-mk('tc-pde','Pump DE (V/H/A)',[{label:'V',data:rs.map(r=>V(r,'pDV')),borderColor:'#58a6ff',pointRadius:4,tension:.3,borderWidth:2},{label:'H',data:rs.map(r=>V(r,'pDH')),borderColor:'#d29922',pointRadius:4,tension:.3,borderWidth:2},{label:'A',data:rs.map(r=>V(r,'pDA')||0),borderColor:'#3fb950',pointRadius:4,tension:.3,borderWidth:2}],pAl,pDa);
-mk('tc-pnde','Pump NDE (V/H/A)',[{label:'V',data:rs.map(r=>V(r,'pNV')),borderColor:'#58a6ff',pointRadius:4,tension:.3,borderWidth:2},{label:'H',data:rs.map(r=>V(r,'pNH')),borderColor:'#d29922',pointRadius:4,tension:.3,borderWidth:2},{label:'A',data:rs.map(r=>r.vib?.pNA||0),borderColor:'#3fb950',pointRadius:4,tension:.3,borderWidth:2}],pAl,pDa);
-const co2=()=>({responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:10}}},scales:{y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}}});
-const gc=(r,k)=>{return (r.el||r.elec||{})[k]||0;};
-if(E('tc-cur')){const c=new Chart(E('tc-cur'),{type:'line',data:{labels:lb,datasets:[{label:'U',data:rs.map(r=>gc(r,'cu')),borderColor:'#3fb950',pointRadius:4,tension:.3,borderWidth:2},{label:'V',data:rs.map(r=>gc(r,'cv')),borderColor:'rgba(63,185,80,.5)',pointRadius:4,tension:.3,borderWidth:1.5},{label:'W',data:rs.map(r=>gc(r,'cw')),borderColor:'rgba(63,185,80,.3)',pointRadius:4,tension:.3,borderWidth:1.5}]},options:{...co2(),plugins:{...co2().plugins,title:{display:true,text:'Current (A)',color:'#8b949e',font:{size:11}}}}});tc.push(c);}
-if(E('tc-vol')){const c=new Chart(E('tc-vol'),{type:'line',data:{labels:lb,datasets:[{label:'U',data:rs.map(r=>gc(r,'vu')),borderColor:'#bc8cff',pointRadius:4,tension:.3,borderWidth:2},{label:'V',data:rs.map(r=>gc(r,'vv')),borderColor:'rgba(188,140,255,.5)',pointRadius:4,tension:.3,borderWidth:1.5},{label:'W',data:rs.map(r=>gc(r,'vw')),borderColor:'rgba(188,140,255,.3)',pointRadius:4,tension:.3,borderWidth:1.5}]},options:{...co2(),scales:{y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}},plugins:{...co2().plugins,title:{display:true,text:'Voltage (V)',color:'#8b949e',font:{size:11}}}}});tc.push(c);}}
-
-// ══════════ EQUIPMENT ══════════
-function pgEq(el){el.innerHTML='';const hd=document.createElement('div');hd.className='sh';hd.style.marginBottom='16px';hd.innerHTML='<div class="st">Equipment ('+S.eq.length+')</div>'+(canEdit()?'<button class="btn btn-p" onclick="addEq()">+ Add</button>':'');el.appendChild(hd);
-S.eq.forEach(eq=>{const rs=S.rec.filter(r=>r.tag===eq.tag),la=[...rs].sort((a,b)=>b.date.localeCompare(a.date))[0];
-  const mv=la?maxMotorVib(la):0,pv=la?maxPumpVib(la):0;
-  const mAl=mv>=eqMAl(eq)||mv>=eqMDa(eq),pAl=pv>=eqPAl(eq)||pv>=eqPDa(eq);
-  const dc=!la?'d-x':mAl||pAl?'d-a':'d-g';
-  const d=document.createElement('div');d.className='eq-i';
-  d.innerHTML='<div class="eq-av">'+eq.tag.slice(-3)+'</div><div style="flex:1"><div style="font-size:14px;font-weight:600"><span class="dot '+dc+'" style="margin-right:7px"></span>'+eq.tag+'</div>'+
-  '<div style="font-size:11px;color:var(--text3);margin-top:2px">'+(eq.module||eq.mod||'')+' | '+(eq.type?eq.type+' | ':'')+(eq.power||eq.pwr||'')+' '+(eq.powerUnit||'HP')+'</div>'+
-  '<div style="font-size:11px;color:var(--text3);margin-top:2px">Motor Alarm: '+(eq.motorVibAlarm||'—')+' / '+(eq.motorVibDanger||'—')+' mm/s | Pump: '+(eq.pumpVibAlarm||'—')+' / '+(eq.pumpVibDanger||'—')+' mm/s</div>'+
-  '</div><div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="editEq(\''+eq.tag+'\')">Edit</button><button class="btn btn-sm btn-d" onclick="delEq(\''+eq.tag+'\')">Del</button></div>';el.appendChild(d);});}
-const eqFlds=['eq-tag','eq-module','eq-mfg','eq-sn','eq-power','eq-weight','eq-volts','eq-amps','eq-freq','eq-speed','eq-ins','eq-duty','eq-de','eq-nde','eq-loadtype','eq-location'];
-function addEq(){E('meqt').textContent='Add Equipment';eqFlds.forEach(id=>{if(E(id))E(id).value='';});E('eq-mval').value='4.5';E('eq-mvda').value='7.1';E('eq-pval').value='4.5';E('eq-pvda').value='7.1';E('eq-pwrU').value='kW';E('eq-wtU').value='lbs';document.querySelectorAll('#meq .unit-btn').forEach(b=>b.classList.remove('active'));document.querySelector('#meq .unit-btn')?.classList.add('active');om('meq');}
-function editEq(t){const eq=S.eq.find(e=>e.tag===t);if(!eq)return;E('meqt').textContent='Edit — '+t;
-const m={tag:'eq-tag',module:'eq-module',mfg:'eq-mfg',sn:'eq-sn',type:'eq-type',power:'eq-power',weight:'eq-weight',volts:'eq-volts',amps:'eq-amps',pf:'eq-pf',freq:'eq-freq',speed:'eq-speed',ins:'eq-ins',duty:'eq-duty',de:'eq-de',nde:'eq-nde',loadtype:'eq-loadtype',location:'eq-location'};
-Object.entries(m).forEach(([k,id])=>{if(E(id))E(id).value=eq[k]||'';});
-E('eq-mval').value=eq.motorVibAlarm||eq.vibAlarm||4.5;E('eq-mvda').value=eq.motorVibDanger||eq.vibDanger||7.1;
-E('eq-pval').value=eq.pumpVibAlarm||eq.vibAlarm||4.5;E('eq-pvda').value=eq.pumpVibDanger||eq.vibDanger||7.1;
-const pu=eq.powerUnit||'HP';E('eq-pwrU').value=pu;document.querySelectorAll('#meq .unit-grp')[0]?.querySelectorAll('.unit-btn').forEach(b=>b.classList.toggle('active',b.textContent===pu));
-const wu=eq.weightUnit||'lbs';E('eq-wtU').value=wu;document.querySelectorAll('#meq .unit-grp')[1]?.querySelectorAll('.unit-btn').forEach(b=>b.classList.toggle('active',b.textContent===wu));
-om('meq');}
-async function saveEq(){if(!canEdit()){toast('ไม่มีสิทธิ์แก้ไข (Viewer)','error');return;}const t=E('eq-tag').value.trim();if(!t){toast('Tag required','error');return;}
-const o={tag:t,module:E('eq-module').value,mfg:E('eq-mfg').value,sn:E('eq-sn').value,type:E('eq-type')?.value||'',power:E('eq-power').value,powerUnit:E('eq-pwrU').value,weight:E('eq-weight').value,weightUnit:E('eq-wtU').value,volts:E('eq-volts').value,amps:E('eq-amps').value,pf:E('eq-pf')?.value||'',freq:E('eq-freq').value,speed:E('eq-speed').value,ins:E('eq-ins').value,duty:E('eq-duty').value,de:E('eq-de').value,nde:E('eq-nde').value,loadtype:E('eq-loadtype').value,location:E('eq-location').value,
-motorVibAlarm:parseFloat(E('eq-mval').value)||4.5,motorVibDanger:parseFloat(E('eq-mvda').value)||7.1,pumpVibAlarm:parseFloat(E('eq-pval').value)||4.5,pumpVibDanger:parseFloat(E('eq-pvda').value)||7.1};
-try{await db.collection('equipment').doc(t).set(o);const i=S.eq.findIndex(e=>e.tag===t);if(i>=0)S.eq[i]=o;else S.eq.push(o);cm('meq');pgEq(E('content'));toast(t+' saved');}catch(e){toast('Error: '+e.message,'error');}}
-async function delEq(t){if(!isAdmin()){toast('เฉพาะ Admin เท่านั้น','error');return;}if(!confirm('Delete '+t+'?'))return;try{await db.collection('equipment').doc(t).delete();S.eq=S.eq.filter(e=>e.tag!==t);pgEq(E('content'));toast('Deleted '+t,'warning');}catch(e){toast('Error: '+e.message,'error');}}
-
-
-// ══════════ USERS PAGE ══════════
-function pgUsers(el){
-  if(!isAdmin()){el.innerHTML='<div class="card" style="text-align:center;padding:40px"><div style="font-size:32px">🔒</div><div style="color:var(--red);margin-top:10px">เฉพาะ Admin เท่านั้น</div></div>';return;}
-  el.innerHTML='';
-  // Assign role section
-  const sec1=document.createElement('div');sec1.className='card';
-  sec1.innerHTML='<div class="st" style="margin-bottom:16px">👥 User Management</div>'+
-    '<div style="font-size:12px;color:var(--text3);margin-bottom:14px;padding:10px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border)">'+
-    '⚠ สร้าง user ใหม่ได้ที่ <b>Firebase Console → Authentication → Add user</b><br>ที่นี่ใช้กำหนด Role ให้แต่ละ user</div>'+
-    '<div class="g2" style="gap:12px;margin-bottom:14px">'+
-    '<div class="fg"><label class="fl">User Email *</label><input class="fi" id="ur-email2" placeholder="user@email.com" type="email"></div>'+
-    '<div class="fg"><label class="fl">Role</label><select class="fi" id="ur-role2">'+
-    '<option value="viewer">👁 Viewer — ดูได้อย่างเดียว</option>'+
-    '<option value="editor">✎ Editor — บันทึก PM / แก้ไข Equipment ได้</option>'+
-    '<option value="admin">⚡ Admin — สิทธิ์เต็ม + จัดการ User</option>'+
-    '</select></div></div>'+
-    '<button class="btn btn-p" onclick="assignRole2()">✓ Assign Role</button>';
-  el.appendChild(sec1);
-  // User list section
-  const sec2=document.createElement('div');sec2.className='card';
-  sec2.innerHTML='<div class="st" style="margin-bottom:14px">รายชื่อ User ทั้งหมด</div><div id="ulist2"></div>';
-  el.appendChild(sec2);
-  loadUList2();
-}
-
-async function assignRole2(){
-  if(!isAdmin()){toast('เฉพาะ Admin','error');return;}
-  const email=E('ur-email2')?.value.trim().toLowerCase();
-  const role=E('ur-role2')?.value;
-  if(!email){toast('กรอก Email','error');return;}
-  try{
-    await db.collection('users').doc(email).set({email,role,updatedBy:S.usr?.email,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
-    toast(email+' → '+role+' ✓');
-    if(E('ur-email2'))E('ur-email2').value='';
-    loadUList2();
-  }catch(e){toast('Error: '+e.message,'error');}
-}
-
-async function loadUList2(){
-  try{
-    const snap=await db.collection('users').orderBy('email').get();
-    const ul=E('ulist2');if(!ul)return;
-    ul.innerHTML='';
-    if(!snap.docs.length){ul.innerHTML='<div style="color:var(--text3);padding:12px">ยังไม่มี user</div>';return;}
-    const tbl=document.createElement('table');tbl.className='cht';
-    tbl.innerHTML='<thead><tr><th>Email</th><th>Role</th><th>Updated by</th><th></th></tr></thead>';
-    const tb=document.createElement('tbody');
-    snap.docs.forEach(d=>{
-      const u=d.data();const isSelf=u.email===S.usr?.email;
-      const rc=u.role==='admin'?'role-admin':u.role==='editor'?'role-editor':'role-viewer';
-      const tr=document.createElement('tr');
-      tr.innerHTML='<td style="font-size:13px">'+u.email+(isSelf?' <span style="color:var(--accent);font-size:10px">(you)</span>':'')+'</td>'+
-        '<td><span class="role-chip '+rc+'">'+u.role+'</span></td>'+
-        '<td style="font-size:11px;color:var(--text3)">'+(u.updatedBy||'—')+'</td>'+
-        '<td></td>';
-      if(!isSelf){const td=tr.querySelector('td:last-child');const b=document.createElement('button');b.className='btn btn-sm btn-d';b.textContent='Remove';b.onclick=()=>removeUser2(u.email);td.appendChild(b);}
-      tb.appendChild(tr);
-    });
-    tbl.appendChild(tb);ul.appendChild(tbl);
-  }catch(e){toast('Error: '+e.message,'error');}
-}
-
-async function removeUser2(email){
-  if(!isAdmin())return;
-  if(!confirm('ลบสิทธิ์ '+email+'? (user ยังเข้าสู่ระบบได้ แต่จะเป็น Viewer)'))return;
-  try{
-    await db.collection('users').doc(email).delete();
-    toast('ลบ '+email+' แล้ว (จะกลายเป็น Viewer)','warning');
-    loadUList2();
-  }catch(e){toast('Error: '+e.message,'error');}
-}
-
-// ══════════ SETTINGS ══════════
-function pgSet(el){el.innerHTML='<div class="card"><div class="st" style="margin-bottom:16px">⚙ Settings</div><div class="g2" style="gap:12px;margin-bottom:16px"><div class="fg"><label class="fl">Company</label><input class="fi" id="sco" value="'+(S.set.co||'')+'"></div><div class="fg"><label class="fl">Plant</label><input class="fi" id="spl" value="'+(S.set.plant||'')+'"></div><div class="fg"><label class="fl">Area</label><input class="fi" id="sar" value="'+(S.set.area||'')+'"></div><div class="fg"><label class="fl">Site</label><input class="fi" id="ssi" value="'+(S.set.site||'')+'"></div><div class="fg"><label class="fl">Default Inspector</label><input class="fi" id="sdi" value="'+(S.set.di||'')+'"></div><div class="fg"><label class="fl">Default Approver</label><input class="fi" id="sda" value="'+(S.set.da||'')+'"></div></div><div style="font-size:12px;font-weight:600;color:var(--text3);margin:8px 0">LINE NOTIFICATION (n8n)</div><div class=\"fg\"><label class=\"fl\">n8n Webhook URL</label><input class=\"fi\" id=\"slw\" value=\"'+(S.set.lineWebhook||'')+'\"></div><div style=\"font-size:11px;color:var(--text3);margin-bottom:12px\">⚡ ทุก PM บันทึกจะส่ง Line ทันที — ถ้าว่างไม่ส่ง</div><div style=\"font-size:12px;font-weight:600;color:var(--text3);margin:8px 0\">SIDEBAR BRANDING</div><div class="g3" style="gap:12px;margin-bottom:16px"><div class="fg"><label class="fl">Icon Text</label><input class="fi" id="sli" value="'+(S.set.logoIcon||'PM')+'" maxlength="3" style="width:60px"></div><div class="fg"><label class="fl">Line 1</label><input class="fi" id="sl1" value="'+(S.set.logoLine1||'PM Inspection')+'"></div><div class="fg"><label class="fl">Line 2</label><input class="fi" id="sl2" value="'+(S.set.logoLine2||'TCC Plant GEN')+'"></div></div><button class="btn btn-p" onclick="saveSt()">Save Settings</button></div>'+pgUsrBtn()+'<div<div class="card"><div class="st" style="margin-bottom:14px">🗄️ Database</div><div style="font-size:13px;color:var(--text2)">Equipment: <b>'+S.eq.length+'</b> | Records: <b>'+S.rec.length+'</b> | Alarm Log: <b>'+S.alogs.length+'</b></div></div>';}
-function pgUsrBtn(){if(isAdmin())return '<button class="btn btn-p" onclick="go(\'users\',E(\'nav-users\'))" style="margin-top:12px">👥 User Management</button>';return '';}
-async function saveSt(){const s={co:E('sco').value,plant:E('spl').value,area:E('sar').value,site:E('ssi').value,di:E('sdi').value,da:E('sda').value,logoIcon:E('sli').value,logoLine1:E('sl1').value,logoLine2:E('sl2').value,lineWebhook:(E('slw')?.value||'').trim()};try{await db.collection('settings').doc('global').set(s);S.set={...S.set,...s};applyLogo();toast('Saved');}catch(e){toast('Error: '+e.message,'error');}}
-
-// Clock
-function uClock(){const d=new Date(),s=d.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});const td=E('tdate');if(td)td.textContent=s;const sc=E('sclock');if(sc)sc.textContent=d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
-setInterval(uClock,1000);uClock();
-</script>
-</body></html>
+</body>
+</html>
