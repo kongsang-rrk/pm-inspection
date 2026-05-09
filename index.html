@@ -1094,20 +1094,39 @@ async function pgAlarmLog(el){
   const bClear=document.createElement('button');bClear.className='btn btn-sm btn-d';bClear.textContent='Clear All';
   bClear.onclick=clearAlarmLog;
   btns.append(bRescan,bClear);sh.append(title,btns);wrap.appendChild(sh);
-  const tbl=document.createElement('div');tbl.style.overflowX='auto';
-  tbl.innerHTML='<table class="ht"><thead><tr><th>Date</th><th>Tag</th><th>Location</th><th>Type</th><th>Value</th><th>Limit</th><th>WO</th></tr></thead><tbody id="alog-tb"></tbody></table>';
+  const tbl=document.createElement('div');
+  tbl.style.cssText='overflow-x:auto;overflow-y:auto;max-height:520px;border:1px solid var(--border);border-radius:var(--r)';
+  tbl.innerHTML='<table class="ht" style="min-width:700px">'
+    +'<thead style="position:sticky;top:0;z-index:2;background:var(--bg3)">'
+    +'<tr><th>Date</th><th>Tag</th><th>Location</th><th>Type</th><th>Value</th><th>Limit</th><th>WO</th></tr></thead>'
+    +'<tbody id="alog-tb"></tbody></table>';
   wrap.appendChild(tbl);el.innerHTML='';el.appendChild(wrap);
   const tb=E('alog-tb');if(!tb)return;
   if(!S.alogs.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">ยังไม่มี Alarm Log</td></tr>';return;}
-  S.alogs.forEach(a=>{const isDa=a.type==='danger';tb.innerHTML+=
-    '<tr>'+
-    '<td class="mono">'+a.date+'</td>'+
-    '<td style="font-weight:600">'+a.tag+'</td>'+
-    '<td style="font-size:12px">'+a.loc+'</td>'+
-    '<td><span class="badge '+(isDa?'b-nk':'b-al')+'">'+(isDa?'⛔ Danger':'⚠ Alarm')+'</span></td>'+
-    '<td class="mono" style="color:'+(isDa?'var(--red)':'var(--amber)')+'">'+a.val.toFixed(2)+' mm/s</td>'+
-    '<td class="mono" style="color:var(--text3)">'+a.limit+' mm/s</td>'+
-    '<td style="font-size:12px;color:var(--text3)">'+(a.wo||'—')+'</td></tr>';});}
+  // Summary bar
+  const total=S.alogs.length,dangers=S.alogs.filter(a=>a.type==='danger').length,alarms=S.alogs.filter(a=>a.type==='alarm').length;
+  const summary=document.createElement('div');
+  summary.style.cssText='display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap';
+  summary.innerHTML='<span class="badge b-no">ทั้งหมด: '+total+'</span>'
+    +'<span class="badge b-nk">⛔ Danger: '+dangers+'</span>'
+    +'<span class="badge b-al">⚠ Alarm: '+alarms+'</span>';
+  wrap.insertBefore(summary,tbl);
+  S.alogs.forEach(a=>{
+    const isDa=a.type==='danger';
+    const val=typeof a.val==='number'?a.val.toFixed(2):a.val;
+    const limit=typeof a.limit==='number'?a.limit:a.limit;
+    tb.innerHTML+=
+      '<tr>'
+      +'<td class="mono" style="white-space:nowrap">'+a.date+'</td>'
+      +'<td style="font-weight:600">'+a.tag+'</td>'
+      +'<td style="font-size:12px">'+a.loc.replace(/_/g,' ')+'</td>'
+      +'<td><span class="badge '+(isDa?'b-nk':'b-al')+'">'+(isDa?'⛔ Danger':'⚠ Alarm')+'</span></td>'
+      +'<td class="mono" style="color:'+(isDa?'var(--red)':'var(--amber)')+'">'+val+'</td>'
+      +'<td class="mono" style="color:var(--text3)">'+limit+'</td>'
+      +'<td style="font-size:12px;color:var(--text3)">'+(a.wo||'—')+'</td>'
+      +'</tr>';
+  });
+}
 async function clearAlarmLog(){if(!isAdmin()){toast('เฉพาะ Admin เท่านั้น','error');return;}if(!confirm('ลบ Alarm Log ทั้งหมด?'))return;
   try{const snp=await db.collection('alarmlog').get();const b=db.batch();snp.docs.forEach(d=>b.delete(d.ref));await b.commit();S.alogs=[];pgAlarmLog(E('content'));toast('ล้าง Alarm Log แล้ว','warning');}catch(e){toast('Error: '+e.message,'error');}}
 
