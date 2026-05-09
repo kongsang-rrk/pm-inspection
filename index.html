@@ -376,16 +376,20 @@ function getAl(){
 
 // ══════ ALARM LOG — save & load from Firestore ══════
 // Use deterministic doc ID = tag_date_loc to prevent duplicates
-function alarmDocId(tag,date,loc){return (tag+'_'+date+'_'+loc).replace(/[^a-zA-Z0-9_\-]/g,'_');}
+function alarmDocId(tag,date,loc){return (tag+'_'+date+'_'+loc+'_'+Date.now()).replace(/[^a-zA-Z0-9_\-]/g,'_');}
 
 async function saveAlarmLog(entries){
   if(!entries.length)return;
   const b=db.batch();
   entries.forEach(e=>{
+    // Each event gets unique ID (tag+date+loc+timestamp) so nothing ever overwrites
     const docId=alarmDocId(e.tag,e.date,e.loc);
-    b.set(db.collection('alarmlog').doc(docId),{...e,savedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:false});
+    b.set(db.collection('alarmlog').doc(docId),{...e,savedAt:firebase.firestore.FieldValue.serverTimestamp()});
   });
   await b.commit();
+  // Reload alarm log
+  const snap=await db.collection('alarmlog').orderBy('date','desc').limit(500).get();
+  S.alogs=snap.docs.map(d=>({id:d.id,...d.data()}));
 }
 
 // After saving/editing a PM record — full check all positions + bearing + electrical
@@ -403,9 +407,7 @@ async function backfillAlarmLog(){
     getAllAlarmsFromRec(rec,eq).forEach(e=>entries.push(e));
   });
   if(!entries.length){toast('ไม่มี Alarm ในข้อมูล');return;}
-  await saveAlarmLog(entries);
-  const snap=await db.collection('alarmlog').orderBy('date','desc').limit(200).get();
-  S.alogs=snap.docs.map(d=>({id:d.id,...d.data()}));
+  await saveAlarmLog(entries); // saveAlarmLog already reloads S.alogs
   toast('สร้าง Alarm Log จาก '+entries.length+' entries แล้ว');
 }
 
@@ -894,8 +896,7 @@ try{
     full={id:ref.id,...rec};S.rec.unshift(full);
     toast('บันทึก '+tag+' สำเร็จ ✓');
   }
-  await persistNewAlarms(full);
-  const al2=await db.collection('alarmlog').orderBy('date','desc').limit(200).get();S.alogs=al2.docs.map(d=>({id:d.id,...d.data()}));
+  await persistNewAlarms(full); // saveAlarmLog inside already reloads S.alogs
   // Send Line notification (all PM records + alarm details)
   const alarmEntries=getAllAlarmsFromRec(full,S.eq.find(e=>e.tag===full.tag));
   sendLineNotify(full,alarmEntries);
@@ -1069,7 +1070,12 @@ setTimeout(()=>{
 function exportPDF(){window.print();}
 
 // ══════════ ALARM LOG PAGE — Feature 7 ══════════
-function pgAlarmLog(el){
+async function pgAlarmLog(el){
+  // Always reload fresh from Firestore
+  try{
+    const snap=await db.collection('alarmlog').orderBy('date','desc').limit(500).get();
+    S.alogs=snap.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(e){console.error(e);}
   // Build header without nested quote conflicts
   const wrap=document.createElement('div');wrap.className='card';
   const sh=document.createElement('div');sh.className='sh';sh.style.marginBottom='14px';
