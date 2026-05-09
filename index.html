@@ -552,6 +552,7 @@ async function sendLineNotify(rec,alarmEntries){
   if(rec.res)lines.push('📋 '+rec.res.slice(0,120)+(rec.res.length>120?'...':''));
   lines.push(sep);
   lines.push('PM Inspection — '+(S.set.plant||'TCC Plant GEN'));
+  lines.push('🔗 '+window.location.origin+window.location.pathname);
   const msg=lines.join('\n');
   // Use no-cors for Google Apps Script (avoids CORS preflight block)
   fetch(webhookUrl,{
