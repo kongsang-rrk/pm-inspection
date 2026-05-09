@@ -656,19 +656,27 @@ function pgDash(el){
   const g2a=document.createElement('div');g2a.className='g2';g2a.style.marginBottom='16px';
   // Equipment status card
   const eqCard=document.createElement('div');eqCard.className='card';
-  eqCard.innerHTML='<div class="card-t">Equipment Status</div>';
-  S.eq.forEach(eq=>{
-    const rs=S.rec.filter(r=>r.tag===eq.tag).sort((a,b)=>b.date.localeCompare(a.date)),la=rs[0];
-    const pv=la?maxPumpVib(la):0,mv=la?maxMotorVib(la):0;
+  // Get 6 most recently PM'd equipment tags
+  const recentTags=[];
+  [...S.rec].sort((a,b)=>b.date.localeCompare(a.date)).forEach(r=>{
+    if(!recentTags.includes(r.tag))recentTags.push(r.tag);
+  });
+  const showTags=recentTags.slice(0,6);
+  if(!showTags.length)S.eq.slice(0,6).forEach(e=>showTags.push(e.tag));
+  eqCard.innerHTML='<div class="card-t">Equipment Status <span style="font-size:10px;color:var(--text3);font-weight:400">(6 ล่าสุด)</span></div>';
+  showTags.forEach(tag=>{
+    const eq=S.eq.find(e=>e.tag===tag);if(!eq)return;
+    const rs=S.rec.filter(r=>r.tag===tag).sort((a,b)=>b.date.localeCompare(a.date)),la=rs[0];
+    const pv=la?maxPumpVib(la):0;
     const pDa=pv>=eqPDa(eq),pAl=pv>=eqPAl(eq);
     const dc=!la?'d-x':pDa?'d-r':pAl?'d-a':'d-g';
     const bc=!la?'b-no':pDa?'b-nk':pAl?'b-al':'b-ok';
     const bt=!la?'N/A':pDa?'Danger':pAl?'Alarm':'Normal';
     const row=document.createElement('div');
     row.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer';
-    row.innerHTML='<span class="dot '+dc+'"></span><div style="flex:1"><div style="font-weight:600">'+eq.tag+'</div>'+
-      '<div style="font-size:11px;color:var(--text3)">'+(eq.module||eq.mod||'')+'</div></div>'+
-      '<span class="badge '+bc+'">'+bt+'</span>'+(la?'<span class="mono" style="color:var(--text3);font-size:11px">P:'+pv.toFixed(2)+'</span>':'');
+    row.innerHTML='<span class="dot '+dc+'"></span><div style="flex:1"><div style="font-weight:600">'+tag+'</div>'+
+      '<div style="font-size:11px;color:var(--text3)">'+(eq.module||eq.mod||'')+(la?' | '+la.date:'')+'</div></div>'+
+      '<span class="badge '+bc+'">'+bt+'</span>'+(la?'<span class="mono" style="color:var(--text3);font-size:11px"> P:'+pv.toFixed(2)+'</span>':'');
     row.onclick=()=>{if(la)showD(la.id);};
     eqCard.appendChild(row);
   });
