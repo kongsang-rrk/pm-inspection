@@ -549,9 +549,15 @@ async function sendLineNotify(rec,alarmEntries){
   lines.push(sep);
   lines.push('PM Inspection — '+(S.set.plant||'TCC Plant GEN'));
   const msg=lines.join('\n');
-  fetch(webhookUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,tag:rec.tag,date:rec.date,wo:rec.wo||'',alarmCount:alarmEntries.length,hasDanger:alarmEntries.some(a=>a.type==='danger')})})
-  .then(r=>{if(r.ok)toast('ส่ง Line แล้ว ✓');else toast('Line webhook error: '+r.status,'warning');})
-  .catch(()=>toast('Line webhook ส่งไม่ได้','warning'));
+  // Use no-cors for Google Apps Script (avoids CORS preflight block)
+  fetch(webhookUrl,{
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message:msg,tag:rec.tag,date:rec.date,wo:rec.wo||'',alarmCount:alarmEntries.length,hasDanger:alarmEntries.some(a=>a.type==='danger')})
+  })
+  .then(()=>toast('ส่ง Line แล้ว ✓'))
+  .catch(()=>toast('Line webhook ส่งไม่ได้ ตรวจสอบ URL','warning'));
 }
 
 
