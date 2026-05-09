@@ -810,7 +810,7 @@ el.innerHTML=
 '<tr><td>WI @ °C</td><td><input class="vi" id="wiU" type="number" step=".01" oninput="autoUnbal(\'wiU\',\'wiV\',\'wiW\',\'wiUn\')"></td><td><input class="vi" id="wiV" type="number" step=".01" oninput="autoUnbal(\'wiU\',\'wiV\',\'wiW\',\'wiUn\')"></td><td><input class="vi" id="wiW" type="number" step=".01" oninput="autoUnbal(\'wiU\',\'wiV\',\'wiW\',\'wiUn\')"></td><td><span class="vi-ro" id="wiUn">—</span></td></tr>'+
 '</tbody></table></div>'+
 // ── Results ──
-'<div class="card"><div class="st" style="margin-bottom:14px">📝 Results & Severity</div>'+
+'<div class="card"><div class="st" style="margin-bottom:14px">📊 Operating Data</div><div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:10px">BEARING TEMPERATURE (°C)</div><div class="g4" style="margin-bottom:14px"><div class="fg"><label class="fl">Motor DE (°C)</label><input class="vi" id="od-mde-t" type="number" step="0.1" placeholder="—" style="width:100%"></div><div class="fg"><label class="fl">Motor NDE (°C)</label><input class="vi" id="od-mnde-t" type="number" step="0.1" placeholder="—" style="width:100%"></div><div class="fg"><label class="fl">Pump DE (°C)</label><input class="vi" id="od-pde-t" type="number" step="0.1" placeholder="—" style="width:100%"></div><div class="fg"><label class="fl">Pump NDE (°C)</label><input class="vi" id="od-pnde-t" type="number" step="0.1" placeholder="—" style="width:100%"></div></div><div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:10px">PROCESS DATA</div><div class="g3"><div class="fg"><label class="fl">Suction Pressure (Bar)</label><input class="vi" id="od-suc" type="number" step="0.01" placeholder="—" style="width:100%"></div><div class="fg"><label class="fl">Discharge Pressure (Bar)</label><input class="vi" id="od-dis" type="number" step="0.01" placeholder="—" style="width:100%"></div><div class="fg"><label class="fl">Flow (m³/hr)</label><input class="vi" id="od-flow" type="number" step="0.1" placeholder="—" style="width:100%"></div></div></div>'+'<div class="card"><div class="st" style="margin-bottom:14px">📝 Results & Severity</div>'+
 '<div class="fg" style="margin-bottom:14px"><label class="fl">Results</label><textarea class="ft" id="f-res" rows="4"></textarea></div>'+
 '<div class="fl" style="margin-bottom:8px">Severity:</div>'+
 '<div class="sg"><div class="so" onclick="selS(1,this)">⛔ Immediate</div><div class="so" onclick="selS(2,this)">⚠ Correct ASAP</div><div class="so" onclick="selS(3,this)">🔧 Next opportunity</div><div class="so" onclick="selS(4,this)">👁 Monitor</div><div class="so s5" onclick="selS(5,this)">✓ No action</div></div>'+
@@ -877,7 +877,7 @@ brg:{de:E('f-bde')?.value||'',nde:E('f-bnde')?.value||'',deC:ssVal('f-bdc-wrap',
 vib:{mDV:gv('vmDV'),mDH:gv('vmDH'),mDA:gv('vmDA'),mNV:gv('vmNV'),mNH:gv('vmNH'),mNA:gv('vmNA'),pDV:gv('vpDV'),pDH:gv('vpDH'),pDA:gv('vpDA'),pNV:gv('vpNV'),pNH:gv('vpNH'),pNA:gv('vpNA')},
 el:{cu:gv('ecu'),cv:gv('ecv'),cw:gv('ecw'),cuUn:cuU,vu:gv('evu'),vv:gv('evv'),vw:gv('evw'),vuUn:vuU},
 st:{irUV:gv('irUV'),irVW:gv('irVW'),irWU:gv('irWU'),irG:gv('irG'),pi:gv('irPI'),wrU:gv('wrU'),wrV:gv('wrV'),wrW:gv('wrW'),wrUn:calcUnbal(E('wrU')?.value,E('wrV')?.value,E('wrW')?.value),wiU:gv('wiU'),wiV:gv('wiV'),wiW:gv('wiW'),wiUn:calcUnbal(E('wiU')?.value,E('wiV')?.value,E('wiW')?.value)},
-sev:E('f-sev').value||'5',res:E('f-res').value,ts:firebase.firestore.FieldValue.serverTimestamp(),by:S.usr?.email||''};
+sev:E('f-sev').value||'5',res:E('f-res').value,od:{mDeT:gv('od-mde-t'),mNdeT:gv('od-mnde-t'),pDeT:gv('od-pde-t'),pNdeT:gv('od-pnde-t'),suc:gv('od-suc'),dis:gv('od-dis'),flow:gv('od-flow')},ts:firebase.firestore.FieldValue.serverTimestamp(),by:S.usr?.email||''};
 // Check if editing existing record
 const editId=E('f-edit-id')?.value;
 try{
@@ -968,6 +968,12 @@ function populateCheck(r,id){
   const st=r.st||{};
   ['irUV','irVW','irWU','irG','irPI','wrU','wrV','wrW','wiU','wiV','wiW'].forEach(eid=>{const k=eid==='irPI'?'pi':eid;if(E(eid))E(eid).value=st[k]||'';});
   autoUnbal('wrU','wrV','wrW','wrUn');autoUnbal('wiU','wiV','wiW','wiUn');
+  // Operating data
+  const od=r.od||{};
+  ['od-mde-t','od-mnde-t','od-pde-t','od-pnde-t','od-suc','od-dis','od-flow'].forEach((eid,i)=>{
+    const k=['mDeT','mNdeT','pDeT','pNdeT','suc','dis','flow'][i];
+    if(E(eid))E(eid).value=od[k]||'';
+  });
   // Severity
   const sn=parseInt(r.sev||r.severity||5);
   document.querySelectorAll('.so').forEach(b=>b.className='so');
@@ -1039,6 +1045,16 @@ h+='<div class="sec-h">🧪 Static Test</div>';
 h+=`<div class="dl"><span class="dl-l">IR (MΩ) UV/VW/WU</span><span class="dl-v">${st2.irUV||'—'} / ${st2.irVW||'—'} / ${st2.irWU||'—'}</span></div>`;
 h+=`<div class="dl"><span class="dl-l">WR (Ω) U/V/W</span><span class="dl-v">${st2.wrU||'—'} / ${st2.wrV||'—'} / ${st2.wrW||'—'} <span style="color:var(--amber)">(${st2.wrUn||'—'}%)</span></span></div>`;
 h+=`<div class="dl"><span class="dl-l">WI (mH) U/V/W</span><span class="dl-v">${st2.wiU||'—'} / ${st2.wiV||'—'} / ${st2.wiW||'—'} <span style="color:var(--amber)">(${st2.wiUn||'—'}%)</span></span></div>`;
+h+='<div class="sec-h">📊 Operating Data</div>';
+const od2=r.od||{};
+if(od2.mDeT||od2.mNdeT||od2.pDeT||od2.pNdeT){
+  h+=`<div class="dl"><span class="dl-l">Bearing Temp Motor DE / NDE</span><span class="dl-v">${od2.mDeT||'—'} / ${od2.mNdeT||'—'} °C</span></div>`;
+  h+=`<div class="dl"><span class="dl-l">Bearing Temp Pump DE / NDE</span><span class="dl-v">${od2.pDeT||'—'} / ${od2.pNdeT||'—'} °C</span></div>`;
+}
+if(od2.suc||od2.dis||od2.flow){
+  h+=`<div class="dl"><span class="dl-l">Suction / Discharge</span><span class="dl-v">${od2.suc||'—'} / ${od2.dis||'—'} Bar</span></div>`;
+  h+=`<div class="dl"><span class="dl-l">Flow</span><span class="dl-v">${od2.flow||'—'} m³/hr</span></div>`;
+}
 h+='<div class="sec-h">📝 Results</div>';
 h+=`<div class="dl"><span class="dl-l">Severity</span><span class="dl-v" style="color:${S.sc[r.sev||r.severity]||''}">● ${S.sl[r.sev||r.severity]||'—'}</span></div>`;
 h+=`<div style="font-size:13px;color:var(--text2);white-space:pre-line;margin-top:8px;padding:10px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border)">${r.res||r.results||'—'}</div>`;
