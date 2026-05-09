@@ -561,7 +561,21 @@ function pgDash(el){
   const al=getAl(),lp=S.rec.reduce((m,r)=>r.date>m?r.date:m,''),ac=[...new Set(al.map(a=>a.tag))].length;
   el.innerHTML='<div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button class="btn btn-sm" onclick="printDash()">🖨 Export Dashboard PDF</button></div>';
   al.slice(0,3).forEach(a=>{el.innerHTML+='<div class="ab '+(a.lv==='danger'?'a-re':'a-am')+'"><span>'+(a.lv==='danger'?'⛔':'⚠')+'</span><b>'+a.tag+'</b>: '+a.msg+'<span style="margin-left:auto;font-size:11px;opacity:.7">'+fd(a.date)+'</span></div>';});
-  el.innerHTML+='<div class="metric-row"><div class="mc m1"><div class="ml">Equipment</div><div class="mv" style="color:var(--accent)">'+S.eq.length+'</div></div><div class="mc m2"><div class="ml">PM Records</div><div class="mv" style="color:var(--green)">'+S.rec.length+'</div></div><div class="mc m3"><div class="ml">Alerts</div><div class="mv" style="color:var(--amber)">'+ac+'</div></div><div class="mc m4"><div class="ml">Last PM</div><div class="mv" style="font-size:16px;color:var(--text)">'+fd(lp)+'</div></div></div>';
+  // Metric cards — built via DOM to avoid quote conflicts
+  const mr=document.createElement('div');mr.className='metric-row';
+  const mCards=[
+    {cls:'m1',lbl:'Equipment',val:S.eq.length,col:'var(--accent)',hint:'คลิกดูทั้งหมด →',nav:'equipment',navEl:'nav-equipment'},
+    {cls:'m2',lbl:'PM Records',val:S.rec.length,col:'var(--green)',hint:'คลิกดู History →',nav:'history',navEl:'nav-history'},
+    {cls:'m3',lbl:'Alerts',val:ac,col:'var(--amber)',hint:'คลิกดู Alerts →',nav:'alerts',navEl:'nav-alerts'},
+    {cls:'m4',lbl:'Last PM',val:lp?fd(lp):'—',col:'var(--text)',hint:'',nav:null}
+  ];
+  mCards.forEach(m=>{
+    const mc=document.createElement('div');mc.className='mc '+m.cls;
+    mc.innerHTML='<div class="ml">'+m.lbl+'</div><div class="mv" style="color:'+m.col+';font-size:'+(m.cls==='m4'?'16':'26')+'px">'+m.val+'</div>'+(m.hint?'<div style="font-size:10px;color:var(--text3);margin-top:6px">'+m.hint+'</div>':'');
+    if(m.nav){mc.style.cursor='pointer';mc.onmouseenter=()=>mc.style.borderColor=m.col;mc.onmouseleave=()=>mc.style.borderColor='';mc.onclick=()=>go(m.nav,E(m.navEl));}
+    mr.appendChild(mc);
+  });
+  el.appendChild(mr);
   let sh='';S.eq.forEach(eq=>{const rs=S.rec.filter(r=>r.tag===eq.tag).sort((a,b)=>b.date.localeCompare(a.date)),la=rs[0],p=la?V(la,'pDH'):0;
     const al2=p>=eqPAl(eq),da2=p>=eqPDa(eq),dc=!la?'d-x':da2?'d-r':al2?'d-a':'d-g',bc=!la?'b-no':da2?'b-nk':al2?'b-al':'b-ok',bt=!la?'N/A':da2?'Danger':al2?'Alarm':'Normal';
     sh+='<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)"><span class="dot '+dc+'"></span><div style="flex:1"><div style="font-weight:600">'+eq.tag+'</div><div style="font-size:11px;color:var(--text3)">'+(eq.module||eq.mod||'')+'</div></div><span class="badge '+bc+'">'+bt+'</span>'+(la?'<span class="mono" style="color:var(--text3)">P:'+p.toFixed(2)+'</span>':'')+'</div>';});
@@ -580,7 +594,54 @@ function pgDash(el){
 function printDash(){window.print();}
 
 // ══════════ ALERTS ══════════
-function pgAlert(el){const a=getAl();if(!a.length){el.innerHTML='<div class="card" style="text-align:center;padding:40px"><div style="font-size:32px;margin-bottom:12px">✓</div><div style="color:var(--green);font-size:16px;font-weight:600">No active alerts</div><div style="color:var(--text3);font-size:13px;margin-top:6px">Latest PM records are all within limits</div></div>';return;}a.forEach(x=>{el.innerHTML+='<div class="ab '+(x.lv==='danger'?'a-re':'a-am')+'" style="cursor:pointer" onclick="showD(\''+x.id+'\')"><span>'+(x.lv==='danger'?'⛔':'⚠')+'</span><div style="flex:1"><b>'+x.tag+'</b> — '+x.msg+'</div><span style="font-size:11px;opacity:.7">'+fd(x.date)+'</span></div>';});}
+// ══════════ ALERTS ══════════
+function pgAlert(el){
+  const a=getAl();
+  if(!a.length){
+    el.innerHTML='<div class="card" style="text-align:center;padding:40px"><div style="font-size:40px;margin-bottom:12px">✅</div><div style="color:var(--green);font-size:16px;font-weight:600">No active alerts</div><div style="color:var(--text3);font-size:13px;margin-top:6px">ค่า PM ล่าสุดทุกตัวอยู่ในเกณฑ์ปกติ</div></div>';
+    return;
+  }
+  const byTag={};a.forEach(x=>{if(!byTag[x.tag])byTag[x.tag]=[];byTag[x.tag].push(x);});
+  el.innerHTML='<div style="font-size:13px;color:var(--text3);margin-bottom:12px">พบ '+a.length+' รายการ ใน '+Object.keys(byTag).length+' เครื่อง</div>';
+  Object.entries(byTag).forEach(([tag,items])=>{
+    const eq=S.eq.find(e=>e.tag===tag);
+    const latestRec=[...S.rec.filter(r=>r.tag===tag)].sort((a,b)=>b.date.localeCompare(a.date))[0];
+    const hasDanger=items.some(x=>x.lv==='danger');
+    const card=document.createElement('div');card.className='card';card.style.marginBottom='14px';
+    // Header
+    const hd=document.createElement('div');hd.style.cssText='display:flex;align-items:center;gap:12px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)';
+    hd.innerHTML='<span style="font-size:22px">'+(hasDanger?'⛔':'⚠')+'</span>'+
+      '<div style="flex:1"><div style="font-size:15px;font-weight:700">'+tag+'</div>'+
+      '<div style="font-size:12px;color:var(--text3)">'+(eq?.module||eq?.mod||'')+' | '+(eq?.location||'')+'</div></div>'+
+      '<span class="badge '+(hasDanger?'b-nk':'b-al')+'">'+(hasDanger?'DANGER':'ALARM')+'</span>';
+    card.appendChild(hd);
+    // Alarm rows
+    items.forEach(x=>{
+      const row=document.createElement('div');
+      row.style.cssText='display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)';
+      row.innerHTML='<span>'+(x.lv==='danger'?'🔴':'🟡')+'</span>'+
+        '<div style="flex:1;font-size:13px"><b>'+x.loc.replace(/_/g,' ')+'</b> — '+x.msg+'</div>'+
+        '<span style="font-size:11px;color:var(--text3)">'+x.date+'</span>';
+      card.appendChild(row);
+    });
+    // Action buttons
+    const btns=document.createElement('div');btns.style.cssText='display:flex;gap:8px;margin-top:14px;flex-wrap:wrap';
+    if(latestRec){
+      const bv=document.createElement('button');bv.className='btn btn-sm btn-p';
+      bv.textContent='📋 PM ล่าสุด ('+latestRec.date+')';
+      bv.onclick=()=>showD(latestRec.id);btns.appendChild(bv);
+    }
+    const bh=document.createElement('button');bh.className='btn btn-sm';bh.textContent='☰ History';
+    bh.onclick=()=>{go('history',E('nav-history'));setTimeout(()=>{const hw=E('htag-wrap');const ss=hw?.querySelector('.ss-wrap');if(ss?.setVal)ss.setVal(tag);apH();},300);};
+    btns.appendChild(bh);
+    if(canEdit()){
+      const bn=document.createElement('button');bn.className='btn btn-sm btn-s';bn.textContent='+ New PM';
+      bn.onclick=()=>{go('checksheet',E('nav-checksheet'));setTimeout(()=>{const tw=E('f-tag-wrap');const ss=tw?.querySelector('.ss-wrap');if(ss?.setVal)ss.setVal(tag);onTg(tag);},300);};
+      btns.appendChild(bn);
+    }
+    card.appendChild(btns);el.appendChild(card);
+  });
+}
 
 // ══════════ CHECK SHEET ══════════
 function pgCheck(el){S.cf={ck:{},sev:'5'};
