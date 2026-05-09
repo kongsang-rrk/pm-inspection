@@ -184,10 +184,12 @@
 <div class="fg"><label class="fl">Module for</label><input class="fi" id="eq-module" placeholder="CF Export P201X"></div>
 <div class="fg"><label class="fl">Manufacturer</label><input class="fi" id="eq-mfg" placeholder="Reliance"></div>
 <div class="fg"><label class="fl">Serial No.</label><input class="fi" id="eq-sn" placeholder="1MAZJ9073 G00X"></div>
+<div class="fg"><label class="fl">Type</label><input class="fi" id="eq-type" placeholder="เช่น Induction, Synchronous"></div>
 <div class="fg"><label class="fl">Power</label><div style="display:flex;gap:6px;align-items:center"><input class="fi" id="eq-power" type="number" placeholder="250" style="flex:1"><div class="unit-grp"><button class="unit-btn active" onclick="togU(this,'eq-pwrU','kW')">kW</button><button class="unit-btn" onclick="togU(this,'eq-pwrU','HP')">HP</button></div><input type="hidden" id="eq-pwrU" value="kW"></div></div>
 <div class="fg"><label class="fl">Weight</label><div style="display:flex;gap:6px;align-items:center"><input class="fi" id="eq-weight" type="number" placeholder="2268" style="flex:1"><div class="unit-grp"><button class="unit-btn" onclick="togU(this,'eq-wtU','kg')">kg</button><button class="unit-btn active" onclick="togU(this,'eq-wtU','lbs')">lbs</button></div><input type="hidden" id="eq-wtU" value="lbs"></div></div>
 <div class="fg"><label class="fl">Stat. Volts</label><input class="fi" id="eq-volts" placeholder="380YD"></div>
 <div class="fg"><label class="fl">Stat. Amps</label><input class="fi" id="eq-amps" placeholder="323A"></div>
+<div class="fg"><label class="fl">Power Factor (P.F)</label><input class="fi" id="eq-pf" type="number" step="0.01" placeholder="0.85"></div>
 <div class="fg"><label class="fl">Frequency (Hz)</label><input class="fi" id="eq-freq" type="number" placeholder="50"></div>
 <div class="fg"><label class="fl">Speed (RPM)</label><input class="fi" id="eq-speed" type="number" placeholder="2970"></div>
 <div class="fg"><label class="fl">Insulation Class</label><input class="fi" id="eq-ins" placeholder="F"></div>
@@ -1012,7 +1014,9 @@ h+=`<div class="dl"><span class="dl-l">Approved by</span><span class="dl-v">${r.
 h+='<div class="sec-h">⊞ Machine Data</div>';
 h+=`<div class="dl"><span class="dl-l">Manufacturer / S.N.</span><span class="dl-v">${eq?.mfg||'—'} / ${eq?.sn||'—'}</span></div>`;
 h+=`<div class="dl"><span class="dl-l">Power / Weight</span><span class="dl-v">${eq?.power||'—'} ${eq?.powerUnit||'HP'} / ${eq?.weight||'—'} ${eq?.weightUnit||'lbs'}</span></div>`;
+if(eq?.type)h+=`<div class="dl"><span class="dl-l">Type</span><span class="dl-v">${eq.type}</span></div>`;
 h+=`<div class="dl"><span class="dl-l">Volts / Amps / RPM</span><span class="dl-v">${eq?.volts||'—'} / ${eq?.amps||'—'} / ${eq?.speed||'—'}</span></div>`;
+if(eq?.pf)h+=`<div class="dl"><span class="dl-l">Power Factor (P.F)</span><span class="dl-v">${eq.pf}</span></div>`;
 h+='<div class="sec-h">🔩 Bearing</div>';
 h+=`<div class="dl"><span class="dl-l">DE — ${r.brg?.de||eq?.de||'—'}</span><span class="dl-v">${bst(r.brg?.deC)}</span></div>`;
 h+=`<div class="dl"><span class="dl-l">NDE — ${r.brg?.nde||eq?.nde||'—'}</span><span class="dl-v">${bst(r.brg?.ndeC)}</span></div>`;
@@ -1110,13 +1114,13 @@ S.eq.forEach(eq=>{const rs=S.rec.filter(r=>r.tag===eq.tag),la=[...rs].sort((a,b)
   const dc=!la?'d-x':mAl||pAl?'d-a':'d-g';
   const d=document.createElement('div');d.className='eq-i';
   d.innerHTML='<div class="eq-av">'+eq.tag.slice(-3)+'</div><div style="flex:1"><div style="font-size:14px;font-weight:600"><span class="dot '+dc+'" style="margin-right:7px"></span>'+eq.tag+'</div>'+
-  '<div style="font-size:11px;color:var(--text3);margin-top:2px">'+(eq.module||eq.mod||'')+' | '+(eq.power||eq.pwr||'')+' '+(eq.powerUnit||'HP')+'</div>'+
+  '<div style="font-size:11px;color:var(--text3);margin-top:2px">'+(eq.module||eq.mod||'')+' | '+(eq.type?eq.type+' | ':'')+(eq.power||eq.pwr||'')+' '+(eq.powerUnit||'HP')+'</div>'+
   '<div style="font-size:11px;color:var(--text3);margin-top:2px">Motor Alarm: '+(eq.motorVibAlarm||'—')+' / '+(eq.motorVibDanger||'—')+' mm/s | Pump: '+(eq.pumpVibAlarm||'—')+' / '+(eq.pumpVibDanger||'—')+' mm/s</div>'+
   '</div><div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="editEq(\''+eq.tag+'\')">Edit</button><button class="btn btn-sm btn-d" onclick="delEq(\''+eq.tag+'\')">Del</button></div>';el.appendChild(d);});}
 const eqFlds=['eq-tag','eq-module','eq-mfg','eq-sn','eq-power','eq-weight','eq-volts','eq-amps','eq-freq','eq-speed','eq-ins','eq-duty','eq-de','eq-nde','eq-loadtype','eq-location'];
 function addEq(){E('meqt').textContent='Add Equipment';eqFlds.forEach(id=>{if(E(id))E(id).value='';});E('eq-mval').value='4.5';E('eq-mvda').value='7.1';E('eq-pval').value='4.5';E('eq-pvda').value='7.1';E('eq-pwrU').value='kW';E('eq-wtU').value='lbs';document.querySelectorAll('#meq .unit-btn').forEach(b=>b.classList.remove('active'));document.querySelector('#meq .unit-btn')?.classList.add('active');om('meq');}
 function editEq(t){const eq=S.eq.find(e=>e.tag===t);if(!eq)return;E('meqt').textContent='Edit — '+t;
-const m={tag:'eq-tag',module:'eq-module',mfg:'eq-mfg',sn:'eq-sn',power:'eq-power',weight:'eq-weight',volts:'eq-volts',amps:'eq-amps',freq:'eq-freq',speed:'eq-speed',ins:'eq-ins',duty:'eq-duty',de:'eq-de',nde:'eq-nde',loadtype:'eq-loadtype',location:'eq-location'};
+const m={tag:'eq-tag',module:'eq-module',mfg:'eq-mfg',sn:'eq-sn',type:'eq-type',power:'eq-power',weight:'eq-weight',volts:'eq-volts',amps:'eq-amps',pf:'eq-pf',freq:'eq-freq',speed:'eq-speed',ins:'eq-ins',duty:'eq-duty',de:'eq-de',nde:'eq-nde',loadtype:'eq-loadtype',location:'eq-location'};
 Object.entries(m).forEach(([k,id])=>{if(E(id))E(id).value=eq[k]||'';});
 E('eq-mval').value=eq.motorVibAlarm||eq.vibAlarm||4.5;E('eq-mvda').value=eq.motorVibDanger||eq.vibDanger||7.1;
 E('eq-pval').value=eq.pumpVibAlarm||eq.vibAlarm||4.5;E('eq-pvda').value=eq.pumpVibDanger||eq.vibDanger||7.1;
@@ -1124,7 +1128,7 @@ const pu=eq.powerUnit||'HP';E('eq-pwrU').value=pu;document.querySelectorAll('#me
 const wu=eq.weightUnit||'lbs';E('eq-wtU').value=wu;document.querySelectorAll('#meq .unit-grp')[1]?.querySelectorAll('.unit-btn').forEach(b=>b.classList.toggle('active',b.textContent===wu));
 om('meq');}
 async function saveEq(){if(!canEdit()){toast('ไม่มีสิทธิ์แก้ไข (Viewer)','error');return;}const t=E('eq-tag').value.trim();if(!t){toast('Tag required','error');return;}
-const o={tag:t,module:E('eq-module').value,mfg:E('eq-mfg').value,sn:E('eq-sn').value,power:E('eq-power').value,powerUnit:E('eq-pwrU').value,weight:E('eq-weight').value,weightUnit:E('eq-wtU').value,volts:E('eq-volts').value,amps:E('eq-amps').value,freq:E('eq-freq').value,speed:E('eq-speed').value,ins:E('eq-ins').value,duty:E('eq-duty').value,de:E('eq-de').value,nde:E('eq-nde').value,loadtype:E('eq-loadtype').value,location:E('eq-location').value,
+const o={tag:t,module:E('eq-module').value,mfg:E('eq-mfg').value,sn:E('eq-sn').value,type:E('eq-type')?.value||'',power:E('eq-power').value,powerUnit:E('eq-pwrU').value,weight:E('eq-weight').value,weightUnit:E('eq-wtU').value,volts:E('eq-volts').value,amps:E('eq-amps').value,pf:E('eq-pf')?.value||'',freq:E('eq-freq').value,speed:E('eq-speed').value,ins:E('eq-ins').value,duty:E('eq-duty').value,de:E('eq-de').value,nde:E('eq-nde').value,loadtype:E('eq-loadtype').value,location:E('eq-location').value,
 motorVibAlarm:parseFloat(E('eq-mval').value)||4.5,motorVibDanger:parseFloat(E('eq-mvda').value)||7.1,pumpVibAlarm:parseFloat(E('eq-pval').value)||4.5,pumpVibDanger:parseFloat(E('eq-pvda').value)||7.1};
 try{await db.collection('equipment').doc(t).set(o);const i=S.eq.findIndex(e=>e.tag===t);if(i>=0)S.eq[i]=o;else S.eq.push(o);cm('meq');pgEq(E('content'));toast(t+' saved');}catch(e){toast('Error: '+e.message,'error');}}
 async function delEq(t){if(!isAdmin()){toast('เฉพาะ Admin เท่านั้น','error');return;}if(!confirm('Delete '+t+'?'))return;try{await db.collection('equipment').doc(t).delete();S.eq=S.eq.filter(e=>e.tag!==t);pgEq(E('content'));toast('Deleted '+t,'warning');}catch(e){toast('Error: '+e.message,'error');}}
