@@ -558,30 +558,75 @@ const c=E('content');c.innerHTML='';
 
 // ══════════ DASHBOARD ══════════
 function pgDash(el){
+  el.innerHTML='';
   const al=getAl(),lp=S.rec.reduce((m,r)=>r.date>m?r.date:m,''),ac=[...new Set(al.map(a=>a.tag))].length;
-  el.innerHTML='<div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button class="btn btn-sm" onclick="printDash()">🖨 Export Dashboard PDF</button></div>';
-  al.slice(0,3).forEach(a=>{el.innerHTML+='<div class="ab '+(a.lv==='danger'?'a-re':'a-am')+'"><span>'+(a.lv==='danger'?'⛔':'⚠')+'</span><b>'+a.tag+'</b>: '+a.msg+'<span style="margin-left:auto;font-size:11px;opacity:.7">'+fd(a.date)+'</span></div>';});
-  // Metric cards — built via DOM to avoid quote conflicts
+
+  // Export button
+  const expRow=document.createElement('div');expRow.style.cssText='display:flex;justify-content:flex-end;margin-bottom:12px';
+  const expBtn=document.createElement('button');expBtn.className='btn btn-sm';expBtn.textContent='🖨 Export Dashboard PDF';expBtn.onclick=printDash;
+  expRow.appendChild(expBtn);el.appendChild(expRow);
+
+  // Alert banners (top 3)
+  al.slice(0,3).forEach(a=>{
+    const d=document.createElement('div');d.className='ab '+(a.lv==='danger'?'a-re':'a-am');
+    d.style.cursor='pointer';d.onclick=()=>go('alerts',E('nav-alerts'));
+    d.innerHTML='<span>'+(a.lv==='danger'?'⛔':'⚠')+'</span><b>'+a.tag+'</b>: '+a.msg+
+      '<span style="margin-left:auto;font-size:11px;opacity:.7">'+fd(a.date)+'</span>';
+    el.appendChild(d);
+  });
+
+  // Metric cards — fully DOM, no innerHTML+= after
   const mr=document.createElement('div');mr.className='metric-row';
-  const mCards=[
-    {cls:'m1',lbl:'Equipment',val:S.eq.length,col:'var(--accent)',hint:'คลิกดูทั้งหมด →',nav:'equipment',navEl:'nav-equipment'},
-    {cls:'m2',lbl:'PM Records',val:S.rec.length,col:'var(--green)',hint:'คลิกดู History →',nav:'history',navEl:'nav-history'},
-    {cls:'m3',lbl:'Alerts',val:ac,col:'var(--amber)',hint:'คลิกดู Alerts →',nav:'alerts',navEl:'nav-alerts'},
-    {cls:'m4',lbl:'Last PM',val:lp?fd(lp):'—',col:'var(--text)',hint:'',nav:null}
-  ];
-  mCards.forEach(m=>{
+  [{cls:'m1',lbl:'Equipment',val:S.eq.length,col:'var(--accent)',nav:'equipment',navEl:'nav-equipment'},
+   {cls:'m2',lbl:'PM Records',val:S.rec.length,col:'var(--green)',nav:'history',navEl:'nav-history'},
+   {cls:'m3',lbl:'Alerts',val:ac,col:'var(--amber)',nav:'alerts',navEl:'nav-alerts'},
+   {cls:'m4',lbl:'Last PM',val:lp?fd(lp):'—',col:'var(--text)',nav:null}
+  ].forEach(m=>{
     const mc=document.createElement('div');mc.className='mc '+m.cls;
-    mc.innerHTML='<div class="ml">'+m.lbl+'</div><div class="mv" style="color:'+m.col+';font-size:'+(m.cls==='m4'?'16':'26')+'px">'+m.val+'</div>'+(m.hint?'<div style="font-size:10px;color:var(--text3);margin-top:6px">'+m.hint+'</div>':'');
-    if(m.nav){mc.style.cursor='pointer';mc.onmouseenter=()=>mc.style.borderColor=m.col;mc.onmouseleave=()=>mc.style.borderColor='';mc.onclick=()=>go(m.nav,E(m.navEl));}
+    mc.innerHTML='<div class="ml">'+m.lbl+'</div><div class="mv" style="color:'+m.col+';font-size:'+(m.cls==='m4'?'16':'26')+'px">'+m.val+'</div>';
+    if(m.nav){
+      mc.style.cursor='pointer';
+      mc.onmouseenter=()=>{mc.style.transform='translateY(-2px)';mc.style.borderColor=m.col;};
+      mc.onmouseleave=()=>{mc.style.transform='';mc.style.borderColor='';};
+      mc.onclick=()=>go(m.nav,E(m.navEl));
+    }
     mr.appendChild(mc);
   });
   el.appendChild(mr);
-  let sh='';S.eq.forEach(eq=>{const rs=S.rec.filter(r=>r.tag===eq.tag).sort((a,b)=>b.date.localeCompare(a.date)),la=rs[0],p=la?V(la,'pDH'):0;
-    const al2=p>=eqPAl(eq),da2=p>=eqPDa(eq),dc=!la?'d-x':da2?'d-r':al2?'d-a':'d-g',bc=!la?'b-no':da2?'b-nk':al2?'b-al':'b-ok',bt=!la?'N/A':da2?'Danger':al2?'Alarm':'Normal';
-    sh+='<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)"><span class="dot '+dc+'"></span><div style="flex:1"><div style="font-weight:600">'+eq.tag+'</div><div style="font-size:11px;color:var(--text3)">'+(eq.module||eq.mod||'')+'</div></div><span class="badge '+bc+'">'+bt+'</span>'+(la?'<span class="mono" style="color:var(--text3)">P:'+p.toFixed(2)+'</span>':'')+'</div>';});
-  el.innerHTML+='<div class="g2"><div class="card"><div class="card-t">Equipment Status</div>'+sh+'</div><div class="card"><div class="card-t">Vibration — 6 Latest PM</div><div class="cw" style="height:240px"><canvas id="dv"></canvas></div></div></div>';
-  el.innerHTML+='<div class="card"><div class="card-t">Current & Voltage</div><div class="g2" style="gap:16px"><div class="cw" style="height:200px"><canvas id="dc"></canvas></div><div class="cw" style="height:200px"><canvas id="du"></canvas></div></div></div>';
-  // Feature 5: Take 6 latest PM records across all equipment
+
+  // Equipment Status + Vib Chart row
+  const g2a=document.createElement('div');g2a.className='g2';g2a.style.marginBottom='16px';
+  // Equipment status card
+  const eqCard=document.createElement('div');eqCard.className='card';
+  eqCard.innerHTML='<div class="card-t">Equipment Status</div>';
+  S.eq.forEach(eq=>{
+    const rs=S.rec.filter(r=>r.tag===eq.tag).sort((a,b)=>b.date.localeCompare(a.date)),la=rs[0];
+    const pv=la?maxPumpVib(la):0,mv=la?maxMotorVib(la):0;
+    const pDa=pv>=eqPDa(eq),pAl=pv>=eqPAl(eq);
+    const dc=!la?'d-x':pDa?'d-r':pAl?'d-a':'d-g';
+    const bc=!la?'b-no':pDa?'b-nk':pAl?'b-al':'b-ok';
+    const bt=!la?'N/A':pDa?'Danger':pAl?'Alarm':'Normal';
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer';
+    row.innerHTML='<span class="dot '+dc+'"></span><div style="flex:1"><div style="font-weight:600">'+eq.tag+'</div>'+
+      '<div style="font-size:11px;color:var(--text3)">'+(eq.module||eq.mod||'')+'</div></div>'+
+      '<span class="badge '+bc+'">'+bt+'</span>'+(la?'<span class="mono" style="color:var(--text3);font-size:11px">P:'+pv.toFixed(2)+'</span>':'');
+    row.onclick=()=>{if(la)showD(la.id);};
+    eqCard.appendChild(row);
+  });
+  g2a.appendChild(eqCard);
+  // Vib chart card
+  const vibCard=document.createElement('div');vibCard.className='card';
+  vibCard.innerHTML='<div class="card-t">Vibration — 6 Latest PM</div><div class="cw" style="height:240px"><canvas id="dv"></canvas></div>';
+  g2a.appendChild(vibCard);
+  el.appendChild(g2a);
+
+  // Current & Voltage chart
+  const elCard=document.createElement('div');elCard.className='card';
+  elCard.innerHTML='<div class="card-t">Current & Voltage</div><div class="g2" style="gap:16px"><div class="cw" style="height:200px"><canvas id="dc"></canvas></div><div class="cw" style="height:200px"><canvas id="du"></canvas></div></div>';
+  el.appendChild(elCard);
+
+  // Draw charts
   setTimeout(()=>{
     const sorted=[...S.rec].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6).reverse();
     const lb=sorted.map(r=>r.tag+' '+r.date.slice(5));
@@ -591,6 +636,7 @@ function pgDash(el){
     if(E('du'))new Chart(E('du'),{type:'bar',data:{labels:sorted.map(r=>r.tag),datasets:[{label:'U',data:sorted.map(r=>(r.el||r.elec||{}).vu||0),backgroundColor:'rgba(188,140,255,.7)',borderRadius:4},{label:'V',data:sorted.map(r=>(r.el||r.elec||{}).vv||0),backgroundColor:'rgba(188,140,255,.45)',borderRadius:4},{label:'W',data:sorted.map(r=>(r.el||r.elec||{}).vw||0),backgroundColor:'rgba(188,140,255,.25)',borderRadius:4}]},options:{...co(),scales:{y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:9},maxRotation:40}}},plugins:{...co().plugins,title:{display:true,text:'Voltage (V)',color:'#8b949e',font:{size:11}}}}});
   },100);
 }
+
 function printDash(){window.print();}
 
 // ══════════ ALERTS ══════════
