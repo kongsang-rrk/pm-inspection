@@ -345,6 +345,11 @@ function checkElecAlarms(rec,entries){
   if(vuUn>3)entries.push({type:'alarm',tag:rec.tag,loc:'Voltage_Unbal',val:vuUn,limit:3,wo:rec.wo||'',date:rec.date,msg:'Voltage Unbal '+vuUn.toFixed(2)+'% (limit 3%)'});
   if(wrUn>3)entries.push({type:'alarm',tag:rec.tag,loc:'WR_Unbal',val:wrUn,limit:3,wo:rec.wo||'',date:rec.date,msg:'Winding Resistance Unbal '+wrUn.toFixed(2)+'% (limit 3%)'});
   if(wiUn>10)entries.push({type:'alarm',tag:rec.tag,loc:'WI_Unbal',val:wiUn,limit:10,wo:rec.wo||'',date:rec.date,msg:'Winding Inductance Unbal '+wiUn.toFixed(2)+'% (limit 10%)'});
+  // Insulation Resistance — alarm if any value < 10 MΩ (and value was actually recorded)
+  [{k:'irUV',loc:'IR_UV'},{k:'irVW',loc:'IR_VW'},{k:'irWU',loc:'IR_WU'},{k:'irG',loc:'IR_UVW-G'}].forEach(({k,loc})=>{
+    const v=parseFloat(st[k]||0);
+    if(v>0&&v<10)entries.push({type:'alarm',tag:rec.tag,loc,val:v,limit:10,wo:rec.wo||'',date:rec.date,msg:'IR '+loc.replace('IR_','')+' = '+v+' MΩ (ต่ำกว่า 10 MΩ)'});
+  });
 }
 function getAllAlarmsFromRec(rec,eq){
   const entries=[];
