@@ -520,6 +520,7 @@ function openUserMgmt(){if(!isAdmin()){toast('เฉพาะ Admin','error');re
 
 // ══════ LINE NOTIFICATION ══════
 async function sendLineNotify(rec,alarmEntries){
+  if(S.set.lineEnabled===false)return; // toggled off
   const webhookUrl=S.set.lineWebhook||'';
   if(!webhookUrl)return;
   const eq=S.eq.find(e=>e.tag===rec.tag);
@@ -1258,9 +1259,69 @@ async function removeUser2(email){
 }
 
 // ══════════ SETTINGS ══════════
-function pgSet(el){el.innerHTML='<div class="card"><div class="st" style="margin-bottom:16px">⚙ Settings</div><div class="g2" style="gap:12px;margin-bottom:16px"><div class="fg"><label class="fl">Company</label><input class="fi" id="sco" value="'+(S.set.co||'')+'"></div><div class="fg"><label class="fl">Plant</label><input class="fi" id="spl" value="'+(S.set.plant||'')+'"></div><div class="fg"><label class="fl">Area</label><input class="fi" id="sar" value="'+(S.set.area||'')+'"></div><div class="fg"><label class="fl">Site</label><input class="fi" id="ssi" value="'+(S.set.site||'')+'"></div><div class="fg"><label class="fl">Default Inspector</label><input class="fi" id="sdi" value="'+(S.set.di||'')+'"></div><div class="fg"><label class="fl">Default Approver</label><input class="fi" id="sda" value="'+(S.set.da||'')+'"></div></div><div style="font-size:12px;font-weight:600;color:var(--text3);margin:8px 0">LINE NOTIFICATION (n8n)</div><div class=\"fg\"><label class=\"fl\">n8n Webhook URL</label><input class=\"fi\" id=\"slw\" value=\"'+(S.set.lineWebhook||'')+'\"></div><div style=\"font-size:11px;color:var(--text3);margin-bottom:12px\">⚡ ทุก PM บันทึกจะส่ง Line ทันที — ถ้าว่างไม่ส่ง</div><div style=\"font-size:12px;font-weight:600;color:var(--text3);margin:8px 0\">SIDEBAR BRANDING</div><div class="g3" style="gap:12px;margin-bottom:16px"><div class="fg"><label class="fl">Icon Text</label><input class="fi" id="sli" value="'+(S.set.logoIcon||'PM')+'" maxlength="3" style="width:60px"></div><div class="fg"><label class="fl">Line 1</label><input class="fi" id="sl1" value="'+(S.set.logoLine1||'PM Inspection')+'"></div><div class="fg"><label class="fl">Line 2</label><input class="fi" id="sl2" value="'+(S.set.logoLine2||'TCC Plant GEN')+'"></div></div><button class="btn btn-p" onclick="saveSt()">Save Settings</button></div>'+pgUsrBtn()+'<div<div class="card"><div class="st" style="margin-bottom:14px">🗄️ Database</div><div style="font-size:13px;color:var(--text2)">Equipment: <b>'+S.eq.length+'</b> | Records: <b>'+S.rec.length+'</b> | Alarm Log: <b>'+S.alogs.length+'</b></div></div>';}
-function pgUsrBtn(){if(isAdmin())return '<button class="btn btn-p" onclick="go(\'users\',E(\'nav-users\'))" style="margin-top:12px">👥 User Management</button>';return '';}
-async function saveSt(){const s={co:E('sco').value,plant:E('spl').value,area:E('sar').value,site:E('ssi').value,di:E('sdi').value,da:E('sda').value,logoIcon:E('sli').value,logoLine1:E('sl1').value,logoLine2:E('sl2').value,lineWebhook:(E('slw')?.value||'').trim()};try{await db.collection('settings').doc('global').set(s);S.set={...S.set,...s};applyLogo();toast('Saved');}catch(e){toast('Error: '+e.message,'error');}}
+function pgSet(el){
+  el.innerHTML='';
+  // Settings card
+  const card=document.createElement('div');card.className='card';
+  card.innerHTML='<div class="st" style="margin-bottom:16px">⚙ Settings</div>'+
+    '<div class="g2" style="gap:12px;margin-bottom:16px">'+
+    '<div class="fg"><label class="fl">Company</label><input class="fi" id="sco" value="'+(S.set.co||'')+'"></div>'+
+    '<div class="fg"><label class="fl">Plant</label><input class="fi" id="spl" value="'+(S.set.plant||'')+'"></div>'+
+    '<div class="fg"><label class="fl">Area</label><input class="fi" id="sar" value="'+(S.set.area||'')+'"></div>'+
+    '<div class="fg"><label class="fl">Site</label><input class="fi" id="ssi" value="'+(S.set.site||'')+'"></div>'+
+    '<div class="fg"><label class="fl">Default Inspector</label><input class="fi" id="sdi" value="'+(S.set.di||'')+'"></div>'+
+    '<div class="fg"><label class="fl">Default Approver</label><input class="fi" id="sda" value="'+(S.set.da||'')+'"></div>'+
+    '</div>'+
+    '<div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">LINE NOTIFICATION</div>'+
+    '<div class="fg"><label class="fl">Webhook URL (Google Apps Script)</label>'+
+    '<input class="fi" id="slw" value="'+(S.set.lineWebhook||'')+'" placeholder="https://script.google.com/macros/s/..."></div>'+
+    '<div style="font-size:11px;color:var(--text3);margin-top:-8px;margin-bottom:10px">ถ้าว่างจะไม่ส่ง Line</div>';
+  // Line toggle button - built via DOM
+  const toggleRow=document.createElement('div');
+  toggleRow.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border);margin-bottom:12px';
+  const isOn=S.set.lineEnabled!==false;
+  toggleRow.innerHTML='<div><div style="font-size:13px;font-weight:500">Line Notification</div>'+
+    '<div style="font-size:11px;color:var(--text3)" id="line-status">'+(isOn?'🟢 เปิด — ส่งทุก PM':'⭘ ปิด — ไม่ส่ง')+'</div></div>';
+  const toggleBtn=document.createElement('button');
+  toggleBtn.style.cssText='padding:8px 20px;border-radius:20px;border:none;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s';
+  toggleBtn.style.background=isOn?'#238636':'#30363d';
+  toggleBtn.style.color=isOn?'#fff':'#8b949e';
+  toggleBtn.textContent=isOn?'● ON':'⭘ OFF';
+  toggleBtn.id='line-toggle-btn';
+  toggleBtn.onclick=toggleLine;
+  toggleRow.appendChild(toggleBtn);
+  card.appendChild(toggleRow);
+  card.innerHTML+=
+    '<div style="font-size:12px;font-weight:600;color:var(--text3);margin:8px 0">SIDEBAR BRANDING</div>'+
+    '<div class="g3" style="gap:12px;margin-bottom:16px">'+
+    '<div class="fg"><label class="fl">Icon Text</label><input class="fi" id="sli" value="'+(S.set.logoIcon||'PM')+'" maxlength="3" style="width:60px"></div>'+
+    '<div class="fg"><label class="fl">Line 1</label><input class="fi" id="sl1" value="'+(S.set.logoLine1||'PM Inspection')+'"></div>'+
+    '<div class="fg"><label class="fl">Line 2</label><input class="fi" id="sl2" value="'+(S.set.logoLine2||'TCC Plant GEN')+'"></div>'+
+    '</div>';
+  const saveBtn=document.createElement('button');saveBtn.className='btn btn-p';saveBtn.textContent='Save Settings';saveBtn.onclick=saveSt;
+  card.appendChild(saveBtn);
+  if(isAdmin()){const uBtn=document.createElement('button');uBtn.className='btn';uBtn.style.marginTop='8px';uBtn.innerHTML='👥 User Management';uBtn.onclick=()=>go('users',E('nav-users'));card.appendChild(uBtn);}
+  el.appendChild(card);
+  // DB card
+  const dbCard=document.createElement('div');dbCard.className='card';
+  dbCard.innerHTML='<div class="st" style="margin-bottom:14px">🗄️ Database</div>'+
+    '<div style="font-size:13px;color:var(--text2)">Equipment: <b>'+S.eq.length+'</b> | Records: <b>'+S.rec.length+'</b> | Alarm Log: <b>'+S.alogs.length+'</b></div>';
+  el.appendChild(dbCard);
+}
+function toggleLine(){
+  const isOn=S.set.lineEnabled!==false;
+  S.set.lineEnabled=!isOn;
+  // Update UI
+  const btn=E('line-toggle-btn');const status=E('line-status');
+  if(btn){btn.style.background=S.set.lineEnabled?'#238636':'#30363d';btn.style.color=S.set.lineEnabled?'#fff':'#8b949e';btn.textContent=S.set.lineEnabled?'● ON':'⭘ OFF';}
+  if(status)status.textContent=S.set.lineEnabled?'🟢 เปิด — ส่งทุก PM':'⭘ ปิด — ไม่ส่ง';
+  // Save to Firestore
+  db.collection('settings').doc('global').set({lineEnabled:S.set.lineEnabled},{merge:true})
+    .then(()=>toast(S.set.lineEnabled?'Line Notification เปิดแล้ว ✓':'Line Notification ปิดแล้ว','warning'))
+    .catch(e=>toast('Error: '+e.message,'error'));
+}
+
+async function saveSt(){const s={co:E('sco').value,plant:E('spl').value,area:E('sar').value,site:E('ssi').value,di:E('sdi').value,da:E('sda').value,logoIcon:E('sli').value,logoLine1:E('sl1').value,logoLine2:E('sl2').value,lineWebhook:(E('slw')?.value||'').trim(),lineEnabled:S.set.lineEnabled!==false};try{await db.collection('settings').doc('global').set(s);S.set={...S.set,...s};applyLogo();toast('Saved');}catch(e){toast('Error: '+e.message,'error');}}
 
 // Clock
 function uClock(){const d=new Date(),s=d.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});const td=E('tdate');if(td)td.textContent=s;const sc=E('sclock');if(sc)sc.textContent=d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
