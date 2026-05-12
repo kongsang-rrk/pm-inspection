@@ -124,7 +124,7 @@
 .dl{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)}
 .dl-l{color:var(--text3);font-size:12px}.dl-v{font-family:var(--mono);font-size:13px;text-align:right}
 .sec-h{font-size:11px;font-weight:600;color:var(--accent);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.05em}
-@media print{.sidebar,.topbar,.toast-c,.mf,.mh button,.mh .mc-btn,.btn,.ss-drop,.itab,#tr-chips,#trt-wrap,.sh button{display:none!important}.trend-section{page-break-inside:avoid;page-break-after:auto}.mo{position:static!important;background:none!important}.modal{max-height:none!important;width:100%!important;border:none!important;box-shadow:none!important;border-radius:0!important}.mb{padding:0!important}body{background:#fff!important;color:#000!important}*{color:#000!important;border-color:#ccc!important}.badge{border:1px solid #999!important}.dl{border-color:#ddd!important}.sec-h{color:#1a5fb4!important}.content{overflow:visible!important;height:auto!important}.main{overflow:visible!important}.app{display:block!important;height:auto!important;overflow:visible!important}.card{break-inside:avoid;border:1px solid #ddd!important}.mc{border:1px solid #ddd!important}.metric-row{grid-template-columns:repeat(4,1fr)!important}.g2{grid-template-columns:1fr 1fr!important}canvas{max-height:200px!important}}
+.trend-hidden{display:none}@media print{.trend-hidden{display:block!important}.sidebar,.topbar,.toast-c,.mf,.mh button,.mh .mc-btn,.btn,.ss-drop,.itab,#tr-chips,#trt-wrap,.sh button{display:none!important}.trend-section{page-break-inside:avoid;page-break-after:auto;display:block!important}.mo{position:static!important;background:none!important}.modal{max-height:none!important;width:100%!important;border:none!important;box-shadow:none!important;border-radius:0!important}.mb{padding:0!important}body{background:#fff!important;color:#000!important}*{color:#000!important;border-color:#ccc!important}.badge{border:1px solid #999!important}.dl{border-color:#ddd!important}.sec-h{color:#1a5fb4!important}.content{overflow:visible!important;height:auto!important}.main{overflow:visible!important}.app{display:block!important;height:auto!important;overflow:visible!important}.card{break-inside:avoid;border:1px solid #ddd!important}.mc{border:1px solid #ddd!important}.metric-row{grid-template-columns:repeat(4,1fr)!important}.g2{grid-template-columns:1fr 1fr!important}canvas{max-height:200px!important}}
 
 /* Role-based UI */
 .viewer-hide{display:none!important}
@@ -1138,6 +1138,7 @@ let tc=[];
 function pgTrend(el){
   const opts=S.eq.map(e=>({value:e.tag,label:e.tag+' — '+(e.module||e.mod||'')}));
   if(!S._trTags)S._trTags=S.eq[0]?[S.eq[0].tag]:[];
+  if(!S._trActive)S._trActive='motor';
   el.innerHTML='';
   // ── Header card ──
   const card=document.createElement('div');card.className='card';
@@ -1162,6 +1163,15 @@ function pgTrend(el){
   addWrap.appendChild(ssWrap);
   selWrap.appendChild(addWrap);
   card.appendChild(selWrap);
+  // ── Tabs (ปุ่มสลับ section ที่ active) ──
+  const tabs=document.createElement('div');tabs.className='itab';tabs.style.marginTop='14px';
+  const tabDefs=[{k:'motor',l:'🌀 Motor Vib'},{k:'pump',l:'🌀 Pump Vib'},{k:'elec',l:'⚡ Electrical'}];
+  tabDefs.forEach(td=>{
+    const t=document.createElement('div');t.className='it'+(S._trActive===td.k?' active':'');t.textContent=td.l;
+    t.onclick=()=>{S._trActive=td.k;pgTrend(el);};
+    tabs.appendChild(t);
+  });
+  card.appendChild(tabs);
   el.appendChild(card);
 
   if(!S._trTags.length){
@@ -1171,24 +1181,24 @@ function pgTrend(el){
     return;
   }
 
-  // ── 3 Sections: Motor Vib, Pump Vib, Electrical ──
-  // For each section, create a card with sub-grids of charts per equipment
+  // ── 3 Sections rendered all (only active visible on screen, all visible on print) ──
   const sections=[
-    {key:'motor',title:'🌀 Motor Vibration',sub:[{id:'mde',label:'DE — V/H/A',fields:['mDV','mDH','mDA']},{id:'mnde',label:'NDE — V/H/A',fields:['mNV','mNH','mNA']}],kind:'vib_motor'},
-    {key:'pump', title:'🌀 Pump Vibration', sub:[{id:'pde',label:'DE — V/H/A',fields:['pDV','pDH','pDA']},{id:'pnde',label:'NDE — V/H/A',fields:['pNV','pNH','pNA']}],kind:'vib_pump'},
-    {key:'elec', title:'⚡ Electrical',     sub:[{id:'cur',label:'Current — U/V/W',fields:['cu','cv','cw']},{id:'vol',label:'Voltage — U/V/W',fields:['vu','vv','vw']}],kind:'elec'}
+    {key:'motor',title:'🌀 Motor Vibration',sub:[{id:'mde',label:'DE'},{id:'mnde',label:'NDE'}]},
+    {key:'pump', title:'🌀 Pump Vibration', sub:[{id:'pde',label:'DE'},{id:'pnde',label:'NDE'}]},
+    {key:'elec', title:'⚡ Electrical',     sub:[{id:'cur',label:'Current'},{id:'vol',label:'Voltage'}]}
   ];
 
   sections.forEach(sec=>{
     const sc=document.createElement('div');sc.className='card trend-section';
+    sc.dataset.section=sec.key;
+    // Hide on screen if not active (but visible on print via CSS)
+    if(S._trActive!==sec.key)sc.classList.add('trend-hidden');
     sc.innerHTML='<div class="st" style="margin-bottom:14px">'+sec.title+'</div>';
-    // For each tag, render a sub-card with both DE/NDE charts side by side
     S._trTags.forEach((tag,ti)=>{
       const eqCard=document.createElement('div');
       eqCard.style.cssText='margin-bottom:18px;padding:12px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border)';
       const eq=S.eq.find(e=>e.tag===tag);
       eqCard.innerHTML='<div style="font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+trColor(ti)+'"></span>'+tag+' <span style="color:var(--text3);font-weight:400;font-size:11px">— '+(eq?.module||eq?.mod||'')+'</span></div>';
-      // 2 charts side by side
       const grid=document.createElement('div');grid.className='g2';grid.style.gap='14px';
       sec.sub.forEach(s=>{
         const cw=document.createElement('div');cw.className='cw';cw.style.height='220px';
@@ -1201,7 +1211,6 @@ function pgTrend(el){
     el.appendChild(sc);
   });
 
-  // Draw all charts
   setTimeout(()=>drTr(),50);
 }
 
