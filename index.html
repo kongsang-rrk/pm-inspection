@@ -125,10 +125,16 @@
 .dl{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)}
 .dl-l{color:var(--text3);font-size:12px}.dl-v{font-family:var(--mono);font-size:13px;text-align:right}
 .sec-h{font-size:11px;font-weight:600;color:var(--accent);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.05em}
-.trend-hidden{position:absolute;left:-99999px;top:0;width:1200px;visibility:hidden;pointer-events:none}.printing-record .content,.printing-record .sidebar,.printing-record .topbar{display:none!important}
-.printing-record .mo{position:fixed!important;inset:0!important;z-index:9999!important;background:#fff!important;overflow:auto!important;display:flex!important;align-items:flex-start!important;justify-content:center!important}
-.printing-record .modal{max-height:none!important;width:100%!important;max-width:900px!important;border:none!important;box-shadow:none!important;border-radius:0!important;margin:0!important}
+.trend-hidden{position:absolute;left:-99999px;top:0;width:1200px;visibility:hidden;pointer-events:none}.printing-record{overflow:visible!important}
+.printing-record .sidebar,.printing-record .topbar,.printing-record .content,.printing-record .main,.printing-record .app,.printing-record .toast-c{display:none!important}
+.printing-record .mo{position:static!important;display:block!important;background:#fff!important;width:100%!important;height:auto!important;overflow:visible!important;padding:0!important;align-items:flex-start!important}
+.printing-record .modal{max-height:none!important;height:auto!important;width:100%!important;max-width:100%!important;border:none!important;box-shadow:none!important;border-radius:0!important;margin:0!important;overflow:visible!important;display:block!important}
+.printing-record .mb{max-height:none!important;height:auto!important;overflow:visible!important;padding:12px!important}
+.printing-record .mh{position:static!important;background:#fff!important;border-bottom:1px solid #333!important}
 .printing-record .mh button{display:none!important}
+.printing-record .dl{color:#000!important;border-color:#ddd!important}
+.printing-record .sec-h{color:#1a5fb4!important;page-break-after:avoid!important}
+@media print{.printing-record{overflow:visible!important}.printing-record canvas{max-height:180px!important}.printing-record .card{box-shadow:none!important}}
 @media print{.trend-hidden{position:static!important;left:auto!important;visibility:visible!important;width:auto!important;display:block!important}.sidebar,.topbar,.toast-c,.mf,.mh button,.mh .mc-btn,.btn,.ss-drop,.itab,#tr-chips,#trt-wrap,.sh button{display:none!important}@page{size:A4 landscape;margin:12mm}
 .trend-section{display:block!important;width:100%!important;page-break-before:always;padding:0!important;background:none!important;border:none!important;box-shadow:none!important}
 .trend-section>.st{font-size:15px!important;font-weight:700!important;margin-bottom:8px!important;padding:6px 0!important;border-bottom:2px solid #333!important;color:#000!important}
@@ -199,7 +205,7 @@
 <!-- Equipment Modal -->
 <div class="mo" id="meq"><div class="modal" style="width:650px"><div class="mh"><div style="font-size:15px;font-weight:600" id="meqt">Add Equipment</div><button class="mc-btn" onclick="cm('meq')">✕</button></div>
 <div class="mb"><div class="g2" style="gap:12px;margin-bottom:12px">
-<div class="fg"><label class="fl">Tag No.*</label><input class="fi" id="eq-tag" placeholder="P-201X"></div>
+<input type="hidden" id="eq-edit-mode" value="0"><div class="fg"><label class="fl">Tag No.*</label><input class="fi" id="eq-tag" placeholder="P-201X"></div>
 <div class="fg"><label class="fl">Module for</label><input class="fi" id="eq-module" placeholder="CF Export P201X"></div>
 <div class="fg"><label class="fl">Manufacturer</label><input class="fi" id="eq-mfg" placeholder="Reliance"></div>
 <div class="fg"><label class="fl">Serial No.</label><input class="fi" id="eq-sn" placeholder="1MAZJ9073 G00X"></div>
@@ -1121,7 +1127,22 @@ setTimeout(()=>{
   if(E('dv-mini'))new Chart(E('dv-mini'),{type:'bar',data:{labels:vLabels,datasets:[{data:vData,backgroundColor:vColors,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},title:{display:true,text:'Vibration (mm/s)',color:'#8b949e',font:{size:10}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:9}}},x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:8},maxRotation:45}}}}});
   if(E('de-mini'))new Chart(E('de-mini'),{type:'bar',data:{labels:['Cu','Cv','Cw','Vu','Vv','Vw'],datasets:[{data:[el2.cu||0,el2.cv||0,el2.cw||0,el2.vu||0,el2.vv||0,el2.vw||0],backgroundColor:['rgba(63,185,80,.7)','rgba(63,185,80,.5)','rgba(63,185,80,.3)','rgba(188,140,255,.7)','rgba(188,140,255,.5)','rgba(188,140,255,.3)'],borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},title:{display:true,text:'Current & Voltage',color:'#8b949e',font:{size:10}}},scales:{y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:9}}},x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:9}}}}}});
 },100);}
-function exportPDF(){document.body.classList.add("printing-record");window.print();setTimeout(()=>document.body.classList.remove("printing-record"),1500);}
+function exportPDF(){
+  // Mark for print and ensure modal scrolls fully
+  document.body.classList.add('printing-record');
+  const modal=document.querySelector('.mo.show .modal')||document.querySelector('#mdet .modal');
+  const mb=document.querySelector('#mdetb');
+  if(mb){mb.style.maxHeight='none';mb.style.overflow='visible';}
+  if(modal){modal.style.maxHeight='none';modal.style.height='auto';modal.style.overflow='visible';}
+  setTimeout(()=>{
+    window.print();
+    setTimeout(()=>{
+      document.body.classList.remove('printing-record');
+      if(mb){mb.style.maxHeight='';mb.style.overflow='';}
+      if(modal){modal.style.maxHeight='';modal.style.height='';modal.style.overflow='';}
+    },1500);
+  },200);
+}
 
 
 // ══════════ ALARM LOG PAGE — Feature 7 ══════════
@@ -1347,25 +1368,50 @@ function printTrend(){
 }
 
 // ══════════ EQUIPMENT ══════════
-function pgEq(el){el.innerHTML='';const hd=document.createElement('div');hd.className='sh';hd.style.marginBottom='16px';hd.innerHTML='<div class="st">Equipment ('+S.eq.length+')</div>';
-  // Search + Add row
-  const searchRow=document.createElement('div');searchRow.style.cssText='display:flex;gap:8px;margin-bottom:12px;align-items:center';
-  const si=document.createElement('input');si.className='fi';si.placeholder='🔍 ค้นหา Tag หรือ Module...';si.style.flex='1';
-  si.oninput=()=>renderEqList(si.value.toLowerCase());
-  searchRow.appendChild(si);
-  if(canEdit()){const ab=document.createElement('button');ab.className='btn btn-p';ab.textContent='+ Add';ab.onclick=addEq;searchRow.appendChild(ab);}
-  hd.appendChild(searchRow);el.appendChild(hd);
-S.eq.forEach(eq=>{const rs=S.rec.filter(r=>r.tag===eq.tag),la=[...rs].sort((a,b)=>b.date.localeCompare(a.date))[0];
-  const mv=la?maxMotorVib(la):0,pv=la?maxPumpVib(la):0;
-  const mAl=mv>=eqMAl(eq)||mv>=eqMDa(eq),pAl=pv>=eqPAl(eq)||pv>=eqPDa(eq);
-  const dc=!la?'d-x':mAl||pAl?'d-a':'d-g';
-  const d=document.createElement('div');d.className='eq-i';
-  d.innerHTML='<div class="eq-av">'+eq.tag.slice(-3)+'</div><div style="flex:1"><div style="font-size:14px;font-weight:600"><span class="dot '+dc+'" style="margin-right:7px"></span>'+eq.tag+'</div>'+
-  '<div style="font-size:11px;color:var(--text3);margin-top:2px">'+(eq.module||eq.mod||'')+' | '+(eq.type?eq.type+' | ':'')+(eq.power||eq.pwr||'')+' '+(eq.powerUnit||'HP')+'</div>'+
-  '<div style="font-size:11px;color:var(--text3);margin-top:2px">Motor Alarm: '+(eq.motorVibAlarm||'—')+' / '+(eq.motorVibDanger||'—')+' mm/s | Pump: '+(eq.pumpVibAlarm||'—')+' / '+(eq.pumpVibDanger||'—')+' mm/s</div>'+
-  '</div><div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="editEq(\''+eq.tag+'\')">Edit</button><button class="btn btn-sm btn-d" onclick="delEq(\''+eq.tag+'\')">Del</button></div>';el.appendChild(d);});}
-const eqFlds=['eq-tag','eq-module','eq-mfg','eq-sn','eq-power','eq-weight','eq-volts','eq-amps','eq-freq','eq-speed','eq-ins','eq-duty','eq-de','eq-nde','eq-loadtype','eq-location'];
-function addEq(){E('meqt').textContent='Add Equipment';eqFlds.forEach(id=>{if(E(id))E(id).value='';});E('eq-mval').value='4.5';E('eq-mvda').value='7.1';E('eq-pval').value='4.5';E('eq-pvda').value='7.1';E('eq-pwrU').value='kW';E('eq-wtU').value='lbs';document.querySelectorAll('#meq .unit-btn').forEach(b=>b.classList.remove('active'));document.querySelector('#meq .unit-btn')?.classList.add('active');om('meq');}
+function pgEq(el){
+  el.innerHTML='';
+  // Header card with search and add
+  const hdc=document.createElement('div');hdc.className='card';
+  const top=document.createElement('div');top.style.cssText='display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px';
+  const title=document.createElement('div');title.className='st';title.id='eq-title';title.textContent='Equipment ('+S.eq.length+')';
+  top.appendChild(title);
+  if(canEdit()){
+    const ab=document.createElement('button');ab.className='btn btn-p';ab.textContent='+ Add';ab.onclick=addEq;
+    top.appendChild(ab);
+  }
+  hdc.appendChild(top);
+  // Search
+  const si=document.createElement('input');si.className='fi';si.placeholder='🔍 ค้นหา Tag, Module หรือ Type...';
+  si.oninput=()=>renderEqList(si.value.toLowerCase().trim());
+  hdc.appendChild(si);
+  el.appendChild(hdc);
+  // List container
+  const list=document.createElement('div');list.id='eq-list-c';
+  el.appendChild(list);
+
+  function renderEqList(q){
+    list.innerHTML='';
+    const filtered=q?S.eq.filter(e=>(e.tag||'').toLowerCase().includes(q)||(e.module||e.mod||'').toLowerCase().includes(q)||(e.type||'').toLowerCase().includes(q)):S.eq;
+    E('eq-title').textContent='Equipment ('+filtered.length+(q?'/'+S.eq.length:'')+')';
+    if(!filtered.length){list.innerHTML='<div class="card" style="text-align:center;padding:30px;color:var(--text3)">ไม่พบอุปกรณ์</div>';return;}
+    filtered.forEach(eq=>{
+      const rs=S.rec.filter(r=>r.tag===eq.tag),la=[...rs].sort((a,b)=>b.date.localeCompare(a.date))[0];
+      const mv=la?maxMotorVib(la):0,pv=la?maxPumpVib(la):0;
+      const mAl=mv>=eqMAl(eq)||mv>=eqMDa(eq),pAl=pv>=eqPAl(eq)||pv>=eqPDa(eq);
+      const dc=!la?'d-x':mAl||pAl?'d-a':'d-g';
+      const d=document.createElement('div');d.className='eq-i';
+      d.innerHTML='<span class="dot '+dc+'" style="flex-shrink:0"></span>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-weight:600">'+eq.tag+'</div>'+
+          '<div style="font-size:11px;color:var(--text3);margin-top:2px">'+(eq.module||eq.mod||'')+' | '+(eq.type?eq.type+' | ':'')+(eq.power||eq.pwr||'')+' '+(eq.powerUnit||'HP')+'</div>'+
+        '</div>'+
+        (canEdit()?'<div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="editEq(\''+eq.tag+'\')">Edit</button>'+(isAdmin()?'<button class="btn btn-sm btn-d" onclick="delEq(\''+eq.tag+'\')">Del</button>':'')+'</div>':'');
+      list.appendChild(d);
+    });
+  }
+  renderEqList('');
+}
+
 function editEq(t){const eq=S.eq.find(e=>e.tag===t);if(!eq)return;E('meqt').textContent='Edit — '+t;
 const m={tag:'eq-tag',module:'eq-module',mfg:'eq-mfg',sn:'eq-sn',type:'eq-type',power:'eq-power',weight:'eq-weight',volts:'eq-volts',amps:'eq-amps',pf:'eq-pf',freq:'eq-freq',speed:'eq-speed',ins:'eq-ins',duty:'eq-duty',de:'eq-de',nde:'eq-nde',loadtype:'eq-loadtype',location:'eq-location'};
 Object.entries(m).forEach(([k,id])=>{if(E(id))E(id).value=eq[k]||'';});
@@ -1373,7 +1419,7 @@ E('eq-mval').value=eq.motorVibAlarm||eq.vibAlarm||4.5;E('eq-mvda').value=eq.moto
 E('eq-pval').value=eq.pumpVibAlarm||eq.vibAlarm||4.5;E('eq-pvda').value=eq.pumpVibDanger||eq.vibDanger||7.1;
 const pu=eq.powerUnit||'HP';E('eq-pwrU').value=pu;document.querySelectorAll('#meq .unit-grp')[0]?.querySelectorAll('.unit-btn').forEach(b=>b.classList.toggle('active',b.textContent===pu));
 const wu=eq.weightUnit||'lbs';E('eq-wtU').value=wu;document.querySelectorAll('#meq .unit-grp')[1]?.querySelectorAll('.unit-btn').forEach(b=>b.classList.toggle('active',b.textContent===wu));
-om('meq');}
+if(E('eq-edit-mode'))E('eq-edit-mode').value='1';om('meq');}
 async function saveEq(){if(!canEdit()){toast('ไม่มีสิทธิ์แก้ไข (Viewer)','error');return;}const t=E('eq-tag').value.trim();if(!t){toast('Tag required','error');return;}const isEdit=E('eq-edit-mode')?.value==='1';if(!isEdit&&S.eq.find(e=>e.tag===t)){toast('Tag '+t+' มีอยู่แล้ว! ไม่สามารถ Add ซ้ำได้','error');return;}
 const o={tag:t,module:E('eq-module').value,mfg:E('eq-mfg').value,sn:E('eq-sn').value,type:E('eq-type')?.value||'',power:E('eq-power').value,powerUnit:E('eq-pwrU').value,weight:E('eq-weight').value,weightUnit:E('eq-wtU').value,volts:E('eq-volts').value,amps:E('eq-amps').value,pf:E('eq-pf')?.value||'',freq:E('eq-freq').value,speed:E('eq-speed').value,ins:E('eq-ins').value,duty:E('eq-duty').value,de:E('eq-de').value,nde:E('eq-nde').value,loadtype:E('eq-loadtype').value,location:E('eq-location').value,
 motorVibAlarm:parseFloat(E('eq-mval').value)||4.5,motorVibDanger:parseFloat(E('eq-mvda').value)||7.1,pumpVibAlarm:parseFloat(E('eq-pval').value)||4.5,pumpVibDanger:parseFloat(E('eq-pvda').value)||7.1};
@@ -1515,7 +1561,7 @@ async function importXlsxFile(file){
     reader.onload=async(e)=>{
       try{
         const data=new Uint8Array(e.target.result);
-        const wb=XLSX.read(data,{type:'array',cellDates:true});
+        const wb=XLSX.read(data,{type:'array',cellDates:false});
         // Find sheet that has Tag at D9 (some files have multiple sheets)
         let ws=null;
         for(const sn of wb.SheetNames){
@@ -1533,14 +1579,16 @@ async function importXlsxFile(file){
         const datecell=ws['AC2'];
         if(datecell){
           const dv=datecell.v;
-          if(dv instanceof Date){
-            // Always use UTC parts — Excel dates have no timezone
-            const yr=dv.getUTCFullYear(),mo=String(dv.getUTCMonth()+1).padStart(2,'0'),dy=String(dv.getUTCDate()).padStart(2,'0');
-            date=yr+'-'+mo+'-'+dy;
-          }else if(typeof dv==='number'){
-            // Excel serial date — pure UTC conversion
-            const d=new Date(Math.round((dv-25569)*86400*1000));
+          if(typeof dv==='number'){
+            // Excel serial date — days since 1900-01-01 (with leap year bug)
+            // Excel epoch: serial 1 = 1900-01-01, but Excel thinks 1900 was leap year so subtract 25569 to get unix epoch
+            const ms=Math.round((dv-25569)*86400*1000);
+            const d=new Date(ms);
             const yr=d.getUTCFullYear(),mo=String(d.getUTCMonth()+1).padStart(2,'0'),dy=String(d.getUTCDate()).padStart(2,'0');
+            date=yr+'-'+mo+'-'+dy;
+          }else if(dv instanceof Date){
+            // Date object — pull UTC parts (Excel cells have no timezone)
+            const yr=dv.getUTCFullYear(),mo=String(dv.getUTCMonth()+1).padStart(2,'0'),dy=String(dv.getUTCDate()).padStart(2,'0');
             date=yr+'-'+mo+'-'+dy;
           }else{
             // String format — parse directly
@@ -1607,7 +1655,7 @@ async function importXlsxFile(file){
         const eqExists=S.eq.find(e=>e.tag===tag);
         if(!eqExists){
           const eqData={tag,module:g('E8'),mfg:g('D10'),sn:g('D12'),type:g('D11'),
-            power:g('N8').replace(/[^0-9.]/g,''),powerUnit:g('N8').includes('kW')?'kW':'HP',
+            power:g('N8').replace(/[^0-9.]/g,''),powerUnit:(g('U8')||'HP').trim(),weight:g('Z8').replace(/[^0-9.]/g,''),weightUnit:(g('AD8')||'kg').trim().toLowerCase(),
             volts:g('N9'),amps:g('N10').replace(/[^0-9.]/g,''),
             freq:g('N11'),speed:g('N12'),
             de:g('AD10').replace('DE:','').trim(),
