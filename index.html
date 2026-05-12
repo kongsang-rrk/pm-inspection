@@ -124,7 +124,7 @@
 .dl{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)}
 .dl-l{color:var(--text3);font-size:12px}.dl-v{font-family:var(--mono);font-size:13px;text-align:right}
 .sec-h{font-size:11px;font-weight:600;color:var(--accent);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.05em}
-@media print{.sidebar,.topbar,.toast-c,.mf,.mh button,.mh .mc-btn,.btn,.ss-drop{display:none!important}.mo{position:static!important;background:none!important}.modal{max-height:none!important;width:100%!important;border:none!important;box-shadow:none!important;border-radius:0!important}.mb{padding:0!important}body{background:#fff!important;color:#000!important}*{color:#000!important;border-color:#ccc!important}.badge{border:1px solid #999!important}.dl{border-color:#ddd!important}.sec-h{color:#1a5fb4!important}.content{overflow:visible!important;height:auto!important}.main{overflow:visible!important}.app{display:block!important;height:auto!important;overflow:visible!important}.card{break-inside:avoid;border:1px solid #ddd!important}.mc{border:1px solid #ddd!important}.metric-row{grid-template-columns:repeat(4,1fr)!important}.g2{grid-template-columns:1fr 1fr!important}canvas{max-height:200px!important}}
+@media print{.sidebar,.topbar,.toast-c,.mf,.mh button,.mh .mc-btn,.btn,.ss-drop,.itab,#tr-chips,#trt-wrap,.sh button{display:none!important}.trend-section{page-break-inside:avoid;page-break-after:auto}.mo{position:static!important;background:none!important}.modal{max-height:none!important;width:100%!important;border:none!important;box-shadow:none!important;border-radius:0!important}.mb{padding:0!important}body{background:#fff!important;color:#000!important}*{color:#000!important;border-color:#ccc!important}.badge{border:1px solid #999!important}.dl{border-color:#ddd!important}.sec-h{color:#1a5fb4!important}.content{overflow:visible!important;height:auto!important}.main{overflow:visible!important}.app{display:block!important;height:auto!important;overflow:visible!important}.card{break-inside:avoid;border:1px solid #ddd!important}.mc{border:1px solid #ddd!important}.metric-row{grid-template-columns:repeat(4,1fr)!important}.g2{grid-template-columns:1fr 1fr!important}canvas{max-height:200px!important}}
 
 /* Role-based UI */
 .viewer-hide{display:none!important}
@@ -1139,52 +1139,82 @@ function pgTrend(el){
   const opts=S.eq.map(e=>({value:e.tag,label:e.tag+' — '+(e.module||e.mod||'')}));
   if(!S._trTags)S._trTags=S.eq[0]?[S.eq[0].tag]:[];
   el.innerHTML='';
+  // ── Header card ──
   const card=document.createElement('div');card.className='card';
-  // Header
   const hd=document.createElement('div');hd.className='sh';
-  hd.innerHTML='<div class="st">Trend Analysis <span style="font-size:11px;color:var(--text3);font-weight:400">— เปรียบเทียบหลาย Tag</span></div>'+
-    '<button class="btn btn-sm" onclick="printTrend()">🖨 Export PDF</button>';
+  hd.innerHTML='<div class="st">Trend Analysis <span style="font-size:11px;color:var(--text3);font-weight:400">— เลือก Tag เพื่อดูกราฟ</span></div>'+
+    '<button class="btn btn-sm" onclick="printTrend()">🖨 Export PDF (ทั้งหมด)</button>';
   card.appendChild(hd);
-  // Tag selector area
+  // Tag selector
   const selWrap=document.createElement('div');
-  selWrap.style.cssText='display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:14px 0;padding:12px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border)';
-  selWrap.innerHTML='<div style="font-size:12px;font-weight:600;color:var(--text3);width:100%;margin-bottom:4px">เปรียบเทียบ Equipment (สูงสุด 5 ตัว):</div>';
-  // Render chips for current tags
-  const chipsBox=document.createElement('div');chipsBox.id='tr-chips';chipsBox.style.cssText='display:flex;gap:6px;flex-wrap:wrap;align-items:center';
+  selWrap.style.cssText='display:flex;flex-direction:column;gap:10px;margin:14px 0 0;padding:12px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border)';
+  selWrap.innerHTML='<div style="font-size:12px;font-weight:600;color:var(--text3)">เลือก Equipment (สูงสุด 5 ตัว):</div>';
+  const chipsBox=document.createElement('div');chipsBox.id='tr-chips';chipsBox.style.cssText='display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-height:30px';
   renderTrChips(chipsBox);
   selWrap.appendChild(chipsBox);
-  // Add tag dropdown
-  const addWrap=document.createElement('div');addWrap.style.cssText='display:flex;gap:6px;align-items:center;margin-top:10px;width:100%';
-  const ssWrap=document.createElement('div');ssWrap.style.width='280px';ssWrap.id='trt-wrap';
+  const addWrap=document.createElement('div');addWrap.style.cssText='display:flex;gap:6px;align-items:center';
+  const ssWrap=document.createElement('div');ssWrap.style.width='320px';ssWrap.id='trt-wrap';
   const availOpts=opts.filter(o=>!S._trTags.includes(o.value));
-  if(availOpts.length){
+  if(availOpts.length&&S._trTags.length<5){
     const ss=mkSS('trt',availOpts,'+ เพิ่ม Equipment...',(v)=>{if(v&&!S._trTags.includes(v)&&S._trTags.length<5){S._trTags.push(v);pgTrend(el);}});
     ssWrap.appendChild(ss);
-  }else{ssWrap.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px">เพิ่มครบแล้ว</div>';}
+  }else{ssWrap.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px">'+(S._trTags.length>=5?'ครบ 5 ตัวแล้ว':'เพิ่มครบหมดแล้ว')+'</div>';}
   addWrap.appendChild(ssWrap);
   selWrap.appendChild(addWrap);
   card.appendChild(selWrap);
-  // Tabs
-  const tabs=document.createElement('div');tabs.className='itab';
-  tabs.innerHTML='<div class="it active" onclick="trT(0,this)">Motor Vib</div><div class="it" onclick="trT(1,this)">Pump Vib</div><div class="it" onclick="trT(2,this)">Electrical</div>';
-  card.appendChild(tabs);
-  // Chart panels
-  card.insertAdjacentHTML('beforeend',
-    '<div id="trp0"><div class="g2" style="gap:16px"><div class="cw" style="height:280px"><canvas id="tc-mde"></canvas></div><div class="cw" style="height:280px"><canvas id="tc-mnde"></canvas></div></div></div>'+
-    '<div id="trp1" style="display:none"><div class="g2" style="gap:16px"><div class="cw" style="height:280px"><canvas id="tc-pde"></canvas></div><div class="cw" style="height:280px"><canvas id="tc-pnde"></canvas></div></div></div>'+
-    '<div id="trp2" style="display:none"><div class="g2" style="gap:16px"><div class="cw" style="height:240px"><canvas id="tc-cur"></canvas></div><div class="cw" style="height:240px"><canvas id="tc-vol"></canvas></div></div></div>');
   el.appendChild(card);
-  drTr();
+
+  if(!S._trTags.length){
+    const empty=document.createElement('div');empty.className='card';empty.style.cssText='text-align:center;padding:40px;color:var(--text3)';
+    empty.textContent='เลือก Equipment ก่อนเพื่อดูกราฟ';
+    el.appendChild(empty);
+    return;
+  }
+
+  // ── 3 Sections: Motor Vib, Pump Vib, Electrical ──
+  // For each section, create a card with sub-grids of charts per equipment
+  const sections=[
+    {key:'motor',title:'🌀 Motor Vibration',sub:[{id:'mde',label:'DE — V/H/A',fields:['mDV','mDH','mDA']},{id:'mnde',label:'NDE — V/H/A',fields:['mNV','mNH','mNA']}],kind:'vib_motor'},
+    {key:'pump', title:'🌀 Pump Vibration', sub:[{id:'pde',label:'DE — V/H/A',fields:['pDV','pDH','pDA']},{id:'pnde',label:'NDE — V/H/A',fields:['pNV','pNH','pNA']}],kind:'vib_pump'},
+    {key:'elec', title:'⚡ Electrical',     sub:[{id:'cur',label:'Current — U/V/W',fields:['cu','cv','cw']},{id:'vol',label:'Voltage — U/V/W',fields:['vu','vv','vw']}],kind:'elec'}
+  ];
+
+  sections.forEach(sec=>{
+    const sc=document.createElement('div');sc.className='card trend-section';
+    sc.innerHTML='<div class="st" style="margin-bottom:14px">'+sec.title+'</div>';
+    // For each tag, render a sub-card with both DE/NDE charts side by side
+    S._trTags.forEach((tag,ti)=>{
+      const eqCard=document.createElement('div');
+      eqCard.style.cssText='margin-bottom:18px;padding:12px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border)';
+      const eq=S.eq.find(e=>e.tag===tag);
+      eqCard.innerHTML='<div style="font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+trColor(ti)+'"></span>'+tag+' <span style="color:var(--text3);font-weight:400;font-size:11px">— '+(eq?.module||eq?.mod||'')+'</span></div>';
+      // 2 charts side by side
+      const grid=document.createElement('div');grid.className='g2';grid.style.gap='14px';
+      sec.sub.forEach(s=>{
+        const cw=document.createElement('div');cw.className='cw';cw.style.height='220px';
+        const cv=document.createElement('canvas');cv.id='tr-'+sec.key+'-'+ti+'-'+s.id;
+        cw.appendChild(cv);grid.appendChild(cw);
+      });
+      eqCard.appendChild(grid);
+      sc.appendChild(eqCard);
+    });
+    el.appendChild(sc);
+  });
+
+  // Draw all charts
+  setTimeout(()=>drTr(),50);
 }
+
+function trColor(i){return ['#58a6ff','#3fb950','#d29922','#bc8cff','#f85149'][i%5];}
 
 function renderTrChips(box){
   box.innerHTML='';
   if(!S._trTags.length){box.innerHTML='<div style="font-size:12px;color:var(--text3)">ยังไม่ได้เลือก</div>';return;}
-  const colors=['#58a6ff','#3fb950','#d29922','#bc8cff','#f85149'];
   S._trTags.forEach((tag,i)=>{
+    const col=trColor(i);
     const chip=document.createElement('span');
-    chip.style.cssText='display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:14px;font-size:12px;background:'+colors[i]+'22;border:1px solid '+colors[i]+'55;color:'+colors[i];
-    chip.innerHTML='<b style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+colors[i]+'"></b>'+tag;
+    chip.style.cssText='display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:14px;font-size:12px;background:'+col+'22;border:1px solid '+col+'55;color:'+col+';font-weight:600';
+    chip.innerHTML='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+col+'"></span>'+tag;
     const x=document.createElement('span');x.textContent='✕';x.style.cssText='cursor:pointer;margin-left:4px;font-weight:700;opacity:.7';
     x.onclick=()=>{S._trTags=S._trTags.filter(t=>t!==tag);pgTrend(E('content'));};
     chip.appendChild(x);
@@ -1192,99 +1222,60 @@ function renderTrChips(box){
   });
 }
 
-function trT(n,btn){
-  document.querySelectorAll('.it').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  [0,1,2].forEach(i=>E('trp'+i).style.display=i===n?'':'none');
-  drTr();
-}
-
 function drTr(){
   const tags=S._trTags||[];
   if(!tags.length)return;
-  // Collect all unique dates across selected tags
-  const allDates=new Set();
-  tags.forEach(t=>S.rec.filter(r=>r.tag===t).forEach(r=>allDates.add(r.date)));
-  const lb=[...allDates].sort();
-  // Reference eq for alarm lines (use first tag)
-  const eq0=S.eq.find(e=>e.tag===tags[0]);
-  const mAl=eqMAl(eq0),mDa=eqMDa(eq0),pAl=eqPAl(eq0),pDa=eqPDa(eq0);
-  const colors=['#58a6ff','#3fb950','#d29922','#bc8cff','#f85149'];
-  // Build datasets per equipment for a given field
-  const buildDs=(fieldGetter)=>tags.map((t,i)=>{
-    const tagRecs=S.rec.filter(r=>r.tag===t);
-    return {
-      label:t,
-      data:lb.map(d=>{const r=tagRecs.find(x=>x.date===d);return r?fieldGetter(r):null;}),
-      borderColor:colors[i],backgroundColor:colors[i]+'22',
-      pointRadius:4,tension:.3,borderWidth:2,spanGaps:true
-    };
-  });
-  const co=()=>({responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:10}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}}});
-  tc.forEach(c=>c.destroy());tc=[];
-  const mk=(id,title,getter,alv,dav)=>{
-    if(!E(id))return;
-    const ds=buildDs(getter);
-    const extra=[];
-    if(alv)extra.push({label:'Alarm',data:lb.map(()=>alv),borderColor:'rgba(210,153,34,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5});
-    if(dav)extra.push({label:'Danger',data:lb.map(()=>dav),borderColor:'rgba(248,81,73,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5});
-    const c=new Chart(E(id),{type:'line',data:{labels:lb,datasets:[...ds,...extra]},options:{...co(),plugins:{...co().plugins,title:{display:true,text:title,color:'#8b949e',font:{size:12,weight:'600'}}}}});
-    tc.push(c);
-  };
-  // Vibration: show all 3 axes (V/H/A) per equipment. Each tag gets a color, each axis a line style
-  const dashStyles=[[],[6,4],[2,3]]; // solid=V, dashed=H, dotted=A
+  tc.forEach(c=>{try{c.destroy();}catch(e){}});tc=[];
   const axisLabels=['V','H','A'];
-  const mkVib=(id,title,vibFields,al,da)=>{
-    if(!E(id))return;
-    const ds=[];
-    tags.forEach((t,ti)=>{
-      const recs=S.rec.filter(r=>r.tag===t);
-      vibFields.forEach((fk,ai)=>{
-        ds.push({
-          label:t+' — '+axisLabels[ai],
-          data:lb.map(d=>{const r=recs.find(x=>x.date===d);return r?parseFloat(V(r,fk))||parseFloat(r.vib?.[fk])||null:null;}),
-          borderColor:colors[ti],borderDash:dashStyles[ai],
-          pointRadius:3,tension:.3,borderWidth:2,spanGaps:true
-        });
-      });
-    });
-    if(al)ds.push({label:'Alarm',data:lb.map(()=>al),borderColor:'rgba(210,153,34,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5});
-    if(da)ds.push({label:'Danger',data:lb.map(()=>da),borderColor:'rgba(248,81,73,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5});
-    const c=new Chart(E(id),{type:'line',data:{labels:lb,datasets:ds},options:{...co(),plugins:{...co().plugins,title:{display:true,text:title,color:'#8b949e',font:{size:12,weight:'600'}}}}});
-    tc.push(c);
-  };
-  mkVib('tc-mde','Motor DE — V/H/A (mm/s)',['mDV','mDH','mDA'],mAl,mDa);
-  mkVib('tc-mnde','Motor NDE — V/H/A (mm/s)',['mNV','mNH','mNA'],mAl,mDa);
-  mkVib('tc-pde','Pump DE — V/H/A (mm/s)',['pDV','pDH','pDA'],pAl,pDa);
-  mkVib('tc-pnde','Pump NDE — V/H/A (mm/s)',['pNV','pNH','pNA'],pAl,pDa);
-  // Electrical: show U/V/W phases per equipment
-  const co2=()=>({responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:10}}},scales:{y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}}});
-  const gc=(r,k)=>parseFloat((r.el||r.elec||{})[k])||0;
   const phaseLabels=['U','V','W'];
-  const mkElec=(id,title,fields,beginZero)=>{
-    if(!E(id))return;
-    const ds=[];
-    tags.forEach((t,ti)=>{
-      const recs=S.rec.filter(r=>r.tag===t);
-      fields.forEach((fk,pi)=>{
-        ds.push({
-          label:t+' — '+phaseLabels[pi],
-          data:lb.map(d=>{const r=recs.find(x=>x.date===d);return r?gc(r,fk):null;}),
-          borderColor:colors[ti],borderDash:dashStyles[pi],
-          pointRadius:3,tension:.3,borderWidth:2,spanGaps:true
-        });
-      });
+  const axColors=['#58a6ff','#d29922','#3fb950']; // V=blue, H=amber, A=green
+  const phColors=['#3fb950','#d29922','#f85149']; // U=green, V=amber, W=red
+  const co=(title,beginZero=true)=>({responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:9},boxWidth:8}},title:{display:true,text:title,color:'#8b949e',font:{size:11,weight:'600'}}},scales:{y:{beginAtZero:beginZero,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:9}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:9},maxRotation:40}}}});
+
+  tags.forEach((tag,ti)=>{
+    const recs=[...S.rec.filter(r=>r.tag===tag)].sort((a,b)=>a.date.localeCompare(b.date));
+    const lb=recs.map(r=>r.date);
+    const eq=S.eq.find(e=>e.tag===tag);
+    const mAl=eqMAl(eq),mDa=eqMDa(eq),pAl=eqPAl(eq),pDa=eqPDa(eq);
+
+    // Motor DE / NDE
+    [{key:'mde',label:'Motor DE',fields:['mDV','mDH','mDA'],al:mAl,da:mDa},
+     {key:'mnde',label:'Motor NDE',fields:['mNV','mNH','mNA'],al:mAl,da:mDa}].forEach(s=>{
+      const id='tr-motor-'+ti+'-'+s.key;
+      if(!E(id))return;
+      const ds=s.fields.map((fk,ai)=>({label:axisLabels[ai],data:recs.map(r=>parseFloat(V(r,fk))||parseFloat(r.vib?.[fk])||0),borderColor:axColors[ai],pointRadius:3,tension:.3,borderWidth:2}));
+      if(s.al)ds.push({label:'Alarm',data:recs.map(()=>s.al),borderColor:'rgba(210,153,34,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5});
+      if(s.da)ds.push({label:'Danger',data:recs.map(()=>s.da),borderColor:'rgba(248,81,73,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5});
+      tc.push(new Chart(E(id),{type:'line',data:{labels:lb,datasets:ds},options:co(s.label+' (mm/s)')}));
     });
-    const opts={...co2(),plugins:{...co2().plugins,title:{display:true,text:title,color:'#8b949e',font:{size:12,weight:'600'}}}};
-    if(!beginZero)opts.scales={y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}};
-    const c=new Chart(E(id),{type:'line',data:{labels:lb,datasets:ds},options:opts});
-    tc.push(c);
-  };
-  mkElec('tc-cur','Current — U/V/W (A)',['cu','cv','cw'],true);
-  mkElec('tc-vol','Voltage — U/V/W (V)',['vu','vv','vw'],false);
+
+    // Pump DE / NDE
+    [{key:'pde',label:'Pump DE',fields:['pDV','pDH','pDA'],al:pAl,da:pDa},
+     {key:'pnde',label:'Pump NDE',fields:['pNV','pNH','pNA'],al:pAl,da:pDa}].forEach(s=>{
+      const id='tr-pump-'+ti+'-'+s.key;
+      if(!E(id))return;
+      const ds=s.fields.map((fk,ai)=>({label:axisLabels[ai],data:recs.map(r=>parseFloat(V(r,fk))||parseFloat(r.vib?.[fk])||0),borderColor:axColors[ai],pointRadius:3,tension:.3,borderWidth:2}));
+      if(s.al)ds.push({label:'Alarm',data:recs.map(()=>s.al),borderColor:'rgba(210,153,34,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5});
+      if(s.da)ds.push({label:'Danger',data:recs.map(()=>s.da),borderColor:'rgba(248,81,73,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5});
+      tc.push(new Chart(E(id),{type:'line',data:{labels:lb,datasets:ds},options:co(s.label+' (mm/s)')}));
+    });
+
+    // Electrical: Current and Voltage
+    const gc=(r,k)=>parseFloat((r.el||r.elec||{})[k])||0;
+    [{key:'cur',label:'Current',fields:['cu','cv','cw'],zero:true},
+     {key:'vol',label:'Voltage',fields:['vu','vv','vw'],zero:false}].forEach(s=>{
+      const id='tr-elec-'+ti+'-'+s.key;
+      if(!E(id))return;
+      const ds=s.fields.map((fk,pi)=>({label:phaseLabels[pi],data:recs.map(r=>gc(r,fk)),borderColor:phColors[pi],pointRadius:3,tension:.3,borderWidth:2}));
+      tc.push(new Chart(E(id),{type:'line',data:{labels:lb,datasets:ds},options:co(s.label+' ('+(s.key==='cur'?'A':'V')+')',s.zero)}));
+    });
+  });
 }
 
-function printTrend(){window.print();}
+function printTrend(){
+  // Add a print-friendly class so all sections are visible (they already are)
+  window.print();
+}
 
 // ══════════ EQUIPMENT ══════════
 function pgEq(el){el.innerHTML='';const hd=document.createElement('div');hd.className='sh';hd.style.marginBottom='16px';hd.innerHTML='<div class="st">Equipment ('+S.eq.length+')</div>'+(canEdit()?'<button class="btn btn-p" onclick="addEq()">+ Add</button>':'');el.appendChild(hd);
