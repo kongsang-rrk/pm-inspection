@@ -934,7 +934,7 @@ function pgHist(el){
   const opts=[{value:'',label:'All Equipment'},...S.eq.map(e=>({value:e.tag,label:e.tag}))];
   el.innerHTML='<div class="card"><div class="sh"><div class="st">PM Records ('+S.rec.length+')</div><div id="htag-wrap" style="width:180px"></div></div>'+
   '<div style="overflow-x:auto"><table class="ht"><thead><tr>'+
-  '<th>Date</th><th>WO</th><th>Tag</th><th>Brg DE</th>'+
+  '<th>Date</th><th>WO</th><th>Tag</th><th>Module</th><th>Brg DE</th>'+
   '<th title="Max vibration all positions">Motor Vib↑</th>'+
   '<th title="Max vibration all positions">Pump Vib↑</th>'+
   '<th>Severity</th><th></th></tr></thead><tbody id="htb"></tbody></table></div></div>';
@@ -951,12 +951,15 @@ rs.forEach(r=>{const eq=S.eq.find(e=>e.tag===r.tag);
     '<td class="mono">'+r.date+'</td>'+
     '<td class="mono" style="color:var(--text3)">'+(r.wo||'—')+'</td>'+
     '<td style="font-weight:600">'+r.tag+'</td>'+
+
+    '<td style="font-size:12px;color:var(--text3)">'+(eq?.module||eq?.mod||'—')+'</td>'+
+
     '<td style="font-size:12px;color:var(--text3)">'+(r.brg?.de||eq?.de||'—')+'</td>'+
     '<td><span class="mono">'+mv.toFixed(2)+'</span> <span class="badge '+(mDa?'b-nk':mAl?'b-al':'b-ok')+'">'+(mDa?'Danger':mAl?'Alarm':'OK')+'</span></td>'+
     '<td><span class="mono">'+pv.toFixed(2)+'</span> <span class="badge '+(pDa?'b-nk':pAl?'b-al':'b-ok')+'">'+(pDa?'Danger':pAl?'Alarm':'OK')+'</span></td>'+
     '<td style="font-size:11px;color:'+(S.sc[r.sev||r.severity]||'')+'">● '+(S.sl[r.sev||r.severity]||'—')+'</td>'+
     '<td><div style="display:flex;gap:4px"><button class="btn btn-sm btn-p" onclick="showD(\''+r.id+'\')">View</button>'+(canEdit()?'<button class="btn btn-sm" onclick="editRec(\''+r.id+'\')">✎ Edit</button>':'')+'<button class="btn btn-sm btn-d" onclick="delRec(\''+r.id+'\')">Del</button></div></td></tr>';});
-if(!rs.length)tb.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text3)">No records</td></tr>';}
+if(!rs.length)tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text3)">No records</td></tr>';}
 
 // ── Feature 3: Edit existing PM record ──
 function editRec(id){
