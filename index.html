@@ -1231,22 +1231,57 @@ function drTr(){
     const c=new Chart(E(id),{type:'line',data:{labels:lb,datasets:[...ds,...extra]},options:{...co(),plugins:{...co().plugins,title:{display:true,text:title,color:'#8b949e',font:{size:12,weight:'600'}}}}});
     tc.push(c);
   };
-  // Motor: use max (V/H/A) of DE / NDE separately
-  mk('tc-mde','Motor DE — Max Vibration (mm/s)',r=>Math.max(parseFloat(V(r,'mDV'))||0,parseFloat(V(r,'mDH'))||0,parseFloat(V(r,'mDA'))||0),mAl,mDa);
-  mk('tc-mnde','Motor NDE — Max Vibration (mm/s)',r=>Math.max(parseFloat(V(r,'mNV'))||0,parseFloat(V(r,'mNH'))||0,parseFloat(r.vib?.mNA)||0),mAl,mDa);
-  mk('tc-pde','Pump DE — Max Vibration (mm/s)',r=>Math.max(parseFloat(V(r,'pDV'))||0,parseFloat(V(r,'pDH'))||0,parseFloat(V(r,'pDA'))||0),pAl,pDa);
-  mk('tc-pnde','Pump NDE — Max Vibration (mm/s)',r=>Math.max(parseFloat(V(r,'pNV'))||0,parseFloat(V(r,'pNH'))||0,parseFloat(r.vib?.pNA)||0),pAl,pDa);
-  // Electrical: current and voltage U avg (or you can show U specifically)
+  // Vibration: show all 3 axes (V/H/A) per equipment. Each tag gets a color, each axis a line style
+  const dashStyles=[[],[6,4],[2,3]]; // solid=V, dashed=H, dotted=A
+  const axisLabels=['V','H','A'];
+  const mkVib=(id,title,vibFields,al,da)=>{
+    if(!E(id))return;
+    const ds=[];
+    tags.forEach((t,ti)=>{
+      const recs=S.rec.filter(r=>r.tag===t);
+      vibFields.forEach((fk,ai)=>{
+        ds.push({
+          label:t+' — '+axisLabels[ai],
+          data:lb.map(d=>{const r=recs.find(x=>x.date===d);return r?parseFloat(V(r,fk))||parseFloat(r.vib?.[fk])||null:null;}),
+          borderColor:colors[ti],borderDash:dashStyles[ai],
+          pointRadius:3,tension:.3,borderWidth:2,spanGaps:true
+        });
+      });
+    });
+    if(al)ds.push({label:'Alarm',data:lb.map(()=>al),borderColor:'rgba(210,153,34,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5});
+    if(da)ds.push({label:'Danger',data:lb.map(()=>da),borderColor:'rgba(248,81,73,.4)',borderDash:[6,4],pointRadius:0,borderWidth:1.5});
+    const c=new Chart(E(id),{type:'line',data:{labels:lb,datasets:ds},options:{...co(),plugins:{...co().plugins,title:{display:true,text:title,color:'#8b949e',font:{size:12,weight:'600'}}}}});
+    tc.push(c);
+  };
+  mkVib('tc-mde','Motor DE — V/H/A (mm/s)',['mDV','mDH','mDA'],mAl,mDa);
+  mkVib('tc-mnde','Motor NDE — V/H/A (mm/s)',['mNV','mNH','mNA'],mAl,mDa);
+  mkVib('tc-pde','Pump DE — V/H/A (mm/s)',['pDV','pDH','pDA'],pAl,pDa);
+  mkVib('tc-pnde','Pump NDE — V/H/A (mm/s)',['pNV','pNH','pNA'],pAl,pDa);
+  // Electrical: show U/V/W phases per equipment
   const co2=()=>({responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#8b949e',font:{size:10},boxWidth:10}}},scales:{y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}}});
   const gc=(r,k)=>parseFloat((r.el||r.elec||{})[k])||0;
-  if(E('tc-cur')){
-    const ds=tags.map((t,i)=>{const recs=S.rec.filter(r=>r.tag===t);return {label:t,data:lb.map(d=>{const r=recs.find(x=>x.date===d);return r?(gc(r,'cu')+gc(r,'cv')+gc(r,'cw'))/3:null;}),borderColor:colors[i],pointRadius:4,tension:.3,borderWidth:2,spanGaps:true};});
-    const c=new Chart(E('tc-cur'),{type:'line',data:{labels:lb,datasets:ds},options:{...co2(),plugins:{...co2().plugins,title:{display:true,text:'Average Current (A)',color:'#8b949e',font:{size:12,weight:'600'}}}}});tc.push(c);
-  }
-  if(E('tc-vol')){
-    const ds=tags.map((t,i)=>{const recs=S.rec.filter(r=>r.tag===t);return {label:t,data:lb.map(d=>{const r=recs.find(x=>x.date===d);return r?(gc(r,'vu')+gc(r,'vv')+gc(r,'vw'))/3:null;}),borderColor:colors[i],pointRadius:4,tension:.3,borderWidth:2,spanGaps:true};});
-    const c=new Chart(E('tc-vol'),{type:'line',data:{labels:lb,datasets:ds},options:{...co2(),scales:{y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}},plugins:{...co2().plugins,title:{display:true,text:'Average Voltage (V)',color:'#8b949e',font:{size:12,weight:'600'}}}}});tc.push(c);
-  }
+  const phaseLabels=['U','V','W'];
+  const mkElec=(id,title,fields,beginZero)=>{
+    if(!E(id))return;
+    const ds=[];
+    tags.forEach((t,ti)=>{
+      const recs=S.rec.filter(r=>r.tag===t);
+      fields.forEach((fk,pi)=>{
+        ds.push({
+          label:t+' — '+phaseLabels[pi],
+          data:lb.map(d=>{const r=recs.find(x=>x.date===d);return r?gc(r,fk):null;}),
+          borderColor:colors[ti],borderDash:dashStyles[pi],
+          pointRadius:3,tension:.3,borderWidth:2,spanGaps:true
+        });
+      });
+    });
+    const opts={...co2(),plugins:{...co2().plugins,title:{display:true,text:title,color:'#8b949e',font:{size:12,weight:'600'}}}};
+    if(!beginZero)opts.scales={y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:10}}},x:{grid:{color:'rgba(255,255,255,.03)'},ticks:{color:'#8b949e',font:{size:10}}}};
+    const c=new Chart(E(id),{type:'line',data:{labels:lb,datasets:ds},options:opts});
+    tc.push(c);
+  };
+  mkElec('tc-cur','Current — U/V/W (A)',['cu','cv','cw'],true);
+  mkElec('tc-vol','Voltage — U/V/W (V)',['vu','vv','vw'],false);
 }
 
 function printTrend(){window.print();}
