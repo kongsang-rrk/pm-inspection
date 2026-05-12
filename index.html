@@ -124,13 +124,19 @@
 .dl{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)}
 .dl-l{color:var(--text3);font-size:12px}.dl-v{font-family:var(--mono);font-size:13px;text-align:right}
 .sec-h{font-size:11px;font-weight:600;color:var(--accent);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.05em}
-.trend-hidden{position:absolute;left:-99999px;top:0;width:1200px;visibility:hidden;pointer-events:none}@media print{.trend-hidden{position:static!important;left:auto!important;visibility:visible!important;width:auto!important;display:block!important}.sidebar,.topbar,.toast-c,.mf,.mh button,.mh .mc-btn,.btn,.ss-drop,.itab,#tr-chips,#trt-wrap,.sh button{display:none!important}.trend-section{page-break-before:always;display:block!important;width:100%!important}
-.trend-section .g2{grid-template-columns:1fr!important;gap:8px!important}
-.trend-section .cw{height:140px!important;width:100%!important}
-.trend-section canvas{max-height:140px!important;width:100%!important}
-.trend-section [style*='margin-bottom:18px']{margin-bottom:8px!important;padding:6px!important}
-.trend-section .st{font-size:13px!important;margin-bottom:6px!important}
-@page{size:A4 portrait;margin:8mm}.mo{position:static!important;background:none!important}.modal{max-height:none!important;width:100%!important;border:none!important;box-shadow:none!important;border-radius:0!important}.mb{padding:0!important}body{background:#fff!important;color:#000!important}*{color:#000!important;border-color:#ccc!important}.badge{border:1px solid #999!important}.dl{border-color:#ddd!important}.sec-h{color:#1a5fb4!important}.content{overflow:visible!important;height:auto!important}.main{overflow:visible!important}.app{display:block!important;height:auto!important;overflow:visible!important}.card{break-inside:avoid;border:1px solid #ddd!important}.mc{border:1px solid #ddd!important}.metric-row{grid-template-columns:repeat(4,1fr)!important}.g2{grid-template-columns:1fr 1fr!important}canvas{max-height:200px!important}}
+.trend-hidden{position:absolute;left:-99999px;top:0;width:1200px;visibility:hidden;pointer-events:none}@media print{.trend-hidden{position:static!important;left:auto!important;visibility:visible!important;width:auto!important;display:block!important}.sidebar,.topbar,.toast-c,.mf,.mh button,.mh .mc-btn,.btn,.ss-drop,.itab,#tr-chips,#trt-wrap,.sh button{display:none!important}@page{size:A4 landscape;margin:12mm}
+.trend-section{display:block!important;width:100%!important;page-break-before:always;padding:0!important;background:none!important;border:none!important;box-shadow:none!important}
+.trend-section>.st{font-size:15px!important;font-weight:700!important;margin-bottom:8px!important;padding:6px 0!important;border-bottom:2px solid #333!important;color:#000!important}
+.trend-section [style*='margin-bottom:18px']{margin-bottom:6px!important;padding:8px!important;border:1px solid #ccc!important;border-radius:4px!important;break-inside:avoid!important}
+.trend-section [style*='margin-bottom:18px'] [style*='font-size:13px']{font-size:11px!important;margin-bottom:4px!important;font-weight:700!important;color:#000!important}
+.trend-section .g2{grid-template-columns:1fr 1fr!important;gap:10px!important;display:grid!important}
+.trend-section .cw{height:150px!important;width:100%!important;overflow:hidden!important}
+.trend-section canvas{max-height:150px!important;width:100%!important;height:150px!important}
+.print-report-header{display:none}
+@media print{
+  .print-report-header{display:flex!important;justify-content:space-between;align-items:center;padding:0 0 8px;border-bottom:1px solid #ccc;margin-bottom:12px;font-size:11px;color:#555}
+  .print-report-header b{font-size:14px;color:#000}
+}.mo{position:static!important;background:none!important}.modal{max-height:none!important;width:100%!important;border:none!important;box-shadow:none!important;border-radius:0!important}.mb{padding:0!important}body{background:#fff!important;color:#000!important}*{color:#000!important;border-color:#ccc!important}.badge{border:1px solid #999!important}.dl{border-color:#ddd!important}.sec-h{color:#1a5fb4!important}.content{overflow:visible!important;height:auto!important}.main{overflow:visible!important}.app{display:block!important;height:auto!important;overflow:visible!important}.card{break-inside:avoid;border:1px solid #ddd!important}.mc{border:1px solid #ddd!important}.metric-row{grid-template-columns:repeat(4,1fr)!important}.g2{grid-template-columns:1fr 1fr!important}canvas{max-height:200px!important}}
 
 /* Role-based UI */
 .viewer-hide{display:none!important}
@@ -1288,8 +1294,24 @@ function drTr(){
 }
 
 function printTrend(){
-  // Add a print-friendly class so all sections are visible (they already are)
-  window.print();
+  // Insert report header at top of content
+  let hdr=E('print-rpt-hdr');
+  if(!hdr){
+    hdr=document.createElement('div');
+    hdr.id='print-rpt-hdr';hdr.className='print-report-header';
+    const now=new Date();
+    const thDate=now.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+    hdr.innerHTML='<div><b>PM Inspection System — Trend Analysis Report</b><br>'+(S.set.plant||'TCC Plant GEN')+' | '+(S.set.co||'GPSC')+'</div>'+
+      '<div style="text-align:right">Equipment: <b>'+S._trTags.join(', ')+'</b><br>วันที่ Export: '+thDate+'</div>';
+    const content=E('content');
+    if(content)content.insertBefore(hdr,content.firstChild);
+  }
+  // Resize all charts before print
+  tc.forEach(ch=>{try{ch.resize();}catch(e){}});
+  setTimeout(()=>{
+    window.print();
+    setTimeout(()=>{if(hdr&&hdr.parentNode)hdr.parentNode.removeChild(hdr);},1500);
+  },400);
 }
 
 // ══════════ EQUIPMENT ══════════
