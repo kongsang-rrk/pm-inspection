@@ -222,13 +222,13 @@
 </div>
 <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">ALARM LIMITS — MOTOR</div>
 <div class="g2" style="gap:12px;margin-bottom:10px">
-<div class="fg"><label class="fl">Motor Vib Alarm (mm/s)</label><input class="fi" id="eq-mval" type="number" step="0.1" value="4.5"></div>
-<div class="fg"><label class="fl">Motor Vib Danger (mm/s)</label><input class="fi" id="eq-mvda" type="number" step="0.1" value="7.1"></div>
+<div class="fg"><label class="fl">Motor Vib Alarm (mm/s)</label><input class="fi" id="eq-mval" type="number" step="0.1" value="2.8"></div>
+<div class="fg"><label class="fl">Motor Vib Danger (mm/s)</label><input class="fi" id="eq-mvda" type="number" step="0.1" value="4.5"></div>
 </div>
 <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">ALARM LIMITS — PUMP</div>
 <div class="g2" style="gap:12px">
-<div class="fg"><label class="fl">Pump Vib Alarm (mm/s)</label><input class="fi" id="eq-pval" type="number" step="0.1" value="4.5"></div>
-<div class="fg"><label class="fl">Pump Vib Danger (mm/s)</label><input class="fi" id="eq-pvda" type="number" step="0.1" value="7.1"></div>
+<div class="fg"><label class="fl">Pump Vib Alarm (mm/s)</label><input class="fi" id="eq-pval" type="number" step="0.1" value="5.1"></div>
+<div class="fg"><label class="fl">Pump Vib Danger (mm/s)</label><input class="fi" id="eq-pvda" type="number" step="0.1" value="8.5"></div>
 </div></div>
 <div class="mf"><button class="btn" onclick="cm('meq')">Cancel</button><button class="btn btn-p" onclick="saveEq()">Save</button></div>
 </div></div>
@@ -602,9 +602,9 @@ async function loadAll(){try{
 
 async function seed(){
 const eqs=[
-  {tag:'P-201A',module:'CF Export P201A',mfg:'Reliance',sn:'1MAZJ9073 G003',power:'250',powerUnit:'HP',weight:'2268',weightUnit:'lbs',volts:'380YD',amps:'323A',freq:'50',speed:'2970',ins:'F',duty:'CONT',de:'65BC03J3OX',nde:'65BC03J3OX',loadtype:'Pump',location:'Pump room',motorVibAlarm:4.5,motorVibDanger:7.1,pumpVibAlarm:4.5,pumpVibDanger:7.1},
-  {tag:'P-201B',module:'CF Export P201B',mfg:'Reliance',sn:'1MAZJ9073 G001',power:'250',powerUnit:'HP',weight:'2268',weightUnit:'lbs',volts:'380YD',amps:'323A',freq:'50',speed:'2970',ins:'F',duty:'CONT',de:'65BC03J3OX',nde:'65BC03J3OX',loadtype:'Pump',location:'Pump room',motorVibAlarm:4.5,motorVibDanger:7.1,pumpVibAlarm:4.5,pumpVibDanger:7.1},
-  {tag:'P-201S',module:'CF Export P201S',mfg:'Reliance',sn:'1MAZJ9073 G002',power:'250',powerUnit:'HP',weight:'2268',weightUnit:'lbs',volts:'380YD',amps:'323A',freq:'50',speed:'2970',ins:'F',duty:'CONT',de:'65BC03J3OX',nde:'65BC03J3OX',loadtype:'Pump',location:'Pump room',motorVibAlarm:4.5,motorVibDanger:7.1,pumpVibAlarm:4.5,pumpVibDanger:7.1}
+  {tag:'P-201A',module:'CF Export P201A',mfg:'Reliance',sn:'1MAZJ9073 G003',power:'250',powerUnit:'HP',weight:'2268',weightUnit:'lbs',volts:'380YD',amps:'323A',freq:'50',speed:'2970',ins:'F',duty:'CONT',de:'65BC03J3OX',nde:'65BC03J3OX',loadtype:'Pump',location:'Pump room',motorVibAlarm:2.8,motorVibDanger:4.5,pumpVibAlarm:5.1,pumpVibDanger:8.5},
+  {tag:'P-201B',module:'CF Export P201B',mfg:'Reliance',sn:'1MAZJ9073 G001',power:'250',powerUnit:'HP',weight:'2268',weightUnit:'lbs',volts:'380YD',amps:'323A',freq:'50',speed:'2970',ins:'F',duty:'CONT',de:'65BC03J3OX',nde:'65BC03J3OX',loadtype:'Pump',location:'Pump room',motorVibAlarm:2.8,motorVibDanger:4.5,pumpVibAlarm:5.1,pumpVibDanger:8.5},
+  {tag:'P-201S',module:'CF Export P201S',mfg:'Reliance',sn:'1MAZJ9073 G002',power:'250',powerUnit:'HP',weight:'2268',weightUnit:'lbs',volts:'380YD',amps:'323A',freq:'50',speed:'2970',ins:'F',duty:'CONT',de:'65BC03J3OX',nde:'65BC03J3OX',loadtype:'Pump',location:'Pump room',motorVibAlarm:2.8,motorVibDanger:4.5,pumpVibAlarm:5.1,pumpVibDanger:8.5}
 ];
 const recs=[
   {date:'2026-04-16',wo:'30000088621',tag:'P-201A',insp:'Rittiras',appr:'Sanan',purp:'PM',ck:{},vib:{mDV:0.78,mDH:0.82,mDA:0.91,mNV:0.67,mNH:1.09,mNA:0,pDV:3.25,pDH:4.8,pDA:0,pNV:1.56,pNH:0,pNA:0},el:{cu:266,cv:270,cw:260,vu:412,vv:412,vw:411},brg:{de:'65BC03J3OX',nde:'65BC03J3OX',deC:'ok',ndeC:'ok'},sev:'5',res:'Cleaned/Re-grease. Pump DE-H alarm.'},
@@ -1531,8 +1531,8 @@ async function importXlsxFile(file){
             de:g('AD10').replace('DE:','').trim(),
             nde:g('AD11').replace('NDE:','').trim(),
             loadtype:g('AF12'),
-            motorVibAlarm:4.5,motorVibDanger:7.1,
-            pumpVibAlarm:4.5,pumpVibDanger:7.1
+            motorVibAlarm:2.8,motorVibDanger:4.5,
+            pumpVibAlarm:5.1,pumpVibDanger:8.5
           };
           await db.collection('equipment').doc(tag).set(eqData,{merge:true});
         }
