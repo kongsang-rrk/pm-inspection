@@ -1482,19 +1482,38 @@ async function importXlsxFile(file){
       try{
         const data=new Uint8Array(e.target.result);
         const wb=XLSX.read(data,{type:'array',cellDates:true});
-        const ws=wb.Sheets[wb.SheetNames[0]];
+        // Find sheet that has Tag at D9 (some files have multiple sheets)
+        let ws=null;
+        for(const sn of wb.SheetNames){
+          const s=wb.Sheets[sn];
+          const d9=s['D9'];
+          if(d9&&String(d9.v||'').trim()){ws=s;break;}
+        }
+        if(!ws)ws=wb.Sheets[wb.SheetNames[0]];
         const g=(addr)=>{const c=ws[addr];return c?String(c.v||'').trim():'';};
         // Extract fields from known cell positions
         const tag=g('D9');
-        if(!tag)return resolve({status:'skip',msg:'ไม่พบ Tag (D9)'});
-        // Date from AC2
+        if(!tag)return resolve({status:'skip',msg:'ไม่พบ Tag (D9) ในทุก Sheet'});
+        // Date from AC2 — fix timezone offset by using local date parts
         let date='';
         const datecell=ws['AC2'];
         if(datecell){
           const dv=datecell.v;
-          if(dv instanceof Date){date=dv.toISOString().slice(0,10);}
-          else if(typeof dv==='number'){const d=new Date((dv-25569)*86400*1000);date=d.toISOString().slice(0,10);}
-          else{const parts=String(dv).split('-');if(parts.length===3)date=parts[0]+'-'+parts[1].padStart(2,0)+'-'+parts[2].padStart(2,0);}
+          if(dv instanceof Date){
+            // Use local date parts to avoid UTC offset shifting date
+            const yr=dv.getFullYear(),mo=String(dv.getMonth()+1).padStart(2,'0'),dy=String(dv.getDate()).padStart(2,'0');
+            date=yr+'-'+mo+'-'+dy;
+          }else if(typeof dv==='number'){
+            // Excel serial date — convert without timezone
+            const d=new Date(Math.round((dv-25569)*86400*1000));
+            const yr=d.getUTCFullYear(),mo=String(d.getUTCMonth()+1).padStart(2,'0'),dy=String(d.getUTCDate()).padStart(2,'0');
+            date=yr+'-'+mo+'-'+dy;
+          }else{
+            const s=String(dv).trim();
+            // Try ISO format YYYY-MM-DD
+            const m=s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+            if(m)date=m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+          }
         }
         if(!date)return resolve({status:'skip',msg:'ไม่พบวันที่ (AC2)'});
         // Check duplicate
