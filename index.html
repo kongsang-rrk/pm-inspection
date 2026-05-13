@@ -125,7 +125,17 @@
 .dl{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)}
 .dl-l{color:var(--text3);font-size:12px}.dl-v{font-family:var(--mono);font-size:13px;text-align:right}
 .sec-h{font-size:11px;font-weight:600;color:var(--accent);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.05em}
-.trend-hidden{position:absolute;left:-99999px;top:0;width:1200px;visibility:hidden;pointer-events:none}@media print{.trend-hidden{position:static!important;left:auto!important;visibility:visible!important;width:auto!important;display:block!important}.sidebar,.topbar,.toast-c,.mf,.mh button,.mh .mc-btn,.btn,.ss-drop,.itab,#tr-chips,#trt-wrap,.sh button{display:none!important}@page{size:A4 landscape;margin:12mm}
+.trend-hidden{position:absolute;left:-99999px;top:0;width:1200px;visibility:hidden;pointer-events:none}.printing-record{overflow:visible!important}
+.printing-record .sidebar,.printing-record .topbar,.printing-record .content,.printing-record .main,.printing-record .app,.printing-record .toast-c{display:none!important}
+.printing-record .mo{position:static!important;display:block!important;background:#fff!important;width:100%!important;height:auto!important;overflow:visible!important;padding:0!important;align-items:flex-start!important}
+.printing-record .modal{max-height:none!important;height:auto!important;width:100%!important;max-width:100%!important;border:none!important;box-shadow:none!important;border-radius:0!important;margin:0!important;overflow:visible!important;display:block!important}
+.printing-record .mb{max-height:none!important;height:auto!important;overflow:visible!important;padding:12px!important}
+.printing-record .mh{position:static!important;background:#fff!important;border-bottom:1px solid #333!important}
+.printing-record .mh button{display:none!important}
+.printing-record .dl{color:#000!important;border-color:#ddd!important}
+.printing-record .sec-h{color:#1a5fb4!important;page-break-after:avoid!important}
+@media print{.printing-record{overflow:visible!important}.printing-record canvas{max-height:180px!important}.printing-record .card{box-shadow:none!important}}
+@media print{.trend-hidden{position:static!important;left:auto!important;visibility:visible!important;width:auto!important;display:block!important}.sidebar,.topbar,.toast-c,.mf,.mh button,.mh .mc-btn,.btn,.ss-drop,.itab,#tr-chips,#trt-wrap,.sh button{display:none!important}@page{size:A4 landscape;margin:12mm}
 .trend-section{display:block!important;width:100%!important;page-break-before:always;padding:0!important;background:none!important;border:none!important;box-shadow:none!important}
 .trend-section>.st{font-size:15px!important;font-weight:700!important;margin-bottom:8px!important;padding:6px 0!important;border-bottom:2px solid #333!important;color:#000!important}
 .trend-section [style*='margin-bottom:18px']{margin-bottom:6px!important;padding:8px!important;border:1px solid #ccc!important;border-radius:4px!important;break-inside:avoid!important}
@@ -195,7 +205,7 @@
 <!-- Equipment Modal -->
 <div class="mo" id="meq"><div class="modal" style="width:650px"><div class="mh"><div style="font-size:15px;font-weight:600" id="meqt">Add Equipment</div><button class="mc-btn" onclick="cm('meq')">✕</button></div>
 <div class="mb"><div class="g2" style="gap:12px;margin-bottom:12px">
-<div class="fg"><label class="fl">Tag No.*</label><input class="fi" id="eq-tag" placeholder="P-201X"></div>
+<input type="hidden" id="eq-edit-mode" value="0"><div class="fg"><label class="fl">Tag No.*</label><input class="fi" id="eq-tag" placeholder="P-201X"></div>
 <div class="fg"><label class="fl">Module for</label><input class="fi" id="eq-module" placeholder="CF Export P201X"></div>
 <div class="fg"><label class="fl">Manufacturer</label><input class="fi" id="eq-mfg" placeholder="Reliance"></div>
 <div class="fg"><label class="fl">Serial No.</label><input class="fi" id="eq-sn" placeholder="1MAZJ9073 G00X"></div>
@@ -582,6 +592,29 @@ async function sendLineNotify(rec,alarmEntries){
 }
 
 
+
+// ── Select All for inspection tables ──
+function selAllCk(btn,col){
+  const table=btn.closest('table');
+  if(!table)return;
+  const rows=table.querySelectorAll('tbody tr');
+  rows.forEach(tr=>{
+    const tdIdx={af:2,ac:3,al:4}[col];
+    const td=tr.querySelectorAll('td')[tdIdx];
+    if(!td)return;
+    const cbs=td.querySelectorAll('.cb');
+    if(!cbs.length)return;
+    if(col==='ac'){
+      // Action column — click FIRST button (Cleaning / Re-Tight)
+      if(cbs.length)cbs[0].click();
+    }else{
+      // As Found / As Left — target 'ok' button
+      let found=false;
+      cbs.forEach(b=>{const t=b.textContent.trim().toLowerCase();if(t==='ok'){b.click();found=true;}});
+      if(!found&&cbs[0])cbs[0].click();
+    }
+  });
+}
 async function loadAll(){try{
   const [es,rs,ss,al]=await Promise.all([
     db.collection('equipment').get(),
@@ -796,12 +829,12 @@ el.innerHTML=
 // ── Feature 1: MCC Module Inspection ──
 '<div class="card"><div class="st" style="margin-bottom:14px">🔌 MCC Module Inspection</div>'+
 '<div style="overflow-x:auto"><table class="cht"><thead><tr>'+
-'<th style="min-width:160px">Item</th><th>Criteria</th><th>As Found</th><th>Action</th><th>As Left</th></tr></thead>'+
+'<th style="min-width:160px">Item</th><th>Criteria</th><th>As Found<br><small><button class=\"btn btn-sm\" onclick=\"selAllCk(this,&quot;af&quot;)\">All OK</button></small></th><th>Action<br><small><button class=\"btn btn-sm\" onclick=\"selAllCk(this,&quot;ac&quot;)\">All Vis</button></small></th><th>As Left<br><small><button class=\"btn btn-sm\" onclick=\"selAllCk(this,&quot;al&quot;)\">All OK</button></small></th></tr></thead>'+
 '<tbody id="mcc-body"></tbody></table></div></div>'+
 // ── Feature 2: Motor Inspection ──
 '<div class="card"><div class="st" style="margin-bottom:14px">🔧 Motor Inspection</div>'+
 '<div style="overflow-x:auto"><table class="cht"><thead><tr>'+
-'<th style="min-width:160px">Item</th><th>Criteria</th><th>As Found</th><th>Action</th><th>As Left</th></tr></thead>'+
+'<th style="min-width:160px">Item</th><th>Criteria</th><th>As Found<br><small><button class=\"btn btn-sm\" onclick=\"selAllCk(this,&quot;af&quot;)\">All OK</button></small></th><th>Action<br><small><button class=\"btn btn-sm\" onclick=\"selAllCk(this,&quot;ac&quot;)\">All Vis</button></small></th><th>As Left<br><small><button class=\"btn btn-sm\" onclick=\"selAllCk(this,&quot;al&quot;)\">All OK</button></small></th></tr></thead>'+
 '<tbody id="mot-body"></tbody></table></div></div>'+
 // ── Vibration ──
 '<div class="card"><div class="st" style="margin-bottom:14px">〰 Vibration (mm/s)</div>'+
@@ -1046,12 +1079,12 @@ h+=`<div class="dl"><span class="dl-l">Module</span><span class="dl-v">${eq?.mod
 h+=`<div class="dl"><span class="dl-l">Purpose</span><span class="dl-v"><span class="badge b-in">${r.purp||r.purpose||'PM'}</span></span></div>`;
 h+=`<div class="dl"><span class="dl-l">Inspector</span><span class="dl-v">${r.insp||r.inspector||'—'}</span></div>`;
 h+=`<div class="dl"><span class="dl-l">Approved by</span><span class="dl-v">${r.appr||r.approver||'—'}</span></div>`;
-h+='<div class="sec-h">⊞ Machine Data</div>';
-h+=`<div class="dl"><span class="dl-l">Manufacturer / S.N.</span><span class="dl-v">${eq?.mfg||'—'} / ${eq?.sn||'—'}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Power / Weight</span><span class="dl-v">${eq?.power||'—'} ${eq?.powerUnit||'HP'} / ${eq?.weight||'—'} ${eq?.weightUnit||'lbs'}</span></div>`;
-if(eq?.type)h+=`<div class="dl"><span class="dl-l">Type</span><span class="dl-v">${eq.type}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Volts / Amps / RPM</span><span class="dl-v">${eq?.volts||'—'} / ${eq?.amps||'—'} / ${eq?.speed||'—'}</span></div>`;
-if(eq?.pf)h+=`<div class="dl"><span class="dl-l">Power Factor (P.F)</span><span class="dl-v">${eq.pf}</span></div>`;
+
+
+
+
+
+
 h+='<div class="sec-h">🔩 Bearing</div>';
 h+=`<div class="dl"><span class="dl-l">DE — ${r.brg?.de||eq?.de||'—'}</span><span class="dl-v">${bst(r.brg?.deC)}</span></div>`;
 h+=`<div class="dl"><span class="dl-l">NDE — ${r.brg?.nde||eq?.nde||'—'}</span><span class="dl-v">${bst(r.brg?.ndeC)}</span></div>`;
@@ -1095,7 +1128,23 @@ setTimeout(()=>{
   if(E('dv-mini'))new Chart(E('dv-mini'),{type:'bar',data:{labels:vLabels,datasets:[{data:vData,backgroundColor:vColors,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},title:{display:true,text:'Vibration (mm/s)',color:'#8b949e',font:{size:10}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:9}}},x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:8},maxRotation:45}}}}});
   if(E('de-mini'))new Chart(E('de-mini'),{type:'bar',data:{labels:['Cu','Cv','Cw','Vu','Vv','Vw'],datasets:[{data:[el2.cu||0,el2.cv||0,el2.cw||0,el2.vu||0,el2.vv||0,el2.vw||0],backgroundColor:['rgba(63,185,80,.7)','rgba(63,185,80,.5)','rgba(63,185,80,.3)','rgba(188,140,255,.7)','rgba(188,140,255,.5)','rgba(188,140,255,.3)'],borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},title:{display:true,text:'Current & Voltage',color:'#8b949e',font:{size:10}}},scales:{y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:9}}},x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:9}}}}}});
 },100);}
-function exportPDF(){window.print();}
+function exportPDF(){
+  // Mark for print and ensure modal scrolls fully
+  document.body.classList.add('printing-record');
+  const modal=document.querySelector('.mo.show .modal')||document.querySelector('#mdet .modal');
+  const mb=document.querySelector('#mdetb');
+  if(mb){mb.style.maxHeight='none';mb.style.overflow='visible';}
+  if(modal){modal.style.maxHeight='none';modal.style.height='auto';modal.style.overflow='visible';}
+  setTimeout(()=>{
+    window.print();
+    setTimeout(()=>{
+      document.body.classList.remove('printing-record');
+      if(mb){mb.style.maxHeight='';mb.style.overflow='';}
+      if(modal){modal.style.maxHeight='';modal.style.height='';modal.style.overflow='';}
+    },1500);
+  },200);
+}
+
 
 // ══════════ ALARM LOG PAGE — Feature 7 ══════════
 async function pgAlarmLog(el){
@@ -1320,18 +1369,71 @@ function printTrend(){
 }
 
 // ══════════ EQUIPMENT ══════════
-function pgEq(el){el.innerHTML='';const hd=document.createElement('div');hd.className='sh';hd.style.marginBottom='16px';hd.innerHTML='<div class="st">Equipment ('+S.eq.length+')</div>'+(canEdit()?'<button class="btn btn-p" onclick="addEq()">+ Add</button>':'');el.appendChild(hd);
-S.eq.forEach(eq=>{const rs=S.rec.filter(r=>r.tag===eq.tag),la=[...rs].sort((a,b)=>b.date.localeCompare(a.date))[0];
-  const mv=la?maxMotorVib(la):0,pv=la?maxPumpVib(la):0;
-  const mAl=mv>=eqMAl(eq)||mv>=eqMDa(eq),pAl=pv>=eqPAl(eq)||pv>=eqPDa(eq);
-  const dc=!la?'d-x':mAl||pAl?'d-a':'d-g';
-  const d=document.createElement('div');d.className='eq-i';
-  d.innerHTML='<div class="eq-av">'+eq.tag.slice(-3)+'</div><div style="flex:1"><div style="font-size:14px;font-weight:600"><span class="dot '+dc+'" style="margin-right:7px"></span>'+eq.tag+'</div>'+
-  '<div style="font-size:11px;color:var(--text3);margin-top:2px">'+(eq.module||eq.mod||'')+' | '+(eq.type?eq.type+' | ':'')+(eq.power||eq.pwr||'')+' '+(eq.powerUnit||'HP')+'</div>'+
-  '<div style="font-size:11px;color:var(--text3);margin-top:2px">Motor Alarm: '+(eq.motorVibAlarm||'—')+' / '+(eq.motorVibDanger||'—')+' mm/s | Pump: '+(eq.pumpVibAlarm||'—')+' / '+(eq.pumpVibDanger||'—')+' mm/s</div>'+
-  '</div><div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="editEq(\''+eq.tag+'\')">Edit</button><button class="btn btn-sm btn-d" onclick="delEq(\''+eq.tag+'\')">Del</button></div>';el.appendChild(d);});}
-const eqFlds=['eq-tag','eq-module','eq-mfg','eq-sn','eq-power','eq-weight','eq-volts','eq-amps','eq-freq','eq-speed','eq-ins','eq-duty','eq-de','eq-nde','eq-loadtype','eq-location'];
-function addEq(){E('meqt').textContent='Add Equipment';eqFlds.forEach(id=>{if(E(id))E(id).value='';});E('eq-mval').value='4.5';E('eq-mvda').value='7.1';E('eq-pval').value='4.5';E('eq-pvda').value='7.1';E('eq-pwrU').value='kW';E('eq-wtU').value='lbs';document.querySelectorAll('#meq .unit-btn').forEach(b=>b.classList.remove('active'));document.querySelector('#meq .unit-btn')?.classList.add('active');om('meq');}
+function pgEq(el){
+  el.innerHTML='';
+  // Header
+  const hdr=document.createElement('div');hdr.className='card';hdr.style.marginBottom='12px';
+  const row1=document.createElement('div');row1.style.cssText='display:flex;align-items:center;gap:10px;margin-bottom:10px';
+  const titleEl=document.createElement('span');titleEl.className='st';titleEl.textContent='Equipment ('+S.eq.length+')';
+  row1.appendChild(titleEl);
+  if(canEdit()){
+    const ab=document.createElement('button');ab.className='btn btn-p';ab.textContent='+ Add';
+    ab.onclick=addEq;row1.appendChild(ab);
+  }
+  hdr.appendChild(row1);
+  const si=document.createElement('input');si.className='fi';
+  si.placeholder='🔍 ค้นหา Tag หรือ Module...';
+  si.id='eq-search';
+  hdr.appendChild(si);
+  el.appendChild(hdr);
+  // Render all equipment items
+  eqRender(el,'');
+  // Wire search after render
+  si.oninput=()=>eqRender(el,si.value||'');
+}
+function eqRender(el,raw){
+  const q=raw.toLowerCase().trim();
+  el.querySelectorAll('.eq-i').forEach(x=>x.remove());
+  const titleEl=el.querySelector('.st');
+  const filtered=q?S.eq.filter(e=>(e.tag||'').toLowerCase().includes(q)||(e.module||e.mod||'').toLowerCase().includes(q)):S.eq;
+  if(titleEl)titleEl.textContent='Equipment ('+filtered.length+(q&&filtered.length!==S.eq.length?'/'+S.eq.length:'')+')';
+  if(!filtered.length){
+    const emp=document.createElement('div');emp.className='eq-i card';
+    emp.style.cssText='text-align:center;padding:24px;color:var(--text3)';
+    emp.textContent='ไม่พบอุปกรณ์';el.appendChild(emp);return;
+  }
+  filtered.forEach(eq=>{
+    const rs=S.rec.filter(r=>r.tag===eq.tag);
+    const la=[...rs].sort((a,b)=>b.date.localeCompare(a.date))[0];
+    const pv=la?maxPumpVib(la):0,mv=la?maxMotorVib(la):0;
+    const bad=mv>=eqMAl(eq)||mv>=eqMDa(eq)||pv>=eqPAl(eq)||pv>=eqPDa(eq);
+    const dc=!la?'d-x':bad?'d-a':'d-g';
+    const d=document.createElement('div');d.className='eq-i';
+    d.innerHTML=
+      '<span class="dot '+dc+'" style="flex-shrink:0"></span>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-weight:600">'+eq.tag+'</div>'+
+        '<div style="font-size:11px;color:var(--text3)">'+
+          (eq.module||eq.mod||'')+
+          (eq.type?' | '+eq.type:'')+
+          (eq.power?' | '+eq.power+' '+(eq.powerUnit||'HP'):'')+
+          (la?' | Last PM: '+la.date:'')+
+        '</div>'+
+      '</div>';
+    if(canEdit()){
+      const bw=document.createElement('div');bw.style.cssText='display:flex;gap:6px;flex-shrink:0';
+      const eb=document.createElement('button');eb.className='btn btn-sm';eb.textContent='Edit';
+      eb.onclick=((t)=>()=>editEq(t))(eq.tag);bw.appendChild(eb);
+      if(isAdmin()){
+        const db3=document.createElement('button');db3.className='btn btn-sm btn-d';db3.textContent='Del';
+        db3.onclick=((t)=>()=>delEq(t))(eq.tag);bw.appendChild(db3);
+      }
+      d.appendChild(bw);
+    }
+    el.appendChild(d);
+  });
+}
+
 function editEq(t){const eq=S.eq.find(e=>e.tag===t);if(!eq)return;E('meqt').textContent='Edit — '+t;
 const m={tag:'eq-tag',module:'eq-module',mfg:'eq-mfg',sn:'eq-sn',type:'eq-type',power:'eq-power',weight:'eq-weight',volts:'eq-volts',amps:'eq-amps',pf:'eq-pf',freq:'eq-freq',speed:'eq-speed',ins:'eq-ins',duty:'eq-duty',de:'eq-de',nde:'eq-nde',loadtype:'eq-loadtype',location:'eq-location'};
 Object.entries(m).forEach(([k,id])=>{if(E(id))E(id).value=eq[k]||'';});
@@ -1339,8 +1441,8 @@ E('eq-mval').value=eq.motorVibAlarm||eq.vibAlarm||4.5;E('eq-mvda').value=eq.moto
 E('eq-pval').value=eq.pumpVibAlarm||eq.vibAlarm||4.5;E('eq-pvda').value=eq.pumpVibDanger||eq.vibDanger||7.1;
 const pu=eq.powerUnit||'HP';E('eq-pwrU').value=pu;document.querySelectorAll('#meq .unit-grp')[0]?.querySelectorAll('.unit-btn').forEach(b=>b.classList.toggle('active',b.textContent===pu));
 const wu=eq.weightUnit||'lbs';E('eq-wtU').value=wu;document.querySelectorAll('#meq .unit-grp')[1]?.querySelectorAll('.unit-btn').forEach(b=>b.classList.toggle('active',b.textContent===wu));
-om('meq');}
-async function saveEq(){if(!canEdit()){toast('ไม่มีสิทธิ์แก้ไข (Viewer)','error');return;}const t=E('eq-tag').value.trim();if(!t){toast('Tag required','error');return;}
+if(E('eq-edit-mode'))E('eq-edit-mode').value='1';om('meq');}
+async function saveEq(){if(!canEdit()){toast('ไม่มีสิทธิ์แก้ไข (Viewer)','error');return;}const t=E('eq-tag').value.trim();if(!t){toast('Tag required','error');return;}const isEdit=E('eq-edit-mode')?.value==='1';if(!isEdit&&S.eq.find(e=>e.tag===t)){toast('Tag '+t+' มีอยู่แล้ว! ไม่สามารถ Add ซ้ำได้','error');return;}
 const o={tag:t,module:E('eq-module').value,mfg:E('eq-mfg').value,sn:E('eq-sn').value,type:E('eq-type')?.value||'',power:E('eq-power').value,powerUnit:E('eq-pwrU').value,weight:E('eq-weight').value,weightUnit:E('eq-wtU').value,volts:E('eq-volts').value,amps:E('eq-amps').value,pf:E('eq-pf')?.value||'',freq:E('eq-freq').value,speed:E('eq-speed').value,ins:E('eq-ins').value,duty:E('eq-duty').value,de:E('eq-de').value,nde:E('eq-nde').value,loadtype:E('eq-loadtype').value,location:E('eq-location').value,
 motorVibAlarm:parseFloat(E('eq-mval').value)||4.5,motorVibDanger:parseFloat(E('eq-mvda').value)||7.1,pumpVibAlarm:parseFloat(E('eq-pval').value)||4.5,pumpVibDanger:parseFloat(E('eq-pvda').value)||7.1};
 try{await db.collection('equipment').doc(t).set(o);const i=S.eq.findIndex(e=>e.tag===t);if(i>=0)S.eq[i]=o;else S.eq.push(o);cm('meq');pgEq(E('content'));toast(t+' saved');}catch(e){toast('Error: '+e.message,'error');}}
@@ -1481,7 +1583,7 @@ async function importXlsxFile(file){
     reader.onload=async(e)=>{
       try{
         const data=new Uint8Array(e.target.result);
-        const wb=XLSX.read(data,{type:'array',cellDates:true});
+        const wb=XLSX.read(data,{type:'array',cellDates:false});
         // Find sheet that has Tag at D9 (some files have multiple sheets)
         let ws=null;
         for(const sn of wb.SheetNames){
@@ -1499,20 +1601,28 @@ async function importXlsxFile(file){
         const datecell=ws['AC2'];
         if(datecell){
           const dv=datecell.v;
-          if(dv instanceof Date){
-            // Use local date parts to avoid UTC offset shifting date
-            const yr=dv.getFullYear(),mo=String(dv.getMonth()+1).padStart(2,'0'),dy=String(dv.getDate()).padStart(2,'0');
-            date=yr+'-'+mo+'-'+dy;
-          }else if(typeof dv==='number'){
-            // Excel serial date — convert without timezone
-            const d=new Date(Math.round((dv-25569)*86400*1000));
+          if(typeof dv==='number'){
+            // Excel serial date — days since 1900-01-01 (with leap year bug)
+            // Excel epoch: serial 1 = 1900-01-01, but Excel thinks 1900 was leap year so subtract 25569 to get unix epoch
+            const ms=Math.round((dv-25569)*86400*1000);
+            const d=new Date(ms);
             const yr=d.getUTCFullYear(),mo=String(d.getUTCMonth()+1).padStart(2,'0'),dy=String(d.getUTCDate()).padStart(2,'0');
             date=yr+'-'+mo+'-'+dy;
+          }else if(dv instanceof Date){
+            // Date object — pull UTC parts (Excel cells have no timezone)
+            const yr=dv.getUTCFullYear(),mo=String(dv.getUTCMonth()+1).padStart(2,'0'),dy=String(dv.getUTCDate()).padStart(2,'0');
+            date=yr+'-'+mo+'-'+dy;
           }else{
+            // String format — parse directly
             const s=String(dv).trim();
-            // Try ISO format YYYY-MM-DD
-            const m=s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
-            if(m)date=m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+            const m=s.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+            if(m){date=m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');}
+            else{
+              // Try "18 Oct 2025" format
+              const months={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+              const m2=s.match(/(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})/);
+              if(m2){date=m2[3]+'-'+(months[m2[2]]||'01')+'-'+m2[1].padStart(2,'0');}
+            }
           }
         }
         if(!date)return resolve({status:'skip',msg:'ไม่พบวันที่ (AC2)'});
@@ -1523,23 +1633,43 @@ async function importXlsxFile(file){
         const wo=g('V2');
         const insp=g('E62')||g('F62');
         const appr=g('V62')||g('W62');
-        // Vibration M = Motor
+        // Vibration Motor DE/NDE
         const mDV=parseFloat(g('AA43'))||0,mDH=parseFloat(g('AC43'))||0,mDA=parseFloat(g('AE43'))||0;
         const mNV=parseFloat(g('AA44'))||0,mNH=parseFloat(g('AC44'))||0,mNA=parseFloat(g('AE44'))||0;
-        // Pump vib (row 46/47 = DE/NDE)
+        // Vibration Pump DE/NDE (rows 46/47)
         const pDV=parseFloat(g('AA46'))||0,pDH=parseFloat(g('AC46'))||0,pDA=parseFloat(g('AE46'))||0;
         const pNV=parseFloat(g('AA47'))||0,pNH=parseFloat(g('AC47'))||0,pNA=parseFloat(g('AE47'))||0;
         // Electrical
         const cu=parseFloat(g('AC51'))||0,cv=parseFloat(g('AE51'))||0,cw=parseFloat(g('AG51'))||0;
         const vu=parseFloat(g('AC52'))||0,vv=parseFloat(g('AE52'))||0,vw=parseFloat(g('AG52'))||0;
         const cuUn=calcUnbal(cu,cv,cw),vuUn=calcUnbal(vu,vv,vw);
+        // IR — check J28 unit: 'MW'=MΩ keep, 'GW'=GΩ ×1000
+        const irUnit=(g('J28')||'MW').trim().toUpperCase();
+        const toMohm=(v)=>{const n=parseFloat(v)||0;if(!n)return 0;return irUnit.startsWith('G')?n*1000:n;};
+        const irUG=toMohm(g('L28')),irVG=toMohm(g('L29')),irWG=toMohm(g('L30')),irG=toMohm(g('L31'));
+        // Vdc from nearby cells
+        const irVdc=g('E28')||g('F28')||g('G28')||'';
+        // WR — check J33 unit: 'W'=Ω keep, 'mW'=mΩ ÷1000
+        const wrUnit=(g('J33')||'W').trim().toLowerCase();
+        const toOhm=(v)=>{const n=parseFloat(v)||0;if(!n)return 0;return wrUnit.startsWith('m')?n/1000:n;};
+        const wrU=toOhm(g('L33')),wrV=toOhm(g('L34')),wrW=toOhm(g('L35'));
+        const wrUn=calcUnbal(wrU,wrV,wrW);
+        // WR temp from C33 or E33
+        const wrTemp=g('E33')||g('F33')||g('G33')||'';
+        // WI — L37-L39 unit mH
+        const wiU=parseFloat(g('L37'))||0,wiV=parseFloat(g('L38'))||0,wiW=parseFloat(g('L39'))||0;
+        const wiUn=calcUnbal(wiU,wiV,wiW);
+        const wiTemp=g('E37')||g('F37')||g('G37')||'';
+        // Bearing DE/NDE from AE10/AE11
+        const brgDE=g('AE10'),brgNDE=g('AE11');
         // Results
         const res=[g('B57'),g('B58'),g('B59'),g('B60')].filter(Boolean).join(' | ').slice(0,200);
         const rec={
           tag,date,wo,insp,appr,purp:'PM',sev:'5',res,
           vib:{mDV,mDH,mDA,mNV,mNH,mNA,pDV,pDH,pDA,pNV,pNH,pNA},
           el:{cu,cv,cw,cuUn,vu,vv,vw,vuUn},
-          st:{},brg:{de:'',nde:'',deC:'ok',ndeC:'ok'},
+          st:{irVdc,irUV:irUG,irVW:irVG,irWU:irWG,irG,wrTemp,wrU,wrV,wrW,wrUn,wiTemp,wiU,wiV,wiW,wiUn},
+          brg:{de:brgDE,nde:brgNDE,deC:'ok',ndeC:'ok'},
           od:{},importedFrom:file.name,
           createdAt:firebase.firestore.FieldValue.serverTimestamp()
         };
@@ -1547,7 +1677,7 @@ async function importXlsxFile(file){
         const eqExists=S.eq.find(e=>e.tag===tag);
         if(!eqExists){
           const eqData={tag,module:g('E8'),mfg:g('D10'),sn:g('D12'),type:g('D11'),
-            power:g('N8').replace(/[^0-9.]/g,''),powerUnit:g('N8').includes('kW')?'kW':'HP',
+            power:g('N8').replace(/[^0-9.]/g,''),powerUnit:(g('U8')||'HP').trim(),weight:g('Z8').replace(/[^0-9.]/g,''),weightUnit:(g('AD8')||'kg').trim().toLowerCase(),
             volts:g('N9'),amps:g('N10').replace(/[^0-9.]/g,''),
             freq:g('N11'),speed:g('N12'),
             de:g('AD10').replace('DE:','').trim(),
