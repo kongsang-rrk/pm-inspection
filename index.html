@@ -1453,6 +1453,22 @@ function eqRender(el,raw){
   }
 }
 
+function addEq(){E('meqt').textContent='Add Equipment';eqFlds.forEach(id=>{if(E(id))E(id).value='';});E('eq-mval').value='2.8';E('eq-mvda').value='4.5';E('eq-pval').value='5.1';E('eq-pvda').value='8.5';E('eq-pwrU').value='kW';E('eq-wtU').value='lbs';document.querySelectorAll('#meq .unit-btn').forEach(b=>b.classList.remove('active'));document.querySelector('#meq .unit-btn')?.classList.add('active');om('meq');}
+function editEq(t){const eq=S.eq.find(e=>e.tag===t);if(!eq)return;E('meqt').textContent='Edit — '+t;
+const m={tag:'eq-tag',module:'eq-module',mfg:'eq-mfg',sn:'eq-sn',power:'eq-power',weight:'eq-weight',volts:'eq-volts',amps:'eq-amps',freq:'eq-freq',speed:'eq-speed',ins:'eq-ins',duty:'eq-duty',de:'eq-de',nde:'eq-nde',loadtype:'eq-loadtype',location:'eq-location'};
+Object.entries(m).forEach(([k,id])=>{if(E(id))E(id).value=eq[k]||'';});
+E('eq-mval').value=eq.motorVibAlarm||eq.vibAlarm||4.5;E('eq-mvda').value=eq.motorVibDanger||eq.vibDanger||7.1;
+E('eq-pval').value=eq.pumpVibAlarm||eq.vibAlarm||4.5;E('eq-pvda').value=eq.pumpVibDanger||eq.vibDanger||7.1;
+const pu=eq.powerUnit||'HP';E('eq-pwrU').value=pu;document.querySelectorAll('#meq .unit-grp')[0]?.querySelectorAll('.unit-btn').forEach(b=>b.classList.toggle('active',b.textContent===pu));
+const wu=eq.weightUnit||'lbs';E('eq-wtU').value=wu;document.querySelectorAll('#meq .unit-grp')[1]?.querySelectorAll('.unit-btn').forEach(b=>b.classList.toggle('active',b.textContent===wu));
+if(E('eq-edit-mode'))E('eq-edit-mode').value='1';om('meq');}
+async function saveEq(){if(!canEdit()){toast('ไม่มีสิทธิ์แก้ไข (Viewer)','error');return;}const t=E('eq-tag').value.trim();if(!t){toast('Tag required','error');return;}
+const o={tag:t,module:E('eq-module').value,mfg:E('eq-mfg').value,sn:E('eq-sn').value,power:E('eq-power').value,powerUnit:E('eq-pwrU').value,weight:E('eq-weight').value,weightUnit:E('eq-wtU').value,volts:E('eq-volts').value,amps:E('eq-amps').value,freq:E('eq-freq').value,speed:E('eq-speed').value,ins:E('eq-ins').value,duty:E('eq-duty').value,de:E('eq-de').value,nde:E('eq-nde').value,loadtype:E('eq-loadtype').value,location:E('eq-location').value,
+motorVibAlarm:parseFloat(E('eq-mval').value)||4.5,motorVibDanger:parseFloat(E('eq-mvda').value)||7.1,pumpVibAlarm:parseFloat(E('eq-pval').value)||4.5,pumpVibDanger:parseFloat(E('eq-pvda').value)||7.1};
+try{await db.collection('equipment').doc(t).set(o);const i=S.eq.findIndex(e=>e.tag===t);if(i>=0)S.eq[i]=o;else S.eq.push(o);cm('meq');pgEq(E('content'));toast(t+' saved');}catch(e){toast('Error: '+e.message,'error');}}
+async function delEq(t){if(!isAdmin()){toast('เฉพาะ Admin เท่านั้น','error');return;}if(!confirm('Delete '+t+'?'))return;try{await db.collection('equipment').doc(t).delete();S.eq=S.eq.filter(e=>e.tag!==t);pgEq(E('content'));toast('Deleted '+t,'warning');}catch(e){toast('Error: '+e.message,'error');}}
+
+
 function editEq(t){const eq=S.eq.find(e=>e.tag===t);if(!eq)return;E('meqt').textContent='Edit — '+t;
 const m={tag:'eq-tag',module:'eq-module',mfg:'eq-mfg',sn:'eq-sn',type:'eq-type',power:'eq-power',weight:'eq-weight',volts:'eq-volts',amps:'eq-amps',pf:'eq-pf',freq:'eq-freq',speed:'eq-speed',ins:'eq-ins',duty:'eq-duty',de:'eq-de',nde:'eq-nde',loadtype:'eq-loadtype',location:'eq-location'};
 Object.entries(m).forEach(([k,id])=>{if(E(id))E(id).value=eq[k]||'';});
