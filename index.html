@@ -127,6 +127,7 @@
 .sec-h{font-size:11px;font-weight:600;color:var(--accent);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.05em}
 .trend-hidden{position:absolute;left:-99999px;top:0;width:1200px;visibility:hidden;pointer-events:none}.printing-record{overflow:visible!important}
 .printing-record .sidebar,.printing-record .topbar,.printing-record .toast-c{display:none!important}
+.printing-record .insp-hide{display:none!important}
 .printing-record .main{overflow:visible!important}
 .printing-record .mo{position:static!important;display:block!important;background:#fff!important;width:100%!important;height:auto!important;overflow:visible!important;padding:0!important;align-items:flex-start!important}
 .printing-record .modal{max-height:none!important;height:auto!important;width:100%!important;max-width:100%!important;border:none!important;box-shadow:none!important;border-radius:0!important;margin:0!important;overflow:visible!important;display:block!important}
@@ -1090,11 +1091,13 @@ h+='<div class="sec-h">🔩 Bearing</div>';
 h+=`<div class="dl"><span class="dl-l">DE — ${r.brg?.de||eq?.de||'—'}</span><span class="dl-v">${bst(r.brg?.deC)}</span></div>`;
 h+=`<div class="dl"><span class="dl-l">NDE — ${r.brg?.nde||eq?.nde||'—'}</span><span class="dl-v">${bst(r.brg?.ndeC)}</span></div>`;
 // MCC Module Inspection display
+h+='<div class="insp-hide">';
 h+='<div class="sec-h">🔌 MCC Module Inspection</div>';
 S.mcc.forEach(i=>{const af=ck[i.k],act=ck[i.k+'_act'],al2=ck[i.k+'_al'];h+=`<div class="dl"><span class="dl-l">${i.l}</span><span class="dl-v" style="display:flex;gap:6px;flex-wrap:wrap">AF:${ckst(af)} Act:<span class="badge b-no">${act||'—'}</span> AL:${ckst(al2)}</span></div>`;});
 // Motor Inspection display
 h+='<div class="sec-h">🔧 Motor Inspection</div>';
 S.mot.forEach(i=>{const af=ck[i.k],act=ck[i.k+'_act'],al2=ck[i.k+'_al'];h+=`<div class="dl"><span class="dl-l">${i.l}</span><span class="dl-v" style="display:flex;gap:6px;flex-wrap:wrap">AF:${ckst(af)} Act:<span class="badge b-no">${act||'—'}</span> AL:${ckst(al2)}</span></div>`;});
+h+='</div>';
 h+='<div class="sec-h">〰 Vibration (mm/s)</div>';
 const mAl=eqMAl(eq),mDa=eqMDa(eq),pAl=eqPAl(eq),pDa=eqPDa(eq);
 h+=`<div class="dl"><span class="dl-l">Motor DE — V/H/A</span><span class="dl-v">${V(r,'mDV')} / ${vst(V(r,'mDH'),mAl,mDa)} / ${V(r,'mDA')}</span></div>`;
