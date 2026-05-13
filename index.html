@@ -595,22 +595,25 @@ async function sendLineNotify(rec,alarmEntries){
 
 // ── Select All for inspection tables ──
 function selAllCk(btn,col){
-  // Find the parent table
-  const table=btn.closest('table')||btn.closest('.card').querySelector('table');
+  const table=btn.closest('table');
   if(!table)return;
   const rows=table.querySelectorAll('tbody tr');
   rows.forEach(tr=>{
-    // col: af=As Found (3rd td), ac=Action (4th td), al=As Left (5th td)
     const tdIdx={af:2,ac:3,al:4}[col];
     const td=tr.querySelectorAll('td')[tdIdx];
     if(!td)return;
-    const btns=td.querySelectorAll('.cb');
+    const cbs=td.querySelectorAll('.cb');
+    if(!cbs.length)return;
     if(col==='ac'){
-      // Action — click "Visual" button
-      btns.forEach(b=>{if(b.textContent.trim()==='Visual'||b.textContent.trim()==='V')b.click();});
+      // Action column — click 'N/A' button (last button in each action group)
+      let found=false;
+      cbs.forEach(b=>{const t=b.textContent.trim();if(t==='N/A'||t==='n/a'){b.click();found=true;}});
+      if(!found&&cbs.length)cbs[cbs.length-1].click();
     }else{
-      // As Found / As Left — click "ok" button
-      btns.forEach(b=>{if(b.textContent.trim()==='ok'||b.textContent.trim()==='OK')b.click();});
+      // As Found / As Left — target 'ok' button
+      let found=false;
+      cbs.forEach(b=>{const t=b.textContent.trim().toLowerCase();if(t==='ok'){b.click();found=true;}});
+      if(!found&&cbs[0])cbs[0].click();
     }
   });
 }
@@ -1078,12 +1081,12 @@ h+=`<div class="dl"><span class="dl-l">Module</span><span class="dl-v">${eq?.mod
 h+=`<div class="dl"><span class="dl-l">Purpose</span><span class="dl-v"><span class="badge b-in">${r.purp||r.purpose||'PM'}</span></span></div>`;
 h+=`<div class="dl"><span class="dl-l">Inspector</span><span class="dl-v">${r.insp||r.inspector||'—'}</span></div>`;
 h+=`<div class="dl"><span class="dl-l">Approved by</span><span class="dl-v">${r.appr||r.approver||'—'}</span></div>`;
-h+='<div class="sec-h">⊞ Machine Data</div>';
-h+=`<div class="dl"><span class="dl-l">Manufacturer / S.N.</span><span class="dl-v">${eq?.mfg||'—'} / ${eq?.sn||'—'}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Power / Weight</span><span class="dl-v">${eq?.power||'—'} ${eq?.powerUnit||'HP'} / ${eq?.weight||'—'} ${eq?.weightUnit||'lbs'}</span></div>`;
-if(eq?.type)h+=`<div class="dl"><span class="dl-l">Type</span><span class="dl-v">${eq.type}</span></div>`;
-h+=`<div class="dl"><span class="dl-l">Volts / Amps / RPM</span><span class="dl-v">${eq?.volts||'—'} / ${eq?.amps||'—'} / ${eq?.speed||'—'}</span></div>`;
-if(eq?.pf)h+=`<div class="dl"><span class="dl-l">Power Factor (P.F)</span><span class="dl-v">${eq.pf}</span></div>`;
+
+
+
+
+
+
 h+='<div class="sec-h">🔩 Bearing</div>';
 h+=`<div class="dl"><span class="dl-l">DE — ${r.brg?.de||eq?.de||'—'}</span><span class="dl-v">${bst(r.brg?.deC)}</span></div>`;
 h+=`<div class="dl"><span class="dl-l">NDE — ${r.brg?.nde||eq?.nde||'—'}</span><span class="dl-v">${bst(r.brg?.ndeC)}</span></div>`;
@@ -1370,43 +1373,51 @@ function printTrend(){
 // ══════════ EQUIPMENT ══════════
 function pgEq(el){
   el.innerHTML='';
-  // Header card with search and add
   const hdc=document.createElement('div');hdc.className='card';
-  const top=document.createElement('div');top.style.cssText='display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px';
+  const top=document.createElement('div');top.style.cssText='display:flex;align-items:center;gap:10px;margin-bottom:12px';
   const title=document.createElement('div');title.className='st';title.id='eq-title';title.textContent='Equipment ('+S.eq.length+')';
   top.appendChild(title);
-  if(canEdit()){
-    const ab=document.createElement('button');ab.className='btn btn-p';ab.textContent='+ Add';ab.onclick=addEq;
-    top.appendChild(ab);
-  }
+  if(canEdit()){const ab=document.createElement('button');ab.className='btn btn-p';ab.textContent='+ Add';ab.onclick=addEq;top.appendChild(ab);}
   hdc.appendChild(top);
-  // Search
   const si=document.createElement('input');si.className='fi';si.placeholder='🔍 ค้นหา Tag, Module หรือ Type...';
   si.oninput=()=>renderEqList(si.value.toLowerCase().trim());
   hdc.appendChild(si);
   el.appendChild(hdc);
-  // List container
-  const list=document.createElement('div');list.id='eq-list-c';
-  el.appendChild(list);
+  const list=document.createElement('div');list.id='eq-list-c';el.appendChild(list);
 
   function renderEqList(q){
     list.innerHTML='';
     const filtered=q?S.eq.filter(e=>(e.tag||'').toLowerCase().includes(q)||(e.module||e.mod||'').toLowerCase().includes(q)||(e.type||'').toLowerCase().includes(q)):S.eq;
-    E('eq-title').textContent='Equipment ('+filtered.length+(q?'/'+S.eq.length:'')+')';
-    if(!filtered.length){list.innerHTML='<div class="card" style="text-align:center;padding:30px;color:var(--text3)">ไม่พบอุปกรณ์</div>';return;}
+    const t=E('eq-title');if(t)t.textContent='Equipment ('+filtered.length+(q?'/'+S.eq.length:'')+')';
+    if(!filtered.length){
+      const empty=document.createElement('div');empty.className='card';empty.style.cssText='text-align:center;padding:30px;color:var(--text3)';
+      empty.textContent='ไม่พบอุปกรณ์';list.appendChild(empty);return;
+    }
     filtered.forEach(eq=>{
-      const rs=S.rec.filter(r=>r.tag===eq.tag),la=[...rs].sort((a,b)=>b.date.localeCompare(a.date))[0];
-      const mv=la?maxMotorVib(la):0,pv=la?maxPumpVib(la):0;
-      const mAl=mv>=eqMAl(eq)||mv>=eqMDa(eq),pAl=pv>=eqPAl(eq)||pv>=eqPDa(eq);
-      const dc=!la?'d-x':mAl||pAl?'d-a':'d-g';
-      const d=document.createElement('div');d.className='eq-i';
-      d.innerHTML='<span class="dot '+dc+'" style="flex-shrink:0"></span>'+
-        '<div style="flex:1;min-width:0">'+
-          '<div style="font-weight:600">'+eq.tag+'</div>'+
-          '<div style="font-size:11px;color:var(--text3);margin-top:2px">'+(eq.module||eq.mod||'')+' | '+(eq.type?eq.type+' | ':'')+(eq.power||eq.pwr||'')+' '+(eq.powerUnit||'HP')+'</div>'+
-        '</div>'+
-        (canEdit()?'<div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="editEq(\''+eq.tag+'\')">Edit</button>'+(isAdmin()?'<button class="btn btn-sm btn-d" onclick="delEq(\''+eq.tag+'\')">Del</button>':'')+'</div>':'');
-      list.appendChild(d);
+      const rs=S.rec.filter(r=>r.tag===eq.tag);
+      const la=[...rs].sort((a,b)=>b.date.localeCompare(a.date))[0];
+      const pv=la?maxPumpVib(la):0,mv=la?maxMotorVib(la):0;
+      const mAlarm=mv>=eqMAl(eq)||mv>=eqMDa(eq),pAlarm=pv>=eqPAl(eq)||pv>=eqPDa(eq);
+      const dc=!la?'d-x':mAlarm||pAlarm?'d-a':'d-g';
+      const row=document.createElement('div');row.className='eq-i';
+      // Left side
+      const dot=document.createElement('span');dot.className='dot '+dc;dot.style.flexShrink='0';
+      const info=document.createElement('div');info.style.cssText='flex:1;min-width:0';
+      const tagDiv=document.createElement('div');tagDiv.style.fontWeight='600';tagDiv.textContent=eq.tag;
+      const subDiv=document.createElement('div');subDiv.style.cssText='font-size:11px;color:var(--text3);margin-top:2px';
+      subDiv.textContent=(eq.module||eq.mod||'')+(eq.type?' | '+eq.type:'')+(eq.power?' | '+eq.power+' '+(eq.powerUnit||'HP'):'');
+      info.appendChild(tagDiv);info.appendChild(subDiv);
+      row.appendChild(dot);row.appendChild(info);
+      // Buttons
+      if(canEdit()){
+        const btns=document.createElement('div');btns.style.cssText='display:flex;gap:6px;flex-shrink:0';
+        const eb=document.createElement('button');eb.className='btn btn-sm';eb.textContent='Edit';
+        eb.addEventListener('click',()=>editEq(eq.tag));btns.appendChild(eb);
+        if(isAdmin()){const db2=document.createElement('button');db2.className='btn btn-sm btn-d';db2.textContent='Del';
+          db2.addEventListener('click',()=>delEq(eq.tag));btns.appendChild(db2);}
+        row.appendChild(btns);
+      }
+      list.appendChild(row);
     });
   }
   renderEqList('');
