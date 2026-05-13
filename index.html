@@ -126,7 +126,8 @@
 .dl-l{color:var(--text3);font-size:12px}.dl-v{font-family:var(--mono);font-size:13px;text-align:right}
 .sec-h{font-size:11px;font-weight:600;color:var(--accent);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.05em}
 .trend-hidden{position:absolute;left:-99999px;top:0;width:1200px;visibility:hidden;pointer-events:none}.printing-record{overflow:visible!important}
-.printing-record .sidebar,.printing-record .topbar,.printing-record .content,.printing-record .main,.printing-record .app,.printing-record .toast-c{display:none!important}
+.printing-record .sidebar,.printing-record .topbar,.printing-record .toast-c{display:none!important}
+.printing-record .main{overflow:visible!important}
 .printing-record .mo{position:static!important;display:block!important;background:#fff!important;width:100%!important;height:auto!important;overflow:visible!important;padding:0!important;align-items:flex-start!important}
 .printing-record .modal{max-height:none!important;height:auto!important;width:100%!important;max-width:100%!important;border:none!important;box-shadow:none!important;border-radius:0!important;margin:0!important;overflow:visible!important;display:block!important}
 .printing-record .mb{max-height:none!important;height:auto!important;overflow:visible!important;padding:12px!important}
@@ -1370,68 +1371,86 @@ function printTrend(){
 
 // ══════════ EQUIPMENT ══════════
 function pgEq(el){
-  el.innerHTML='';
-  // Header
-  const hdr=document.createElement('div');hdr.className='card';hdr.style.marginBottom='12px';
-  const row1=document.createElement('div');row1.style.cssText='display:flex;align-items:center;gap:10px;margin-bottom:10px';
-  const titleEl=document.createElement('span');titleEl.className='st';titleEl.textContent='Equipment ('+S.eq.length+')';
-  row1.appendChild(titleEl);
-  if(canEdit()){
-    const ab=document.createElement('button');ab.className='btn btn-p';ab.textContent='+ Add';
-    ab.onclick=addEq;row1.appendChild(ab);
+  try{
+    el.innerHTML='';
+    const hdr=document.createElement('div');hdr.className='card';hdr.style.marginBottom='12px';
+    const row1=document.createElement('div');row1.style.cssText='display:flex;align-items:center;gap:10px;margin-bottom:10px';
+    const titleEl=document.createElement('span');titleEl.className='st';titleEl.textContent='Equipment ('+(S.eq?.length||0)+')';
+    row1.appendChild(titleEl);
+    if(canEdit()){
+      const ab=document.createElement('button');ab.className='btn btn-p';ab.textContent='+ Add';
+      ab.onclick=addEq;row1.appendChild(ab);
+    }
+    hdr.appendChild(row1);
+    const si=document.createElement('input');si.className='fi';
+    si.placeholder='🔍 ค้นหา Tag หรือ Module...';
+    si.id='eq-search';
+    hdr.appendChild(si);
+    el.appendChild(hdr);
+    eqRender(el,'');
+    si.oninput=function(){eqRender(el,si.value||'');};
+  }catch(err){
+    console.error('pgEq error:',err);
+    el.innerHTML='<div class="card" style="padding:20px;color:var(--red)">Error: '+err.message+'<br><small>'+err.stack+'</small></div>';
   }
-  hdr.appendChild(row1);
-  const si=document.createElement('input');si.className='fi';
-  si.placeholder='🔍 ค้นหา Tag หรือ Module...';
-  si.id='eq-search';
-  hdr.appendChild(si);
-  el.appendChild(hdr);
-  // Render all equipment items
-  eqRender(el,'');
-  // Wire search after render
-  si.oninput=()=>eqRender(el,si.value||'');
 }
 function eqRender(el,raw){
-  const q=raw.toLowerCase().trim();
-  el.querySelectorAll('.eq-i').forEach(x=>x.remove());
-  const titleEl=el.querySelector('.st');
-  const filtered=q?S.eq.filter(e=>(e.tag||'').toLowerCase().includes(q)||(e.module||e.mod||'').toLowerCase().includes(q)):S.eq;
-  if(titleEl)titleEl.textContent='Equipment ('+filtered.length+(q&&filtered.length!==S.eq.length?'/'+S.eq.length:'')+')';
-  if(!filtered.length){
-    const emp=document.createElement('div');emp.className='eq-i card';
-    emp.style.cssText='text-align:center;padding:24px;color:var(--text3)';
-    emp.textContent='ไม่พบอุปกรณ์';el.appendChild(emp);return;
-  }
-  filtered.forEach(eq=>{
-    const rs=S.rec.filter(r=>r.tag===eq.tag);
-    const la=[...rs].sort((a,b)=>b.date.localeCompare(a.date))[0];
-    const pv=la?maxPumpVib(la):0,mv=la?maxMotorVib(la):0;
-    const bad=mv>=eqMAl(eq)||mv>=eqMDa(eq)||pv>=eqPAl(eq)||pv>=eqPDa(eq);
-    const dc=!la?'d-x':bad?'d-a':'d-g';
-    const d=document.createElement('div');d.className='eq-i';
-    d.innerHTML=
-      '<span class="dot '+dc+'" style="flex-shrink:0"></span>'+
-      '<div style="flex:1;min-width:0">'+
-        '<div style="font-weight:600">'+eq.tag+'</div>'+
-        '<div style="font-size:11px;color:var(--text3)">'+
-          (eq.module||eq.mod||'')+
-          (eq.type?' | '+eq.type:'')+
-          (eq.power?' | '+eq.power+' '+(eq.powerUnit||'HP'):'')+
-          (la?' | Last PM: '+la.date:'')+
-        '</div>'+
-      '</div>';
-    if(canEdit()){
-      const bw=document.createElement('div');bw.style.cssText='display:flex;gap:6px;flex-shrink:0';
-      const eb=document.createElement('button');eb.className='btn btn-sm';eb.textContent='Edit';
-      eb.onclick=((t)=>()=>editEq(t))(eq.tag);bw.appendChild(eb);
-      if(isAdmin()){
-        const db3=document.createElement('button');db3.className='btn btn-sm btn-d';db3.textContent='Del';
-        db3.onclick=((t)=>()=>delEq(t))(eq.tag);bw.appendChild(db3);
-      }
-      d.appendChild(bw);
+  try{
+    const q=(raw||'').toLowerCase().trim();
+    el.querySelectorAll('.eq-i').forEach(function(x){x.remove();});
+    const titleEl=el.querySelector('.st');
+    const list=S.eq||[];
+    const filtered=q?list.filter(function(e){return (e.tag||'').toLowerCase().includes(q)||(e.module||e.mod||'').toLowerCase().includes(q);}):list;
+    if(titleEl)titleEl.textContent='Equipment ('+filtered.length+(q&&filtered.length!==list.length?'/'+list.length:'')+')';
+    if(!filtered.length){
+      const emp=document.createElement('div');emp.className='eq-i card';
+      emp.style.cssText='text-align:center;padding:24px;color:var(--text3)';
+      emp.textContent=q?'ไม่พบอุปกรณ์ที่ค้นหา':'ยังไม่มีอุปกรณ์ — กด + Add เพื่อเพิ่ม';
+      el.appendChild(emp);return;
     }
-    el.appendChild(d);
-  });
+    filtered.forEach(function(eq){
+      const rs=(S.rec||[]).filter(function(r){return r.tag===eq.tag;});
+      const la=rs.length?rs.slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'');})[0]:null;
+      let bad=false;
+      try{
+        const pv=la?maxPumpVib(la):0,mv=la?maxMotorVib(la):0;
+        bad=mv>=eqMAl(eq)||mv>=eqMDa(eq)||pv>=eqPAl(eq)||pv>=eqPDa(eq);
+      }catch(e){bad=false;}
+      const dc=!la?'d-x':bad?'d-a':'d-g';
+      const d=document.createElement('div');d.className='eq-i';
+      d.innerHTML=
+        '<span class="dot '+dc+'" style="flex-shrink:0"></span>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-weight:600">'+(eq.tag||'(no tag)')+'</div>'+
+          '<div style="font-size:11px;color:var(--text3)">'+
+            (eq.module||eq.mod||'')+
+            (eq.type?' | '+eq.type:'')+
+            (eq.power?' | '+eq.power+' '+(eq.powerUnit||'HP'):'')+
+            (la&&la.date?' | Last PM: '+la.date:'')+
+          '</div>'+
+        '</div>';
+      if(canEdit()){
+        const bw=document.createElement('div');bw.style.cssText='display:flex;gap:6px;flex-shrink:0';
+        const eb=document.createElement('button');eb.className='btn btn-sm';eb.textContent='Edit';
+        const tagCapture=eq.tag;
+        eb.onclick=function(){editEq(tagCapture);};
+        bw.appendChild(eb);
+        if(isAdmin()){
+          const db3=document.createElement('button');db3.className='btn btn-sm btn-d';db3.textContent='Del';
+          db3.onclick=function(){delEq(tagCapture);};
+          bw.appendChild(db3);
+        }
+        d.appendChild(bw);
+      }
+      el.appendChild(d);
+    });
+  }catch(err){
+    console.error('eqRender error:',err);
+    const errDiv=document.createElement('div');errDiv.className='eq-i card';
+    errDiv.style.cssText='padding:20px;color:var(--red)';
+    errDiv.textContent='Render error: '+err.message;
+    el.appendChild(errDiv);
+  }
 }
 
 function editEq(t){const eq=S.eq.find(e=>e.tag===t);if(!eq)return;E('meqt').textContent='Edit — '+t;
