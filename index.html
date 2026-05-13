@@ -605,10 +605,8 @@ function selAllCk(btn,col){
     const cbs=td.querySelectorAll('.cb');
     if(!cbs.length)return;
     if(col==='ac'){
-      // Action column — click 'N/A' button (last button in each action group)
-      let found=false;
-      cbs.forEach(b=>{const t=b.textContent.trim();if(t==='N/A'||t==='n/a'){b.click();found=true;}});
-      if(!found&&cbs.length)cbs[cbs.length-1].click();
+      // Action column — click FIRST button (Cleaning / Re-Tight)
+      if(cbs.length)cbs[0].click();
     }else{
       // As Found / As Left — target 'ok' button
       let found=false;
@@ -1373,54 +1371,64 @@ function printTrend(){
 // ══════════ EQUIPMENT ══════════
 function pgEq(el){
   el.innerHTML='';
-  const hdc=document.createElement('div');hdc.className='card';
-  const top=document.createElement('div');top.style.cssText='display:flex;align-items:center;gap:10px;margin-bottom:12px';
-  const title=document.createElement('div');title.className='st';title.id='eq-title';title.textContent='Equipment ('+S.eq.length+')';
-  top.appendChild(title);
-  if(canEdit()){const ab=document.createElement('button');ab.className='btn btn-p';ab.textContent='+ Add';ab.onclick=addEq;top.appendChild(ab);}
-  hdc.appendChild(top);
-  const si=document.createElement('input');si.className='fi';si.placeholder='🔍 ค้นหา Tag, Module หรือ Type...';
-  si.oninput=()=>renderEqList(si.value.toLowerCase().trim());
-  hdc.appendChild(si);
-  el.appendChild(hdc);
-  const list=document.createElement('div');list.id='eq-list-c';el.appendChild(list);
 
-  function renderEqList(q){
-    list.innerHTML='';
-    const filtered=q?S.eq.filter(e=>(e.tag||'').toLowerCase().includes(q)||(e.module||e.mod||'').toLowerCase().includes(q)||(e.type||'').toLowerCase().includes(q)):S.eq;
-    const t=E('eq-title');if(t)t.textContent='Equipment ('+filtered.length+(q?'/'+S.eq.length:'')+')';
+  // ── Header ──
+  const hdr=document.createElement('div');hdr.className='card';hdr.style.marginBottom='12px';
+  const row1=document.createElement('div');row1.style.cssText='display:flex;align-items:center;gap:10px;margin-bottom:10px';
+  const titleEl=document.createElement('div');titleEl.className='st';titleEl.textContent='Equipment ('+S.eq.length+')';
+  row1.appendChild(titleEl);
+  if(canEdit()){
+    const ab=document.createElement('button');ab.className='btn btn-p';ab.textContent='+ Add';
+    ab.onclick=addEq;row1.appendChild(ab);
+  }
+  hdr.appendChild(row1);
+  const si=document.createElement('input');si.className='fi';
+  si.placeholder='🔍 ค้นหา Tag หรือ Module...';
+  si.oninput=()=>doFilter();
+  hdr.appendChild(si);
+  el.appendChild(hdr);
+
+  // ── List ──
+  function doFilter(){
+    const q=(si.value||'').toLowerCase().trim();
+    const filtered=q?S.eq.filter(e=>(e.tag||'').toLowerCase().includes(q)||(e.module||e.mod||'').toLowerCase().includes(q)):S.eq;
+    titleEl.textContent='Equipment ('+filtered.length+(q&&filtered.length!==S.eq.length?'/'+S.eq.length:'')+')';
+    // Remove old rows
+    el.querySelectorAll('.eq-i').forEach(x=>x.remove());
     if(!filtered.length){
-      const empty=document.createElement('div');empty.className='card';empty.style.cssText='text-align:center;padding:30px;color:var(--text3)';
-      empty.textContent='ไม่พบอุปกรณ์';list.appendChild(empty);return;
+      const emp=document.createElement('div');emp.className='card';
+      emp.style.cssText='text-align:center;padding:24px;color:var(--text3)';
+      emp.textContent='ไม่พบอุปกรณ์';emp.classList.add('eq-i');el.appendChild(emp);return;
     }
     filtered.forEach(eq=>{
       const rs=S.rec.filter(r=>r.tag===eq.tag);
       const la=[...rs].sort((a,b)=>b.date.localeCompare(a.date))[0];
       const pv=la?maxPumpVib(la):0,mv=la?maxMotorVib(la):0;
-      const mAlarm=mv>=eqMAl(eq)||mv>=eqMDa(eq),pAlarm=pv>=eqPAl(eq)||pv>=eqPDa(eq);
-      const dc=!la?'d-x':mAlarm||pAlarm?'d-a':'d-g';
-      const row=document.createElement('div');row.className='eq-i';
-      // Left side
+      const bad=mv>=eqMAl(eq)||mv>=eqMDa(eq)||pv>=eqPAl(eq)||pv>=eqPDa(eq);
+      const dc=!la?'d-x':bad?'d-a':'d-g';
+      const d=document.createElement('div');d.className='eq-i';
       const dot=document.createElement('span');dot.className='dot '+dc;dot.style.flexShrink='0';
       const info=document.createElement('div');info.style.cssText='flex:1;min-width:0';
-      const tagDiv=document.createElement('div');tagDiv.style.fontWeight='600';tagDiv.textContent=eq.tag;
-      const subDiv=document.createElement('div');subDiv.style.cssText='font-size:11px;color:var(--text3);margin-top:2px';
-      subDiv.textContent=(eq.module||eq.mod||'')+(eq.type?' | '+eq.type:'')+(eq.power?' | '+eq.power+' '+(eq.powerUnit||'HP'):'');
-      info.appendChild(tagDiv);info.appendChild(subDiv);
-      row.appendChild(dot);row.appendChild(info);
-      // Buttons
+      info.innerHTML='<div style="font-weight:600">'+eq.tag+'</div>'+
+        '<div style="font-size:11px;color:var(--text3)">'+(eq.module||eq.mod||'')+
+        (eq.type?' | '+eq.type:'')+
+        (eq.power?' | '+eq.power+' '+(eq.powerUnit||'HP'):'')+
+        (la?' | Last PM: '+la.date:'')+'</div>';
+      d.appendChild(dot);d.appendChild(info);
       if(canEdit()){
-        const btns=document.createElement('div');btns.style.cssText='display:flex;gap:6px;flex-shrink:0';
+        const bw=document.createElement('div');bw.style.cssText='display:flex;gap:6px;flex-shrink:0';
         const eb=document.createElement('button');eb.className='btn btn-sm';eb.textContent='Edit';
-        eb.addEventListener('click',()=>editEq(eq.tag));btns.appendChild(eb);
-        if(isAdmin()){const db2=document.createElement('button');db2.className='btn btn-sm btn-d';db2.textContent='Del';
-          db2.addEventListener('click',()=>delEq(eq.tag));btns.appendChild(db2);}
-        row.appendChild(btns);
+        eb.onclick=()=>editEq(eq.tag);bw.appendChild(eb);
+        if(isAdmin()){
+          const db3=document.createElement('button');db3.className='btn btn-sm btn-d';db3.textContent='Del';
+          db3.onclick=()=>delEq(eq.tag);bw.appendChild(db3);
+        }
+        d.appendChild(bw);
       }
-      list.appendChild(row);
+      el.appendChild(d);
     });
   }
-  renderEqList('');
+  doFilter();
 }
 
 function editEq(t){const eq=S.eq.find(e=>e.tag===t);if(!eq)return;E('meqt').textContent='Edit — '+t;
