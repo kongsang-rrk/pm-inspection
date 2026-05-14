@@ -1137,111 +1137,76 @@ setTimeout(()=>{
   if(E('de-mini'))new Chart(E('de-mini'),{type:'bar',data:{labels:['Cu','Cv','Cw','Vu','Vv','Vw'],datasets:[{data:[el2.cu||0,el2.cv||0,el2.cw||0,el2.vu||0,el2.vv||0,el2.vw||0],backgroundColor:['rgba(63,185,80,.7)','rgba(63,185,80,.5)','rgba(63,185,80,.3)','rgba(188,140,255,.7)','rgba(188,140,255,.5)','rgba(188,140,255,.3)'],borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false},title:{display:true,text:'Current & Voltage',color:'#8b949e',font:{size:10}}},scales:{y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8b949e',font:{size:9}}},x:{grid:{display:false},ticks:{color:'#8b949e',font:{size:9}}}}}});
 },100);}
 function exportPDF(){
-  // Get content from modal body
   const mb=document.getElementById('mdetb');
   if(!mb){window.print();return;}
-  // Get modal header (tag + date)
   const mh=document.querySelector('#mdet .mh');
-  const title=mh?mh.querySelector('div')?.textContent||'PM Record':'PM Record';
-  // Get current styles for dark→light conversion
+  const titleText=mh?mh.querySelector('div')?.textContent||'PM Record':'PM Record';
+
+  // Extract chart data from current charts in modal
+  // Find canvas elements and capture as images
+  const canvases=mb.querySelectorAll('canvas');
+  const chartImages={};
+  canvases.forEach(cv=>{
+    try{chartImages[cv.id]=cv.toDataURL('image/png');}catch(e){}
+  });
+
+  // Clone modal body HTML
+  const clone=mb.cloneNode(true);
+  // Replace canvas elements with img tags (chart images)
+  clone.querySelectorAll('canvas').forEach(cv=>{
+    const img=document.createElement('img');
+    img.src=chartImages[cv.id]||'';
+    img.style.cssText='width:100%;max-height:220px;object-fit:contain';
+    cv.parentNode.replaceChild(img,cv);
+  });
+  // Remove buttons from clone
+  clone.querySelectorAll('button,.btn').forEach(b=>b.remove());
+
   const html=`<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>${title}</title>
+<title>${titleText}</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;color:#000;background:#fff;padding:12mm}
-  .dl{display:flex;align-items:flex-start;padding:6px 0;border-bottom:1px solid #ddd;gap:12px}
-  .dl-l{width:200px;flex-shrink:0;color:#555;font-size:12px}
+  body{font-family:Arial,sans-serif;font-size:12px;color:#000;background:#fff;padding:10mm}
+  .dl{display:flex;align-items:flex-start;padding:5px 0;border-bottom:1px solid #eee;gap:12px}
+  .dl-l{width:180px;flex-shrink:0;color:#555;font-size:11px}
   .dl-v{flex:1;font-weight:500}
-  .sec-h{font-size:12px;font-weight:700;color:#1a5fb4;text-transform:uppercase;letter-spacing:.05em;margin:14px 0 6px;padding-bottom:4px;border-bottom:2px solid #1a5fb4}
-  .insp-hide{display:none}
-  canvas{max-height:180px;width:100%}
-  .card{border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:12px}
-  .cw{height:180px;margin:8px 0}
-  h2{font-size:15px;margin-bottom:4px}
-  .sub{font-size:12px;color:#666;margin-bottom:12px}
-  @media print{body{padding:8mm}@page{size:A4 portrait;margin:8mm}}
+  .sec-h{font-size:11px;font-weight:700;color:#1a5fb4;text-transform:uppercase;letter-spacing:.05em;margin:12px 0 5px;padding-bottom:3px;border-bottom:2px solid #1a5fb4}
+  .insp-hide{display:none!important}
+  .card{border:1px solid #ddd;border-radius:6px;padding:10px;margin-bottom:10px;break-inside:avoid}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .cw{height:180px}
+  img{width:100%;height:100%;object-fit:contain}
+  h2{font-size:14px;margin-bottom:2px;font-weight:700}
+  .sub{font-size:11px;color:#666;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #ddd}
+  .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;border:1px solid #ccc}
+  .b-ok{background:#e8f5e9;color:#2e7d32;border-color:#a5d6a7}
+  .b-al{background:#fff8e1;color:#f57f17;border-color:#ffe082}
+  .b-nk{background:#ffebee;color:#c62828;border-color:#ef9a9a}
+  .b-no{background:#f5f5f5;color:#757575}
+  .mono{font-family:monospace}
+  table{width:100%;border-collapse:collapse;font-size:11px}
+  th,td{border:1px solid #ddd;padding:4px 6px;text-align:left}
+  th{background:#f5f5f5;font-weight:600}
+  @media print{body{padding:6mm}@page{size:A4 portrait;margin:8mm}.card{break-inside:avoid}}
 </style>
 </head>
 <body>
-<h2>${title}</h2>
-<div class="sub">PM Inspection System — ${S.set.plant||'TCC Plant GEN'}</div>
-${mb.innerHTML}
-<script>
-  // Remove buttons in print window
-  document.querySelectorAll('button,.btn').forEach(b=>b.remove());
-  // Fix colors for print
-  document.querySelectorAll('[style*="color:var"]').forEach(el=>{el.style.color='';});
-  window.onload=()=>{
-    setTimeout(()=>{window.print();window.close();},400);
-  };
-<\/script>
+<h2>${titleText}</h2>
+<div class="sub">PM Inspection System — ${S.set.plant||'TCC Plant GEN'} | Export: ${new Date().toLocaleDateString('th-TH')}</div>
+${clone.innerHTML}
 </body>
 </html>`;
-  const w=window.open('','_blank','width=800,height=900');
+
+  const w=window.open('','_blank','width=820,height=1000');
+  if(!w){toast('กรุณาอนุญาต popup ในบราวเซอร์','warning');return;}
   w.document.write(html);
   w.document.close();
+  w.onload=()=>setTimeout(()=>w.print(),300);
 }
 
-
-
-// ══════════ ALARM LOG PAGE — Feature 7 ══════════
-async function pgAlarmLog(el){
-  // Always reload fresh from Firestore
-  try{
-    const snap=await db.collection('alarmlog').orderBy('date','desc').limit(500).get();
-    S.alogs=snap.docs.map(d=>({id:d.id,...d.data()}));
-  }catch(e){console.error(e);}
-  // Build header without nested quote conflicts
-  const wrap=document.createElement('div');wrap.className='card';
-  const sh=document.createElement('div');sh.className='sh';sh.style.marginBottom='14px';
-  const title=document.createElement('div');title.className='st';title.textContent='🔔 Alarm Log ('+S.alogs.length+')';
-  const btns=document.createElement('div');btns.style.cssText='display:flex;gap:6px';
-  const bRescan=document.createElement('button');bRescan.className='btn btn-sm btn-s';bRescan.textContent='↺ Re-scan';
-  bRescan.onclick=()=>backfillAlarmLog().then(()=>pgAlarmLog(el));
-  const bClear=document.createElement('button');bClear.className='btn btn-sm btn-d';bClear.textContent='Clear All';
-  bClear.onclick=clearAlarmLog;
-  btns.append(bRescan,bClear);sh.append(title,btns);wrap.appendChild(sh);
-  const tbl=document.createElement('div');
-  tbl.style.cssText='overflow-x:auto;overflow-y:auto;max-height:520px;border:1px solid var(--border);border-radius:var(--r)';
-  tbl.innerHTML='<table class="ht" style="min-width:700px">'
-    +'<thead style="position:sticky;top:0;z-index:2;background:var(--bg3)">'
-    +'<tr><th>Date</th><th>Tag</th><th>Location</th><th>Type</th><th>Value</th><th>Limit</th><th>WO</th></tr></thead>'
-    +'<tbody id="alog-tb"></tbody></table>';
-  wrap.appendChild(tbl);el.innerHTML='';el.appendChild(wrap);
-  const tb=E('alog-tb');if(!tb)return;
-  if(!S.alogs.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">ยังไม่มี Alarm Log</td></tr>';return;}
-  // Summary bar
-  const total=S.alogs.length,dangers=S.alogs.filter(a=>a.type==='danger').length,alarms=S.alogs.filter(a=>a.type==='alarm').length;
-  const summary=document.createElement('div');
-  summary.style.cssText='display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap';
-  summary.innerHTML='<span class="badge b-no">ทั้งหมด: '+total+'</span>'
-    +'<span class="badge b-nk">⛔ Danger: '+dangers+'</span>'
-    +'<span class="badge b-al">⚠ Alarm: '+alarms+'</span>';
-  wrap.insertBefore(summary,tbl);
-  S.alogs.forEach(a=>{
-    const isDa=a.type==='danger';
-    const val=typeof a.val==='number'?a.val.toFixed(2):a.val;
-    const limit=typeof a.limit==='number'?a.limit:a.limit;
-    tb.innerHTML+=
-      '<tr>'
-      +'<td class="mono" style="white-space:nowrap">'+a.date+'</td>'
-      +'<td style="font-weight:600">'+a.tag+'</td>'
-      +'<td style="font-size:12px">'+a.loc.replace(/_/g,' ')+'</td>'
-      +'<td><span class="badge '+(isDa?'b-nk':'b-al')+'">'+(isDa?'⛔ Danger':'⚠ Alarm')+'</span></td>'
-      +'<td class="mono" style="color:'+(isDa?'var(--red)':'var(--amber)')+'">'+val+'</td>'
-      +'<td class="mono" style="color:var(--text3)">'+limit+'</td>'
-      +'<td style="font-size:12px;color:var(--text3)">'+(a.wo||'—')+'</td>'
-      +'</tr>';
-  });
-}
-async function clearAlarmLog(){if(!isAdmin()){toast('เฉพาะ Admin เท่านั้น','error');return;}if(!confirm('ลบ Alarm Log ทั้งหมด?'))return;
-  try{const snp=await db.collection('alarmlog').get();const b=db.batch();snp.docs.forEach(d=>b.delete(d.ref));await b.commit();S.alogs=[];pgAlarmLog(E('content'));toast('ล้าง Alarm Log แล้ว','warning');}catch(e){toast('Error: '+e.message,'error');}}
-
-// ══════════ TRENDS ══════════
-let tc=[];
 function pgTrend(el){
   const opts=S.eq.map(e=>({value:e.tag,label:e.tag+' — '+(e.module||e.mod||'')}));
   if(!S._trTags)S._trTags=S.eq[0]?[S.eq[0].tag]:[];
