@@ -812,6 +812,7 @@ function pgAlert(el){
 }
 
 // ══════════ CHECK SHEET ══════════
+let tc=[];
 function pgCheck(el){S.cf={ck:{},sev:'5'};
 const eqOpts=S.eq.map(e=>({value:e.tag,label:e.tag+(e.module?' — '+e.module:'')}));
 const purpOpts=[{value:'PM',label:'PM'},{value:'Routine',label:'Routine'},{value:'Investigation',label:'Investigation'},{value:'CM',label:'CM'}];
