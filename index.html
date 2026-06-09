@@ -1487,6 +1487,7 @@ function eqRender(el,raw){
   }
 }
 
+const eqFlds=['eq-tag','eq-module','eq-mfg','eq-sn','eq-type','eq-power','eq-weight','eq-volts','eq-amps','eq-pf','eq-freq','eq-speed','eq-ins','eq-duty','eq-de','eq-nde','eq-loadtype','eq-location'];
 function addEq(){E('meqt').textContent='Add Equipment';eqFlds.forEach(id=>{if(E(id))E(id).value='';});E('eq-mval').value='2.8';E('eq-mvda').value='4.5';E('eq-pval').value='5.1';E('eq-pvda').value='8.5';E('eq-pwrU').value='kW';E('eq-wtU').value='lbs';document.querySelectorAll('#meq .unit-btn').forEach(b=>b.classList.remove('active'));document.querySelector('#meq .unit-btn')?.classList.add('active');om('meq');}
 function editEq(t){const eq=S.eq.find(e=>e.tag===t);if(!eq)return;E('meqt').textContent='Edit — '+t;
 const m={tag:'eq-tag',module:'eq-module',mfg:'eq-mfg',sn:'eq-sn',type:'eq-type',power:'eq-power',weight:'eq-weight',volts:'eq-volts',amps:'eq-amps',pf:'eq-pf',freq:'eq-freq',speed:'eq-speed',ins:'eq-ins',duty:'eq-duty',de:'eq-de',nde:'eq-nde',loadtype:'eq-loadtype',location:'eq-location'};
