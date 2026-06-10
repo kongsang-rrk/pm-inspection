@@ -1125,7 +1125,13 @@ function populateCheck(r,id){
   // Method 1: data-ck-key attribute (new style)
   document.querySelectorAll('.cb[data-ck-key]').forEach(btn=>{
     const key=btn.dataset.ckKey,val=btn.dataset.ckVal;
-    if(key&&val){btn.className='cb';if(ck[key]===val)btn.className='cb '+val;}
+    if(!key||!val)return;
+    btn.className='cb';
+    if(ck[key]===val){
+      // Action buttons store text value but display as 'ok' class
+      const isAct=key.endsWith('_act');
+      btn.className=isAct?'cb ok':'cb '+val;
+    }
   });
   // Method 2: onclick attribute (legacy)
   document.querySelectorAll('.cb[onclick]').forEach(btn=>{
