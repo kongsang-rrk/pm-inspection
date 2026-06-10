@@ -624,7 +624,7 @@ function selAllCk(btn,col){
 async function loadAll(){try{
   const [es,rs,ss,al]=await Promise.all([
     db.collection('equipment').get(),
-    db.collection('records').orderBy('date','desc').get(),
+    db.collection('records').orderBy('date','desc').limit(300).get(),
     db.collection('settings').doc('global').get(),
     db.collection('alarmlog').orderBy('date','desc').limit(200).get()
   ]);
@@ -635,7 +635,7 @@ async function loadAll(){try{
   const sf=await db.collection('settings').doc('_seeded').get();if(!sf.exists)await seed();
   // Auto-backfill: write alarm log for any existing records that exceed limits
   // Safe to run every time — deterministic doc IDs prevent duplicates
-  await backfillAlarmLog();
+  // backfillAlarmLog runs manually via Re-scan button
   applyLogo();ub();
 }catch(e){toast('Error: '+e.message,'error');}}
 
@@ -657,7 +657,7 @@ eqs.forEach(e=>b.set(db.collection('equipment').doc(e.tag),e));
 recs.forEach(r=>b.set(db.collection('records').doc(),{...r,ts:firebase.firestore.FieldValue.serverTimestamp(),by:'seed'}));
 b.set(db.collection('settings').doc('_seeded'),{done:true,at:firebase.firestore.FieldValue.serverTimestamp()});
 await b.commit();
-const [es2,rs2,al2]=await Promise.all([db.collection('equipment').get(),db.collection('records').orderBy('date','desc').get(),db.collection('alarmlog').orderBy('date','desc').limit(200).get()]);
+const [es2,rs2,al2]=await Promise.all([db.collection('equipment').get(),db.collection('records').orderBy('date','desc').limit(300).get(),db.collection('alarmlog').orderBy('date','desc').limit(200).get()]);
 S.eq=es2.docs.map(d=>({id:d.id,...d.data()}));
 S.rec=rs2.docs.map(d=>({id:d.id,...d.data()}));
 S.alogs=al2.docs.map(d=>({id:d.id,...d.data()}));
@@ -970,37 +970,110 @@ try{
 // ══════════ HISTORY ══════════
 // Feature 4: show max motor vib + max pump vib
 function pgHist(el){
+  apH._page=0;
   const opts=[{value:'',label:'All Equipment'},...S.eq.map(e=>({value:e.tag,label:e.tag}))];
-  el.innerHTML='<div class="card"><div class="sh"><div class="st">PM Records ('+S.rec.length+')</div><div id="htag-wrap" style="width:180px"></div></div>'+
-  '<div style="overflow-x:auto"><table class="ht"><thead><tr>'+
-  '<th>Date</th><th>WO</th><th>Tag</th><th>Module</th><th>Brg DE</th>'+
-  '<th title="Max vibration all positions">Motor Vib↑</th>'+
-  '<th title="Max vibration all positions">Pump Vib↑</th>'+
-  '<th>Severity</th><th></th></tr></thead><tbody id="htb"></tbody></table></div></div>';
-  const hw=E('htag-wrap');if(hw){const ss=mkSS('htag',opts,'Filter...',()=>apH());hw.appendChild(ss);}
+  el.innerHTML='';
+  const card=document.createElement('div');card.className='card';
+  // Header row
+  const sh=document.createElement('div');sh.className='sh';sh.style.flexWrap='wrap';sh.style.gap='8px';
+  const title=document.createElement('div');title.className='st';title.textContent='PM Records ('+S.rec.length+')';
+  sh.appendChild(title);
+  // Filter controls
+  const fc=document.createElement('div');fc.style.cssText='display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+  // Tag filter
+  const hw=document.createElement('div');hw.id='htag-wrap';hw.style.width='180px';
+  const ss=mkSS('htag',opts,'Filter tag...',()=>{apH._page=0;apH();});hw.appendChild(ss);
+  // Date range
+  const df=document.createElement('input');df.className='fi';df.type='date';df.id='hdate-from';df.style.cssText='width:130px;font-size:12px;padding:5px 8px';
+  df.title='From date';df.onchange=()=>{apH._page=0;apH();};
+  const dt=document.createElement('input');dt.className='fi';dt.type='date';dt.id='hdate-to';dt.style.cssText='width:130px;font-size:12px;padding:5px 8px';
+  dt.title='To date';dt.onchange=()=>{apH._page=0;apH();};
+  const dSep=document.createElement('span');dSep.textContent='→';dSep.style.color='var(--text3)';
+  fc.appendChild(hw);fc.appendChild(df);fc.appendChild(dSep);fc.appendChild(dt);
+  sh.appendChild(fc);
+  card.appendChild(sh);
+  // Pagination bar
+  const pgBar=document.createElement('div');pgBar.id='h-pgctrl';
+  pgBar.style.cssText='display:flex;gap:8px;align-items:center;padding:8px 0;font-size:12px;color:var(--text3);flex-wrap:wrap';
+  card.appendChild(pgBar);
+  // Table
+  const tWrap=document.createElement('div');tWrap.style.overflowX='auto';
+  tWrap.innerHTML='<table class="ht"><thead><tr>'+
+    '<th>Date</th><th>WO</th><th>Tag</th><th>Module</th><th>Brg DE</th>'+
+    '<th>Motor Vib↑</th><th>Pump Vib↑</th><th>Severity</th><th></th>'+
+    '</tr></thead><tbody id="htb"></tbody></table>';
+  card.appendChild(tWrap);
+  el.appendChild(card);
   apH();
 }
-function apH(){const hw=E('htag-wrap');const f=hw?.querySelector('input')?.dataset?.val||'';let rs=[...S.rec].sort((a,b)=>b.date.localeCompare(a.date));if(f)rs=rs.filter(r=>r.tag===f);
-const tb=E('htb');if(!tb)return;tb.innerHTML='';
-rs.forEach(r=>{const eq=S.eq.find(e=>e.tag===r.tag);
-  const mv=maxMotorVib(r),pv=maxPumpVib(r);
-  const mAl=mv>=eqMAl(eq),mDa=mv>=eqMDa(eq);
-  const pAl=pv>=eqPAl(eq),pDa=pv>=eqPDa(eq);
-  tb.innerHTML+='<tr>'+
-    '<td class="mono">'+r.date+'</td>'+
-    '<td class="mono" style="color:var(--text3)">'+(r.wo||'—')+'</td>'+
-    '<td style="font-weight:600">'+r.tag+'</td>'+
+function apH(){
+  const hw=E('htag-wrap');
+  const f=hw?.querySelector('input')?.dataset?.val||'';
+  const dateFrom=E('hdate-from')?.value||'';
+  const dateTo=E('hdate-to')?.value||'';
+  let rs=[...S.rec].sort((a,b)=>b.date.localeCompare(a.date));
+  if(f)rs=rs.filter(r=>r.tag===f);
+  if(dateFrom)rs=rs.filter(r=>r.date>=dateFrom);
+  if(dateTo)rs=rs.filter(r=>r.date<=dateTo);
+  const tb=E('htb');if(!tb)return;
+  // Pagination
+  const PAGE=50;
+  const page=apH._page||0;
+  const total=rs.length;
+  const pageRs=rs.slice(page*PAGE,(page+1)*PAGE);
+  // Pagination controls
+  const pgCtrl=E('h-pgctrl');
+  if(pgCtrl){
+    pgCtrl.innerHTML=total+' records';
+    if(total>PAGE){
+      pgCtrl.innerHTML+=' | หน้า '+(page+1)+'/'+Math.ceil(total/PAGE);
+      if(page>0){const pb=document.createElement('button');pb.className='btn btn-sm';pb.textContent='← ก่อนหน้า';pb.onclick=()=>{apH._page--;apH();};pgCtrl.appendChild(pb);}
+      if((page+1)*PAGE<total){const nb=document.createElement('button');nb.className='btn btn-sm';nb.textContent='ถัดไป →';nb.onclick=()=>{apH._page++;apH();};pgCtrl.appendChild(nb);}
+    }
+  }
+  // Build rows using DocumentFragment (much faster than innerHTML+=)
+  const eqMap={};S.eq.forEach(e=>eqMap[e.tag]=e);
+  const frag=document.createDocumentFragment();
+  pageRs.forEach(r=>{
+    const eq=eqMap[r.tag];
+    const mv=maxMotorVib(r),pv=maxPumpVib(r);
+    const mAl=mv>=eqMAl(eq),mDa=mv>=eqMDa(eq);
+    const pAl=pv>=eqPAl(eq),pDa=pv>=eqPDa(eq);
+    const tr=document.createElement('tr');
+    tr.innerHTML=
+      '<td class="mono">'+r.date+'</td>'+
+      '<td class="mono" style="color:var(--text3)">'+(r.wo||'—')+'</td>'+
+      '<td style="font-weight:600">'+r.tag+'</td>'+
+      '<td style="font-size:12px;color:var(--text3)">'+(eq?.module||eq?.mod||'—')+'</td>'+
+      '<td style="font-size:12px;color:var(--text3)">'+(r.brg?.de||eq?.de||'—')+'</td>'+
+      '<td><span class="mono">'+mv.toFixed(2)+'</span> <span class="badge '+(mDa?'b-nk':mAl?'b-al':'b-ok')+'">'+(mDa?'Danger':mAl?'Alarm':'OK')+'</span></td>'+
+      '<td><span class="mono">'+pv.toFixed(2)+'</span> <span class="badge '+(pDa?'b-nk':pAl?'b-al':'b-ok')+'">'+(pDa?'Danger':pAl?'Alarm':'OK')+'</span></td>'+
+      '<td style="font-size:11px;color:'+(S.sc[r.sev||r.severity]||'')+'">● '+(S.sl[r.sev||r.severity]||'—')+'</td>'+
+      '<td></td>';
+    // Add buttons via DOM
+    const actTd=tr.querySelector('td:last-child');
+    actTd.style.cssText='display:flex;gap:4px;padding:6px 10px';
+    const vb=document.createElement('button');vb.className='btn btn-sm btn-p';vb.textContent='View';
+    vb.onclick=(function(id){return function(){showD(id);};})(r.id);actTd.appendChild(vb);
+    if(canEdit()){
+      const eb=document.createElement('button');eb.className='btn btn-sm';eb.textContent='✎ Edit';
+      eb.onclick=(function(id){return function(){editRec(id);};})(r.id);actTd.appendChild(eb);
+      const db2=document.createElement('button');db2.className='btn btn-sm btn-d';db2.textContent='Del';
+      db2.onclick=(function(id){return function(){delRec(id);};})(r.id);actTd.appendChild(db2);
+    }
+    frag.appendChild(tr);
+  });
+  tb.innerHTML='';
+  if(!pageRs.length){
+    const empty=document.createElement('tr');
+    empty.innerHTML='<td colspan="9" style="text-align:center;padding:20px;color:var(--text3)">No records</td>';
+    tb.appendChild(empty);
+  }else{
+    tb.appendChild(frag);
+  }
+}
+apH._page=0;
 
-    '<td style="font-size:12px;color:var(--text3)">'+(eq?.module||eq?.mod||'—')+'</td>'+
-
-    '<td style="font-size:12px;color:var(--text3)">'+(r.brg?.de||eq?.de||'—')+'</td>'+
-    '<td><span class="mono">'+mv.toFixed(2)+'</span> <span class="badge '+(mDa?'b-nk':mAl?'b-al':'b-ok')+'">'+(mDa?'Danger':mAl?'Alarm':'OK')+'</span></td>'+
-    '<td><span class="mono">'+pv.toFixed(2)+'</span> <span class="badge '+(pDa?'b-nk':pAl?'b-al':'b-ok')+'">'+(pDa?'Danger':pAl?'Alarm':'OK')+'</span></td>'+
-    '<td style="font-size:11px;color:'+(S.sc[r.sev||r.severity]||'')+'">● '+(S.sl[r.sev||r.severity]||'—')+'</td>'+
-    '<td><div style="display:flex;gap:4px"><button class="btn btn-sm btn-p" onclick="showD(\''+r.id+'\')">View</button>'+(canEdit()?'<button class="btn btn-sm" onclick="editRec(\''+r.id+'\')">✎ Edit</button>':'')+'<button class="btn btn-sm btn-d" onclick="delRec(\''+r.id+'\')">Del</button></div></td></tr>';});
-if(!rs.length)tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text3)">No records</td></tr>';}
-
-// ── Feature 3: Edit existing PM record ──
 function editRec(id){
   const r=S.rec.find(x=>x.id===id);if(!r){toast('ไม่พบ record','error');return;}
   go('checksheet',E('nav-checksheet'));
