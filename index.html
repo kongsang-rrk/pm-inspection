@@ -1120,27 +1120,18 @@ function populateCheck(r,id){
   document.querySelectorAll('.so').forEach(b=>b.className='so');
   const sevBtns=document.querySelectorAll('.so');if(sevBtns[sn-1])sevBtns[sn-1].className='so s'+sn;
   if(E('f-sev'))E('f-sev').value=sn;S.cf.sev=String(sn);
-  // Inspections (ck) — restore MCC/Motor/Action buttons
+  // Inspections (ck) — restore MCC/Motor/Action buttons via data-ck-key
   const ck=r.ck||{};
-  // Method 1: data-ck-key attribute (new style)
+  // Reset all first
+  document.querySelectorAll('.cb[data-ck-key]').forEach(btn=>btn.className='cb');
+  // Then restore matched values
   document.querySelectorAll('.cb[data-ck-key]').forEach(btn=>{
     const key=btn.dataset.ckKey,val=btn.dataset.ckVal;
-    if(!key||!val)return;
-    btn.className='cb';
+    if(!key||!val||ck[key]===undefined)return;
     if(ck[key]===val){
-      // Action buttons store text value but display as 'ok' class
-      const isAct=key.endsWith('_act');
-      btn.className=isAct?'cb ok':'cb '+val;
+      // Action buttons: setCkAct always sets 'cb ok' regardless of which action
+      btn.className=key.endsWith('_act')?'cb ok':'cb '+val;
     }
-  });
-  // Method 2: onclick attribute (legacy)
-  document.querySelectorAll('.cb[onclick]').forEach(btn=>{
-    const oc=btn.getAttribute('onclick')||'';
-    const m=oc.match(/setCk(?:Act)?\s*\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]/);
-    if(!m)return;
-    const[,key,val]=m;
-    btn.className='cb';
-    if(ck[key]===val)btn.className='cb '+val;
   });
   // Store edit ID in hidden field for saveR to use
   if(!E('f-edit-id')){const h=document.createElement('input');h.type='hidden';h.id='f-edit-id';document.body.appendChild(h);}
