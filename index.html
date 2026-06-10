@@ -624,7 +624,7 @@ function selAllCk(btn,col){
 async function loadAll(){try{
   const [es,rs,ss,al]=await Promise.all([
     db.collection('equipment').get(),
-    db.collection('records').orderBy('date','desc').limit(300).get(),
+    db.collection('records').orderBy('date','desc').get(),
     db.collection('settings').doc('global').get(),
     db.collection('alarmlog').orderBy('date','desc').limit(200).get()
   ]);
@@ -657,7 +657,7 @@ eqs.forEach(e=>b.set(db.collection('equipment').doc(e.tag),e));
 recs.forEach(r=>b.set(db.collection('records').doc(),{...r,ts:firebase.firestore.FieldValue.serverTimestamp(),by:'seed'}));
 b.set(db.collection('settings').doc('_seeded'),{done:true,at:firebase.firestore.FieldValue.serverTimestamp()});
 await b.commit();
-const [es2,rs2,al2]=await Promise.all([db.collection('equipment').get(),db.collection('records').orderBy('date','desc').limit(300).get(),db.collection('alarmlog').orderBy('date','desc').limit(200).get()]);
+const [es2,rs2,al2]=await Promise.all([db.collection('equipment').get(),db.collection('records').orderBy('date','desc').get(),db.collection('alarmlog').orderBy('date','desc').limit(200).get()]);
 S.eq=es2.docs.map(d=>({id:d.id,...d.data()}));
 S.rec=rs2.docs.map(d=>({id:d.id,...d.data()}));
 S.alogs=al2.docs.map(d=>({id:d.id,...d.data()}));
