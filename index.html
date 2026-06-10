@@ -898,14 +898,14 @@ function buildInspTable(tbodyId,rows,prefix){
   rows.forEach(i=>{
     const tr=document.createElement('tr');
     const afBtns=`<div style="display:flex;gap:3px">
-      <button class="cb" onclick="setCk('${prefix}${i.k}','ok',this)">OK</button>
-      <button class="cb" onclick="setCk('${prefix}${i.k}','nok',this)">NOK</button>
-      <button class="cb" onclick="setCk('${prefix}${i.k}','na',this)">N/A</button></div>`;
-    const actBtns=i.act.map(a=>`<button class="cb" onclick="setCkAct('${prefix}${i.k}_act','${a}',this)">${a}</button>`).join(' ');
+      <button class="cb" data-ck-key="${prefix}${i.k}" data-ck-val="ok" onclick="setCk('${prefix}${i.k}','ok',this)">OK</button>
+      <button class="cb" data-ck-key="${prefix}${i.k}" data-ck-val="nok" onclick="setCk('${prefix}${i.k}','nok',this)">NOK</button>
+      <button class="cb" data-ck-key="${prefix}${i.k}" data-ck-val="na" onclick="setCk('${prefix}${i.k}','na',this)">N/A</button></div>`;
+    const actBtns=i.act.map(a=>`<button class="cb" data-ck-key="${prefix}${i.k}_act" data-ck-val="${a}" onclick="setCkAct('${prefix}${i.k}_act','${a}',this)">${a}</button>`).join(' ');
     const alBtns=`<div style="display:flex;gap:3px">
-      <button class="cb" onclick="setCk('${prefix}${i.k}_al','ok',this)">OK</button>
-      <button class="cb" onclick="setCk('${prefix}${i.k}_al','nok',this)">NOK</button>
-      <button class="cb" onclick="setCk('${prefix}${i.k}_al','na',this)">N/A</button></div>`;
+      <button class="cb" data-ck-key="${prefix}${i.k}_al" data-ck-val="ok" onclick="setCk('${prefix}${i.k}_al','ok',this)">OK</button>
+      <button class="cb" data-ck-key="${prefix}${i.k}_al" data-ck-val="nok" onclick="setCk('${prefix}${i.k}_al','nok',this)">NOK</button>
+      <button class="cb" data-ck-key="${prefix}${i.k}_al" data-ck-val="na" onclick="setCk('${prefix}${i.k}_al','na',this)">N/A</button></div>`;
     tr.innerHTML=`<td style="font-weight:500;font-size:12px">${i.l}</td><td style="color:var(--text3);font-size:11px">${i.c}</td><td>${afBtns}</td><td><div style="display:flex;gap:3px">${actBtns}</div></td><td>${alBtns}</td>`;
     tb.appendChild(tr);
   });
@@ -1120,14 +1120,21 @@ function populateCheck(r,id){
   document.querySelectorAll('.so').forEach(b=>b.className='so');
   const sevBtns=document.querySelectorAll('.so');if(sevBtns[sn-1])sevBtns[sn-1].className='so s'+sn;
   if(E('f-sev'))E('f-sev').value=sn;S.cf.sev=String(sn);
-  // Inspections (ck) — click matching buttons
+  // Inspections (ck) — restore MCC/Motor/Action buttons
   const ck=r.ck||{};
+  // Method 1: data-ck-key attribute (new style)
+  document.querySelectorAll('.cb[data-ck-key]').forEach(btn=>{
+    const key=btn.dataset.ckKey,val=btn.dataset.ckVal;
+    if(key&&val){btn.className='cb';if(ck[key]===val)btn.className='cb '+val;}
+  });
+  // Method 2: onclick attribute (legacy)
   document.querySelectorAll('.cb[onclick]').forEach(btn=>{
     const oc=btn.getAttribute('onclick')||'';
     const m=oc.match(/setCk(?:Act)?\s*\(\s*['"]([^'"]+)['"]\s*,\s*['"]([^'"]+)['"]/);
     if(!m)return;
     const[,key,val]=m;
-    if(ck[key]===val){btn.className='cb '+val;}
+    btn.className='cb';
+    if(ck[key]===val)btn.className='cb '+val;
   });
   // Store edit ID in hidden field for saveR to use
   if(!E('f-edit-id')){const h=document.createElement('input');h.type='hidden';h.id='f-edit-id';document.body.appendChild(h);}
